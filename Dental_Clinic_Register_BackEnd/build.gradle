@@ -1,0 +1,46 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.5.0'
+}
+
+group = 'edu.ubb.licenta.pgim2289.spring'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter
+    implementation("org.springframework.boot:spring-boot-starter:3.5.0")
+    // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-web
+    implementation("org.springframework.boot:spring-boot-starter-web:3.5.0")
+    // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-validation
+    implementation("org.springframework.boot:spring-boot-starter-validation:3.5.0")
+    // https://mvnrepository.com/artifact/org.mapstruct/mapstruct
+    implementation("org.mapstruct:mapstruct:1.6.3")
+    implementation group: 'org.mapstruct', name: 'mapstruct', version: '1.5.3.Final'
+    annotationProcessor group: 'org.mapstruct', name: 'mapstruct-processor', version: '1.5.3.Final'
+    // https://mvnrepository.com/artifact/org.projectlombok/lombok
+    implementation("org.projectlombok:lombok:1.18.38")
+    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.36'
+    // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-data-jpa
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa:3.5.0")
+    // https://mvnrepository.com/artifact/org.springframework.security/spring-security-core
+    implementation("org.springframework.security:spring-security-core:6.5.0")
+    // https://mvnrepository.com/artifact/com.zaxxer/HikariCP
+    implementation("com.zaxxer:HikariCP:6.3.0")
+    // https://mvnrepository.com/artifact/com.mysql/mysql-connector-j
+    runtimeOnly("com.mysql:mysql-connector-j:9.3.0")
+    // https://mvnrepository.com/artifact/org.slf4j/slf4j-api
+    implementation("org.slf4j:slf4j-api:2.0.17")
+    // https://mvnrepository.com/artifact/ch.qos.logback/logback-classic
+    runtimeOnly("ch.qos.logback:logback-classic:1.5.18")
+
+}
+
+test {
+    useJUnitPlatform()
+}
