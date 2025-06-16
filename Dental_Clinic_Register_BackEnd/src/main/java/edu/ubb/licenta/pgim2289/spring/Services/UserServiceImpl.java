@@ -50,8 +50,9 @@ public class UserServiceImpl implements UserService {
             throw new InvalidParameterException("Phone number already exists");
         }
         if (user.getPhoneNumber() == null
-                || String.valueOf(user.getPhoneNumber()).length() != 10) { // Also corrected to 10 digits as is standard for phone numbers
-            throw new InvalidParameterException("Phone number must contain exactly 10 digits.");
+                || user.getPhoneNumber().length() != 10) {
+            throw new InvalidParameterException("Phone number " +
+                    "must contain exactly 10 digits.");
         }
         if (user.getFirstName() == null || user.getFirstName().isEmpty()) {
             throw new InvalidParameterException("First name is required");

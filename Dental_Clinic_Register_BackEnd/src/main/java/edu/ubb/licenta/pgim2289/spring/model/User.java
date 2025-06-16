@@ -1,10 +1,11 @@
 package edu.ubb.licenta.pgim2289.spring.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import lombok.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
 @Entity
@@ -20,7 +21,7 @@ public class User extends BaseEntity {
     @Column(name = "Email")
     private String email;
     @Column(name = "PhoneNumber")
-    private Integer phoneNumber;
+    private String phoneNumber;
     @Column(name = "FirstName")
     private String firstName;
     @Column(name = "MiddleName")
@@ -33,4 +34,7 @@ public class User extends BaseEntity {
     private Boolean doctor;
     @Column(name = "Patient")
     private Boolean patient;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Appointments> appointments = new ArrayList<>();
+
 }
