@@ -19,10 +19,29 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web:3.5.0")
     implementation("org.springframework.boot:spring-boot-starter-validation:3.5.0")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa:3.5.0")
+    implementation("org.springframework.boot:spring-boot-starter-security:3.5.0")
+    implementation("org.springframework.boot:spring-boot-starter-mail:3.5.0")
 
     // MapStruct - Single Version
     implementation 'org.mapstruct:mapstruct:1.5.3.Final'
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.3.Final'
+
+    //JWT Library(JJWT)
+    // https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-api
+    implementation("io.jsonwebtoken:jjwt-api:0.12.6")
+    // https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-impl
+    runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.6")
+    // https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-jackson
+    runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.6")
+
+
+    //Argon2 Password Hashing
+    // https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk18on
+    implementation("org.bouncycastle:bcprov-jdk18on:1.81")
+
+    //Spring Boot devtools
+    // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-devtools
+    implementation("org.springframework.boot:spring-boot-devtools:3.5.0")
 
     // Lombok - Single Version
     implementation 'org.projectlombok:lombok:1.18.38'
@@ -36,6 +55,15 @@ dependencies {
     runtimeOnly("com.mysql:mysql-connector-j:9.3.0")
     implementation("org.slf4j:slf4j-api:2.0.17")
     runtimeOnly("ch.qos.logback:logback-classic:1.5.18")
+
+    // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-test
+    testImplementation("org.springframework.boot:spring-boot-starter-test:3.5.0")
+    // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-test
+    testImplementation("org.springframework.boot:spring-boot-starter-test:3.5.0")
+
+    //phone number validator
+    // https://mvnrepository.com/artifact/com.googlecode.libphonenumber/libphonenumber
+    implementation("com.googlecode.libphonenumber:libphonenumber:9.0.8")
 
     apply from: "${rootDir}/lint.gradle"
 }
