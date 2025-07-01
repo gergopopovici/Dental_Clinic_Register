@@ -12,8 +12,8 @@ public class ResponseUserDTO {
     private String password;
     @NotBlank
     private String email;
-    @NotNull
-    private Integer phoneNumber;
+    @NotBlank
+    private String phoneNumber;
     @NotBlank
     private String firstName;
     private String middleName;
@@ -25,4 +25,5 @@ public class ResponseUserDTO {
     private Boolean doctor;
     @NotNull
     private Boolean patient;
+    private Boolean enabled;
 }
