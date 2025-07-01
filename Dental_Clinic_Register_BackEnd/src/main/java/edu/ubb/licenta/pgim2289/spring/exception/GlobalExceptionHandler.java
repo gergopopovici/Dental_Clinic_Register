@@ -15,13 +15,13 @@ import java.util.Map;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(InvalidParameterException.class)
-    @ResponseStatus(HttpStatus.CONFLICT) // Use 409 Conflict for "already exists" errors
+    @ResponseStatus(HttpStatus.CONFLICT)
     public Map<String, String> handleInvalidParameters(InvalidParameterException ex) {
         Map<String, String> errorMap = new HashMap<>();
         errorMap.put("error", ex.getMessage());
         return errorMap;
     }
-    // This handler is for @Valid annotation failures (e.g., @Email, @NotBlank)
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Map<String, String> handleValidationExceptions(MethodArgumentNotValidException ex) {
@@ -32,5 +32,29 @@ public class GlobalExceptionHandler {
             errors.put(fieldName, errorMessage);
         });
         return errors;
+    }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public Map<String, String> handleUserNotFound(UserNotFoundException ex) {
+        Map<String, String> errorMap = new HashMap<>();
+        errorMap.put("error", ex.getMessage());
+        return errorMap;
+    }
+
+    @ExceptionHandler(TokenExpiredException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public Map<String, String> handleTokenExpiredException(TokenExpiredException ex) {
+        Map<String, String> errorMap = new HashMap<>();
+        errorMap.put("error", ex.getMessage());
+        return errorMap;
+    }
+
+    @ExceptionHandler(TokenAccessedException.class)
+    @ResponseStatus(HttpStatus.GONE)
+    public Map<String, String> handleTokenAccessedException(TokenAccessedException ex) {
+        Map<String, String> errorMap = new HashMap<>();
+        errorMap.put("error", ex.getMessage());
+        return errorMap;
     }
 }
