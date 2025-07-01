@@ -29,11 +29,13 @@ public class User extends BaseEntity {
     @Column(name = "LastName")
     private String lastName;
     @Column(name = "Administrator")
-    private Boolean administrator;
+    private Boolean administrator = false;
     @Column(name = "Doctor")
-    private Boolean doctor;
+    private Boolean doctor = false;
     @Column(name = "Patient")
-    private Boolean patient;
+    private Boolean patient = true;
+    @Column(name = "enabled", nullable = false)
+    private Boolean enabled = false;
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Appointments> appointments = new ArrayList<>();
 
