@@ -3,6 +3,7 @@ package edu.ubb.licenta.pgim2289.spring.model;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
@@ -28,8 +29,8 @@ public class VerificationToken {
     @Column(nullable = false)
     private Instant expiryDate;
 
-    @Column(nullable = false,name="used")
-    private boolean used = false;
+    @Column(nullable = false, name = "used")
+    private boolean used;
 
     public VerificationToken(String token, User user) {
         this.token = token;

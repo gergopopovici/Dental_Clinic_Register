@@ -29,6 +29,7 @@ public class UserController {
         this.userService = userService;
         this.userMapper = userMapper;
     }
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseUserDTO createUser(@RequestBody @Valid RequestUserDTO user) throws InvalidParameterException {

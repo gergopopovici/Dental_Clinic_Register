@@ -2,7 +2,6 @@ package edu.ubb.licenta.pgim2289.spring.security;
 
 import edu.ubb.licenta.pgim2289.spring.config.JwtProperties;
 import io.jsonwebtoken.*;
-import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +27,7 @@ public class JwtTokenProvider {
 
     public String generateToken(Authentication authentication) {
         UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
-        long now = (new Date()).getTime();
+        long now = new Date().getTime();
         Date expiryDate = new Date(now + jwtProperties.getAccessTokenExpirationMs());
 
         List<String> roles = userPrincipal.getAuthorities().stream()

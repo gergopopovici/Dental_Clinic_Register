@@ -5,11 +5,11 @@ public class TokenExpiredException extends RuntimeException {
         super("Token has already been expired");
     }
 
-    public TokenExpiredException(String message) {
+  /*  public TokenExpiredException(String message) {
         super(message);
-    }
+    } */
 
-    public TokenExpiredException(String message, Throwable cause) {
+   /* public TokenExpiredException(String message, Throwable cause) {
         super(message, cause);
-    }
+    } */
 }

@@ -18,7 +18,7 @@ public class PasswordResetToken extends BaseEntity {
     @Column(name = "expiry_time", nullable = false)
     private LocalDateTime expiryTime;
     @Column(name = "used", nullable = false)
-    private boolean used = false;
+    private boolean used;
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
     @ManyToOne(fetch = FetchType.LAZY)

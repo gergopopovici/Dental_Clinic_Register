@@ -65,6 +65,9 @@ dependencies {
     // https://mvnrepository.com/artifact/com.googlecode.libphonenumber/libphonenumber
     implementation("com.googlecode.libphonenumber:libphonenumber:9.0.8")
 
+    // https://mvnrepository.com/artifact/com.github.spotbugs/spotbugs-annotations
+    implementation("com.github.spotbugs:spotbugs-annotations:4.9.3")
+
     apply from: "${rootDir}/lint.gradle"
 }
 

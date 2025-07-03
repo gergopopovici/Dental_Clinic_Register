@@ -38,7 +38,7 @@ public class PasswordResetTokenServiceImpl implements PasswordResetTokenService 
                     .plusMinutes(30));
             passwordResetToken.setUsed(false);
             passwordResetTokenJpa.save(passwordResetToken);
-        }else {
+        } else {
             throw new UserNotFoundException("User not found");
         }
     }

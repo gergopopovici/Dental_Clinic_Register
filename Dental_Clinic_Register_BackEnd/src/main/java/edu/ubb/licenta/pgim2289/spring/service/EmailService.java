@@ -24,15 +24,17 @@ public class EmailService {
                 + "http://localhost:5175/verify?token=" + token);
         mailSender.send(message);
     }
-    public void sendPasswordResetEmail(String to, String passwordResetLink,String userName) {
+
+    public void sendPasswordResetEmail(String to, String passwordResetLink, String userName) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(fromEmail);
         message.setTo(to);
         message.setSubject("Complete Your Password Reset!");
-        message.setText("Hello " + userName +"!\n\nHere is your password reset link:\n\n"+passwordResetLink);
+        message.setText("Hello " + userName + "!\n\nHere is your password reset link:\n\n" + passwordResetLink);
         mailSender.send(message);
     }
-    public void passwordResetConfirmationEmail(String to,String userName) {
+
+    public void passwordResetConfirmationEmail(String to, String userName) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(fromEmail);
         message.setTo(to);

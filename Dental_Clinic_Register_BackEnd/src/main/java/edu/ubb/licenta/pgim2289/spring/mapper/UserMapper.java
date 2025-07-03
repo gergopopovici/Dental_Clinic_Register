@@ -2,7 +2,6 @@ package edu.ubb.licenta.pgim2289.spring.mapper;
 
 import edu.ubb.licenta.pgim2289.spring.dto.RequestUserDTO;
 import edu.ubb.licenta.pgim2289.spring.dto.ResponseUserDTO;
-import org.mapstruct.IterableMapping;
 import org.mapstruct.Mapper;
 
 import edu.ubb.licenta.pgim2289.spring.model.User;

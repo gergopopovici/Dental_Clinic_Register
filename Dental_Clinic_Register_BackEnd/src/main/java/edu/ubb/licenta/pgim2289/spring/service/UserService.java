@@ -8,6 +8,7 @@ import java.util.Optional;
 
 public interface UserService {
     void createUser(User user) throws InvalidParameterException;
+
     Collection<User> getAllUsers();
 
     Optional<User> findByUserName(String username);

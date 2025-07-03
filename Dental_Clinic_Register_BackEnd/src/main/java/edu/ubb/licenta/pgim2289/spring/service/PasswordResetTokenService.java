@@ -8,6 +8,7 @@ import edu.ubb.licenta.pgim2289.spring.model.PasswordResetToken;
 public interface PasswordResetTokenService {
     void savePasswordResetToken(PasswordResetToken passwordResetToken)
             throws UserNotFoundException;
+
     void accessPasswordResetToken(PasswordResetToken passwordResetToken)
-        throws TokenExpiredException, TokenAccessedException;
+            throws TokenExpiredException, TokenAccessedException;
 }

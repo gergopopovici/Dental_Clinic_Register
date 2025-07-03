@@ -14,7 +14,7 @@ public class PhoneNumberUtilService {
      * Validate phone number based on the region (country code).
      *
      * @param phoneNumber input phone number string (can be with + or without)
-     * @param regionCode two-letter country code, e.g. "RO" for Romania
+     * @param regionCode  two-letter country code, e.g. "RO" for Romania
      * @return true if valid, false otherwise
      */
     public boolean isValidPhoneNumber(String phoneNumber, String regionCode) {
