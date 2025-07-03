@@ -11,14 +11,11 @@ import { RequestPasswordResetTokenDTO, ResponsePasswordResetTokenDTO } from '../
 import { RequestUserDTO } from '../models/User';
 
 export const loginIn = async (login: Login) => {
-  console.log('Login URL:', loginApiUrl);
-  console.log('Login data:', login);
-
   try {
     const response = await axios.post(loginApiUrl, login, {
       headers: {
-        'Content-Type': 'application/json'
-      }
+        'Content-Type': 'application/json',
+      },
     });
     return response.data;
   } catch (error) {
@@ -31,52 +28,12 @@ export const loginIn = async (login: Login) => {
     throw error;
   }
 };
-export const requestPasswordReset = async(data:RequestPasswordResetTokenDTO)=>{
+export const requestPasswordReset = async (data: RequestPasswordResetTokenDTO) => {
   try {
     const response = await axios.post(forgotPasswordApiUrl, data, {
       headers: {
-        'Content-Type': 'application/json'
-      }
-    });
-    return response.data;
-  }catch(error) {
-    console.error('Error response:', error);
-    throw error;
-  }
-}
-export const resetPassword = async(data:ResponsePasswordResetTokenDTO)=>{
-  try{
-    const response = await axios.post(resetPasswordApiUrl,data,{
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
-    return response.data;
-  }catch (error){
-    console.error('Error response:', error);
-    throw error;
-  }
-}
-export const signup = async(data:RequestUserDTO)=>{
-  try{
-    const response = await axios.post(signUpApiUrl,data,{
-      headers:{
-        'Content-Type': 'application/json'
-      }
-    });
-    return response.data;
-  }catch(error){
-    console.error('Error response:', error);
-    throw error;
-  }
-}
-export const verifyAccount = async (token: string) => {
-  try {
-    const response = await axios.get(verifyAccountApiUrl, {
-      params: { token },
-      headers: {
-        'Content-Type': 'application/json'
-      }
+        'Content-Type': 'application/json',
+      },
     });
     return response.data;
   } catch (error) {
@@ -84,4 +41,43 @@ export const verifyAccount = async (token: string) => {
     throw error;
   }
 };
-
+export const resetPassword = async (data: ResponsePasswordResetTokenDTO) => {
+  try {
+    const response = await axios.post(resetPasswordApiUrl, data, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error response:', error);
+    throw error;
+  }
+};
+export const signup = async (data: RequestUserDTO) => {
+  try {
+    const response = await axios.post(signUpApiUrl, data, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error response:', error);
+    throw error;
+  }
+};
+export const verifyAccount = async (token: string) => {
+  try {
+    const response = await axios.get(verifyAccountApiUrl, {
+      params: { token },
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error response:', error);
+    throw error;
+  }
+};

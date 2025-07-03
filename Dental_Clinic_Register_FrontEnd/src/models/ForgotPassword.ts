@@ -1,8 +1,8 @@
-export interface RequestPasswordResetTokenDTO{
+export interface RequestPasswordResetTokenDTO {
   email: string;
 }
-export interface ResponsePasswordResetTokenDTO{
+export interface ResponsePasswordResetTokenDTO {
   token: string;
-  password:string;
+  password: string;
   passwordConfirmation: string;
 }

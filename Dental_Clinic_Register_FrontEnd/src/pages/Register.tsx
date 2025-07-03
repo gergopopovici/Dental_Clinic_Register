@@ -1,4 +1,15 @@
-import { Alert, Avatar, Box, Button, Card, CardContent, CircularProgress, Link, TextField, Typography } from '@mui/material';
+import {
+  Alert,
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  CircularProgress,
+  Link,
+  TextField,
+  Typography,
+} from '@mui/material';
 import AppRegistrationIcon from '@mui/icons-material/AppRegistration';
 import { FormEvent, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
@@ -60,138 +71,134 @@ function Register() {
       minWidth="100vw"
       bgcolor="#f4f6f8"
       sx={{
-        backgroundImage:registerPageBackground,
+        backgroundImage: registerPageBackground,
         width: '100%',
         height: '100%',
         backgroundRepeat: 'repeat',
         backgroundPosition: 'center',
-        backgroundSize: 'contain'
+        backgroundSize: 'contain',
       }}
     >
-      <Box
-        display="flex"
-        flexGrow={1}
-        justifyContent="center"
-        alignItems="center"
-      >
-      <Card sx={{ maxWidth: 400, width: '90%', p: 3 }}>
-        <Box display={'flex'} justifyContent={'center'} mb={2}>
-          <Avatar sx={{ backgroundColor: 'primary.main', width: 56, height: 56 }}>
-            <AppRegistrationIcon fontSize={'large'} />
-          </Avatar>
-        </Box>
-        <CardContent>
-          <Typography variant={'h5'} align={'center'} gutterBottom>
-            Welcome to Our Clinic! Please fill out the form below!
-          </Typography>
-
-          {successMessage && (
-            <Alert severity="success" sx={{ mb: 2 }}>
-              {successMessage}
-            </Alert>
-          )}
-          {errorMessage && (
-            <Alert severity="error" sx={{ mb: 2 }}>
-              {errorMessage}
-            </Alert>
-          )}
-
-          <form onSubmit={handleSubmit}>
-            <TextField
-              label={'username'}
-              type={'text'}
-              fullWidth={true}
-              required={true}
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              sx={{ mb: 2 }}
-            />
-            <TextField
-              label={'password'}
-              type={'password'}
-              fullWidth={true}
-              required={true}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              sx={{ mb: 2 }}
-            />
-            <TextField
-              label={'Confirm Password'}
-              type={'password'}
-              fullWidth={true}
-              required={true}
-              value={passwordConfirm}
-              onChange={(e) => setPasswordConfirm(e.target.value)}
-              sx={{ mb: 2 }}
-            />
-            <TextField
-              label={'email'}
-              type={'text'}
-              fullWidth={true}
-              required={true}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              sx={{ mb: 2 }}
-            />
-            <TextField
-              label={'Phone Number'}
-              type={'text'}
-              fullWidth={true}
-              required={true}
-              value={phoneNumber}
-              onChange={(e) => setPhoneNumber(e.target.value)}
-              sx={{ mb: 2 }}
-            />
-            <TextField
-              label={'First Name'}
-              type={'text'}
-              fullWidth={true}
-              required={true}
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
-              sx={{ mb: 2 }}
-            />
-            <TextField
-              label={'Middle Name'}
-              type={'text'}
-              fullWidth={true}
-              required={false}
-              value={middleName}
-              onChange={(e) => setMiddleName(e.target.value)}
-              sx={{ mb: 2 }}
-            />
-            <TextField
-              label={'Last Name'}
-              type={'text'}
-              fullWidth={true}
-              required={true}
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
-              sx={{ mb: 2 }}
-            />
-            <Button
-              type={'submit'}
-              variant={'contained'}
-              color={'primary'}
-              fullWidth
-              disabled={registerMutation.isPending}
-            >
-              {registerMutation.isPending ? <CircularProgress size={24} color="inherit" /> : 'Register'}
-            </Button>
-          </form>
-          <Box component="footer" textAlign="center" py={2}>
-            <Link
-              href="http://www.vecteezy.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              underline="hover"
-              color="red">
-              Background designed by vecteezy.com
-            </Link>
+      <Box display="flex" flexGrow={1} justifyContent="center" alignItems="center">
+        <Card sx={{ maxWidth: 400, width: '90%', p: 3 }}>
+          <Box display={'flex'} justifyContent={'center'} mb={2}>
+            <Avatar sx={{ backgroundColor: 'primary.main', width: 56, height: 56 }}>
+              <AppRegistrationIcon fontSize={'large'} />
+            </Avatar>
           </Box>
-        </CardContent>
-      </Card>
-    </Box>
+          <CardContent>
+            <Typography variant={'h5'} align={'center'} gutterBottom>
+              Welcome to Our Clinic! Please fill out the form below!
+            </Typography>
+
+            {successMessage && (
+              <Alert severity="success" sx={{ mb: 2 }}>
+                {successMessage}
+              </Alert>
+            )}
+            {errorMessage && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                {errorMessage}
+              </Alert>
+            )}
+
+            <form onSubmit={handleSubmit}>
+              <TextField
+                label={'username'}
+                type={'text'}
+                fullWidth={true}
+                required={true}
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                sx={{ mb: 2 }}
+              />
+              <TextField
+                label={'password'}
+                type={'password'}
+                fullWidth={true}
+                required={true}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                sx={{ mb: 2 }}
+              />
+              <TextField
+                label={'Confirm Password'}
+                type={'password'}
+                fullWidth={true}
+                required={true}
+                value={passwordConfirm}
+                onChange={(e) => setPasswordConfirm(e.target.value)}
+                sx={{ mb: 2 }}
+              />
+              <TextField
+                label={'email'}
+                type={'text'}
+                fullWidth={true}
+                required={true}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                sx={{ mb: 2 }}
+              />
+              <TextField
+                label={'Phone Number'}
+                type={'text'}
+                fullWidth={true}
+                required={true}
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                sx={{ mb: 2 }}
+              />
+              <TextField
+                label={'First Name'}
+                type={'text'}
+                fullWidth={true}
+                required={true}
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                sx={{ mb: 2 }}
+              />
+              <TextField
+                label={'Middle Name'}
+                type={'text'}
+                fullWidth={true}
+                required={false}
+                value={middleName}
+                onChange={(e) => setMiddleName(e.target.value)}
+                sx={{ mb: 2 }}
+              />
+              <TextField
+                label={'Last Name'}
+                type={'text'}
+                fullWidth={true}
+                required={true}
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                sx={{ mb: 2 }}
+              />
+              <Button
+                type={'submit'}
+                variant={'contained'}
+                color={'primary'}
+                fullWidth
+                disabled={registerMutation.isPending}
+              >
+                {registerMutation.isPending ? <CircularProgress size={24} color="inherit" /> : 'Register'}
+              </Button>
+            </form>
+            <Box component="footer" textAlign="center" py={2}>
+              <Link
+                href="http://www.vecteezy.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                underline="hover"
+                color="red"
+              >
+                Background designed by vecteezy.com
+              </Link>
+            </Box>
+          </CardContent>
+        </Card>
+      </Box>
     </Box>
   );
 }

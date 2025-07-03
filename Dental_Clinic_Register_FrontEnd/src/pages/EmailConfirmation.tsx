@@ -1,21 +1,15 @@
-import {
-  Avatar,
-  Box,
-  Card,
-  Typography,
-  CircularProgress,
-} from '@mui/material';
-import CheckIcon from "@mui/icons-material/Check";
-import ErrorIcon from "@mui/icons-material/Error";
+import { Avatar, Box, Card, Typography, CircularProgress } from '@mui/material';
+import CheckIcon from '@mui/icons-material/Check';
+import ErrorIcon from '@mui/icons-material/Error';
 import { Navigate, useSearchParams } from 'react-router-dom';
-import { useMutation } from "@tanstack/react-query";
-import { verifyAccount } from "../services/AuthorisationService";
+import { useMutation } from '@tanstack/react-query';
+import { verifyAccount } from '../services/AuthorisationService';
 import { useEffect, useState } from 'react';
 import { genericBackground2 } from '../assets';
 
 function EmailConfirmation() {
   const [searchparams] = useSearchParams();
-  const token = searchparams.get("token");
+  const token = searchparams.get('token');
 
   const verifyMutation = useMutation({
     mutationFn: verifyAccount,
@@ -25,23 +19,22 @@ function EmailConfirmation() {
 
   useEffect(() => {
     if (token && !hasMutated) {
-      console.log("This is the token" + token);
+      console.log('This is the token' + token);
       verifyMutation.mutate(token);
       setHasMutated(true);
     }
   }, [token, hasMutated, verifyMutation]);
 
-  if(!token)
-  {
-    return <Navigate to="/login"  replace={true}/>;
+  if (!token) {
+    return <Navigate to="/login" replace={true} />;
   }
 
   let content;
   if (verifyMutation.isPending) {
     content = (
       <>
-        <Avatar sx={{ bgcolor: "primary.main", width: 56, height: 56 }}>
-          <CircularProgress size={28} sx={{ color: "white" }} />
+        <Avatar sx={{ bgcolor: 'primary.main', width: 56, height: 56 }}>
+          <CircularProgress size={28} sx={{ color: 'white' }} />
         </Avatar>
         <Typography variant="body2" align="center" mt={2}>
           Verifying your email...
@@ -51,7 +44,7 @@ function EmailConfirmation() {
   } else if (verifyMutation.isSuccess) {
     content = (
       <>
-        <Avatar sx={{ bgcolor: "primary.main", width: 56, height: 56 }}>
+        <Avatar sx={{ bgcolor: 'primary.main', width: 56, height: 56 }}>
           <CheckIcon fontSize="large" />
         </Avatar>
         <Typography variant="h5" align="center" gutterBottom>
@@ -65,7 +58,7 @@ function EmailConfirmation() {
   } else if (verifyMutation.isError) {
     content = (
       <>
-        <Avatar sx={{ bgcolor: "error.main", width: 56, height: 56 }}>
+        <Avatar sx={{ bgcolor: 'error.main', width: 56, height: 56 }}>
           <ErrorIcon fontSize="large" />
         </Avatar>
         <Typography variant="h5" align="center" color="error" gutterBottom>
@@ -92,15 +85,11 @@ function EmailConfirmation() {
         backgroundSize: 'contain',
       }}
     >
-      <Card sx={{ maxWidth: 400, width: "90%", p: 3 }}>
+      <Card sx={{ maxWidth: 400, width: '90%', p: 3 }}>
         <Box display="flex" flexDirection="column" alignItems="center" mb={2}>
           {content}
         </Box>
-        <Box
-          component="footer"
-          textAlign="center"
-          width="100%"
-        >
+        <Box component="footer" textAlign="center" width="100%">
           <Typography variant="body2">
             <a
               href="http://www.freepik.com"

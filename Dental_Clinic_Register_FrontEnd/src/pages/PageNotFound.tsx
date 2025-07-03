@@ -27,13 +27,7 @@ function NotFoundPage() {
         }}
       />
       <Typography variant="body2" sx={{ mt: 2, color: 'red' }}>
-        <Link
-          href="http://www.freepik.com"
-          target="_blank"
-          rel="noopener noreferrer"
-          underline="hover"
-          color="red"
-        >
+        <Link href="http://www.freepik.com" target="_blank" rel="noopener noreferrer" underline="hover" color="red">
           Designed by Freepik
         </Link>
       </Typography>
