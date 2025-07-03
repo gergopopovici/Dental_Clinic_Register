@@ -1,97 +1,75 @@
 package edu.ubb.licenta.pgim2289.spring.service;
 
+import edu.ubb.licenta.pgim2289.spring.dto.MessageResponse;
+import edu.ubb.licenta.pgim2289.spring.dto.RequestUserDTO;
 import edu.ubb.licenta.pgim2289.spring.model.User;
+import edu.ubb.licenta.pgim2289.spring.model.VerificationToken;
 import edu.ubb.licenta.pgim2289.spring.repository.UserJpa;
-import lombok.extern.slf4j.Slf4j;
+import edu.ubb.licenta.pgim2289.spring.repository.VerificationTokenJpa;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.security.InvalidParameterException;
-import java.util.Collection;
+import java.time.Instant;
 import java.util.Optional;
 
 @Service
-@Slf4j
 public class UserServiceImpl implements UserService {
 
-    private final UserJpa userJpa;
-    private final PasswordEncoder passwordEncoder;
+    private final UserJpa userRepository;
+    private final PasswordEncoder encoder;
+    private final VerificationTokenJpa verificationTokenRepository;
 
-    public UserServiceImpl(UserJpa userJpa, PasswordEncoder passwordEncoder) {
-        this.userJpa = userJpa;
-        this.passwordEncoder = passwordEncoder;
+
+    public UserServiceImpl(UserJpa userRepository, PasswordEncoder encoder,
+                           VerificationTokenJpa verificationTokenRepository) {
+        this.userRepository = userRepository;
+        this.encoder = encoder;
+        this.verificationTokenRepository = verificationTokenRepository;
     }
 
     @Override
-    public void createUser(User user) throws InvalidParameterException {
-        log.info("Creating user: " + user.getUserName());
-        validateUser(user);
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        userJpa.save(user);
+    public User createUser(RequestUserDTO dto) {
+        User user = new User();
+        user.setUserName(dto.getUsername());
+        user.setEmail(dto.getEmail());
+        user.setPassword(encoder.encode(dto.getPassword()));
+        user.setFirstName(dto.getFirstName());
+        user.setLastName(dto.getLastName());
+        user.setPhoneNumber(dto.getPhoneNumber());
+        user.setPatient(true);
+        user.setDoctor(false);
+        user.setAdministrator(false);
+        return userRepository.save(user);
     }
 
     @Override
-    public Collection<User> getAllUsers() {
-        return userJpa.findAll();
+    public ResponseEntity<MessageResponse> verifyUserAccount(String token) {
+        Optional<VerificationToken> optionalToken = verificationTokenRepository.findByToken(token);
+        if (optionalToken.isEmpty()) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: Invalid verification token!"));
+        }
+
+        VerificationToken verificationToken = optionalToken.get();
+        if (verificationToken.isUsed()) {
+            return ResponseEntity.ok(new MessageResponse("Account has already "
+                    + "been verified!"));
+        }
+
+        if (verificationToken.getExpiryDate().isBefore(Instant.now())) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: "
+                    + "Verification token has expired!"));
+        }
+
+        User user = verificationToken.getUser();
+        user.setEnabled(true);
+        userRepository.save(user);
+        verificationToken.setUsed(true);
+        verificationTokenRepository.save(verificationToken);
+
+        return ResponseEntity.ok(new MessageResponse("Account verified successfully!"
+                + "You can now log in."));
     }
 
-    @Override
-    public Optional<User> findByUserName(String username) {
-        return userJpa.findByUserName(username);
-    }
-
-    public void validateUser(User user) {
-        validateUsername(user);
-        validatePassword(user);
-        validateEmail(user);
-        validatePhoneNumber(user);
-        validateName(user);
-    }
-
-    private void validateUsername(User user) {
-        String username = user.getUserName();
-        if (username == null || username.isEmpty()) {
-            throw new InvalidParameterException("Username is required");
-        }
-        if (userJpa.existsByUserName(username)) {
-            throw new InvalidParameterException("Username already exists");
-        }
-    }
-
-    private void validatePassword(User user) {
-        String password = user.getPassword();
-        if (password == null || password.isEmpty()) {
-            throw new InvalidParameterException("Password is required");
-        }
-    }
-
-    private void validateEmail(User user) {
-        String email = user.getEmail();
-        if (email == null || email.isEmpty()) {
-            throw new InvalidParameterException("Email is required");
-        }
-        if (userJpa.existsByEmail(email)) {
-            throw new InvalidParameterException("Email already exists");
-        }
-    }
-
-    private void validatePhoneNumber(User user) {
-        String phone = user.getPhoneNumber();
-        if (phone == null || phone.length() != 10) {
-            throw new InvalidParameterException("Phone number must contain exactly 10 digits.");
-        }
-        if (userJpa.existsByPhoneNumber(phone)) {
-            throw new InvalidParameterException("Phone number already exists");
-        }
-    }
-
-    private void validateName(User user) {
-        if (user.getFirstName() == null || user.getFirstName().isEmpty()) {
-            throw new InvalidParameterException("First name is required");
-        }
-        if (user.getLastName() == null || user.getLastName().isEmpty()) {
-            throw new InvalidParameterException("Last name is required");
-        }
-    }
 
 }

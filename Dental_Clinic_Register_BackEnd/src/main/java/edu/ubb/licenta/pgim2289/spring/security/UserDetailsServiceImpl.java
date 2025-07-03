@@ -1,7 +1,7 @@
 package edu.ubb.licenta.pgim2289.spring.security;
 
 import edu.ubb.licenta.pgim2289.spring.model.User;
-import edu.ubb.licenta.pgim2289.spring.service.UserService;
+import edu.ubb.licenta.pgim2289.spring.repository.UserJpa;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Autowired
-    private UserService userJpa;
+    private UserJpa userJpa;
 
     @Override
     @Transactional

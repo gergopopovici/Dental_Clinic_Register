@@ -1,15 +1,14 @@
 package edu.ubb.licenta.pgim2289.spring.service;
 
+import edu.ubb.licenta.pgim2289.spring.dto.MessageResponse;
+import edu.ubb.licenta.pgim2289.spring.dto.RequestUserDTO;
 import edu.ubb.licenta.pgim2289.spring.model.User;
+import org.springframework.http.ResponseEntity;
 
-import java.security.InvalidParameterException;
-import java.util.Collection;
-import java.util.Optional;
+
 
 public interface UserService {
-    void createUser(User user) throws InvalidParameterException;
+    User createUser(RequestUserDTO dto);
 
-    Collection<User> getAllUsers();
-
-    Optional<User> findByUserName(String username);
+    ResponseEntity<MessageResponse> verifyUserAccount(String token);
 }
