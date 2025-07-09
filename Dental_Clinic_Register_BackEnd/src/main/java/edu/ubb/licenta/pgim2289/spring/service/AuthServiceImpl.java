@@ -26,6 +26,7 @@ public class AuthServiceImpl implements AuthService {
     private final EmailService emailService;
     private final PasswordResetService passwordResetService;
     private final ValidationService validationService;
+    private final PatientService patientService;
 
     public AuthServiceImpl(AuthenticationDependencies deps) {
         this.authenticationManager = deps.authenticationManager;
@@ -34,6 +35,7 @@ public class AuthServiceImpl implements AuthService {
         this.emailService = deps.emailService;
         this.passwordResetService = deps.passwordResetService;
         this.validationService = deps.validationService;
+        this.patientService = deps.patientService;
     }
 
     @Override
@@ -46,7 +48,6 @@ public class AuthServiceImpl implements AuthService {
         SecurityContextHolder.getContext().setAuthentication(authentication);
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 
-        // Delegate token operations to TokenService
         TokenResponse tokenResponse = tokenService.createTokensForUser(userDetails.getId(), authentication);
 
         List<String> roles = userDetails.getAuthorities().stream()
@@ -70,7 +71,7 @@ public class AuthServiceImpl implements AuthService {
         }
 
         User savedUser = userService.createUser(dto);
-
+        patientService.createPatient(dto);
         emailService.sendVerificationEmail(savedUser);
 
         return ResponseEntity.ok(new MessageResponse("User registered successfully! "
@@ -94,9 +95,18 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public ResponseEntity<MessageResponse> logoutUser() {
-        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder
-                .getContext().getAuthentication().getPrincipal();
-        tokenService.revokeUserTokens(userDetails.getId());
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if (auth != null) {
+            Object principal = auth.getPrincipal();
+
+            if (principal instanceof UserDetailsImpl userDetails) {
+                tokenService.revokeUserTokens(userDetails.getId());
+            }
+            SecurityContextHolder.clearContext();
+        }
+
         return ResponseEntity.ok(new MessageResponse("Log out successful!"));
     }
+
 }

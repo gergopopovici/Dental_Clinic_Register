@@ -2,30 +2,38 @@ package edu.ubb.licenta.pgim2289.spring.service;
 
 import edu.ubb.licenta.pgim2289.spring.dto.MessageResponse;
 import edu.ubb.licenta.pgim2289.spring.dto.RequestUserDTO;
+import edu.ubb.licenta.pgim2289.spring.model.Role;
 import edu.ubb.licenta.pgim2289.spring.model.User;
 import edu.ubb.licenta.pgim2289.spring.model.VerificationToken;
-import edu.ubb.licenta.pgim2289.spring.repository.UserJpa;
+import edu.ubb.licenta.pgim2289.spring.repository.RoleRepository;
+import edu.ubb.licenta.pgim2289.spring.repository.UserRepository;
 import edu.ubb.licenta.pgim2289.spring.repository.VerificationTokenJpa;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
+@Slf4j
 public class UserServiceImpl implements UserService {
 
-    private final UserJpa userRepository;
+    private final UserRepository userRepository;
     private final PasswordEncoder encoder;
     private final VerificationTokenJpa verificationTokenRepository;
+    private final RoleRepository roleRepository;
 
 
-    public UserServiceImpl(UserJpa userRepository, PasswordEncoder encoder,
-                           VerificationTokenJpa verificationTokenRepository) {
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder encoder,
+                           VerificationTokenJpa verificationTokenRepository, RoleRepository roleRepository) {
         this.userRepository = userRepository;
         this.encoder = encoder;
         this.verificationTokenRepository = verificationTokenRepository;
+        this.roleRepository = roleRepository;
     }
 
     @Override
@@ -37,10 +45,11 @@ public class UserServiceImpl implements UserService {
         user.setFirstName(dto.getFirstName());
         user.setLastName(dto.getLastName());
         user.setPhoneNumber(dto.getPhoneNumber());
-        user.setPatient(true);
-        user.setDoctor(false);
-        user.setAdministrator(false);
-        return userRepository.save(user);
+        Set<String> roleNamesForNewUser = dto.getRoles();
+        log.info("roleNamesForNewUser: {}", roleNamesForNewUser);
+        log.info("All roles from the Role entity: {}", roleRepository.findAll());
+        User savedUser = registerUser(user, roleNamesForNewUser);
+        return userRepository.save(savedUser);
     }
 
     @Override
@@ -66,10 +75,19 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
         verificationToken.setUsed(true);
         verificationTokenRepository.save(verificationToken);
-
         return ResponseEntity.ok(new MessageResponse("Account verified successfully!"
                 + "You can now log in."));
     }
 
-
+    public User registerUser(User user, Set<String> roleNames) {
+        Set<Role> roles = new HashSet<>();
+        for (String roleName : roleNames) {
+            Role role = roleRepository.findByRoleName(Role.RoleName.valueOf(roleName))
+                    .orElseThrow(() -> new RuntimeException("Error:"
+                            + " Role not found."));
+            roles.add(role);
+        }
+        user.setRoles(roles);
+        return userRepository.save(user);
+    }
 }

@@ -8,7 +8,7 @@ import edu.ubb.licenta.pgim2289.spring.exception.TokenExpiredException;
 import edu.ubb.licenta.pgim2289.spring.model.PasswordResetToken;
 import edu.ubb.licenta.pgim2289.spring.model.User;
 import edu.ubb.licenta.pgim2289.spring.repository.PasswordResetTokenJpa;
-import edu.ubb.licenta.pgim2289.spring.repository.UserJpa;
+import edu.ubb.licenta.pgim2289.spring.repository.UserRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -19,13 +19,13 @@ import java.util.UUID;
 @Service
 public class PasswordResetServiceImpl implements PasswordResetService {
 
-    private final UserJpa userRepository;
+    private final UserRepository userRepository;
     private final PasswordEncoder encoder;
     private final PasswordResetTokenService passwordResetTokenService;
     private final PasswordResetTokenJpa passwordResetTokenJpa;
     private final EmailService emailService;
 
-    public PasswordResetServiceImpl(UserJpa userRepository, PasswordEncoder encoder,
+    public PasswordResetServiceImpl(UserRepository userRepository, PasswordEncoder encoder,
                                     PasswordResetTokenService passwordResetTokenService,
                                     PasswordResetTokenJpa passwordResetTokenJpa,
                                     EmailService emailService) {

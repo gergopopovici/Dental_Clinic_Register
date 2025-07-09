@@ -4,7 +4,7 @@ import edu.ubb.licenta.pgim2289.spring.config.JwtProperties;
 import edu.ubb.licenta.pgim2289.spring.dto.TokenResponse;
 import edu.ubb.licenta.pgim2289.spring.model.RefreshToken;
 import edu.ubb.licenta.pgim2289.spring.repository.RefreshTokenJpa;
-import edu.ubb.licenta.pgim2289.spring.repository.UserJpa;
+import edu.ubb.licenta.pgim2289.spring.repository.UserRepository;
 import edu.ubb.licenta.pgim2289.spring.security.JwtTokenProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -16,11 +16,11 @@ import java.util.UUID;
 public class TokenServiceImpl implements TokenService {
 
     private final RefreshTokenJpa refreshTokenRepository;
-    private final UserJpa userRepository;
+    private final UserRepository userRepository;
     private final JwtTokenProvider jwtTokenProvider;
     private final JwtProperties jwtProperties;
 
-    public TokenServiceImpl(RefreshTokenJpa refreshTokenRepository, UserJpa userRepository,
+    public TokenServiceImpl(RefreshTokenJpa refreshTokenRepository, UserRepository userRepository,
                             JwtTokenProvider jwtTokenProvider, JwtProperties jwtProperties) {
         this.refreshTokenRepository = refreshTokenRepository;
         this.userRepository = userRepository;

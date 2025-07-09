@@ -13,6 +13,7 @@ public class AuthenticationDependencies {
     public final EmailService emailService;
     public final PasswordResetService passwordResetService;
     public final ValidationService validationService;
+    public final PatientService patientService;
 
     public AuthenticationDependencies(
             AuthenticationManager authenticationManager,
@@ -20,7 +21,8 @@ public class AuthenticationDependencies {
             TokenService tokenService,
             EmailService emailService,
             PasswordResetService passwordResetService,
-            ValidationService validationService
+            ValidationService validationService,
+            PatientService patientService
     ) {
         this.authenticationManager = authenticationManager;
         this.userService = userService;
@@ -28,5 +30,6 @@ public class AuthenticationDependencies {
         this.emailService = emailService;
         this.passwordResetService = passwordResetService;
         this.validationService = validationService;
+        this.patientService = patientService;
     }
 }

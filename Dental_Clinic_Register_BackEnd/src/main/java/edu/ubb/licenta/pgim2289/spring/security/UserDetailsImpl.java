@@ -8,10 +8,10 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.io.Serial;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class UserDetailsImpl implements UserDetails {
     @Serial
@@ -38,17 +38,9 @@ public class UserDetailsImpl implements UserDetails {
     }
 
     public static UserDetailsImpl build(User user) {
-        List<GrantedAuthority> authorities = new ArrayList<>();
-
-        if (user.getAdministrator() != null && user.getAdministrator()) {
-            authorities.add(new SimpleGrantedAuthority("ROLE_ADMINISTRATOR"));
-        }
-        if (user.getDoctor() != null && user.getDoctor()) {
-            authorities.add(new SimpleGrantedAuthority("ROLE_DOCTOR"));
-        }
-        if (user.getPatient() != null && user.getPatient()) {
-            authorities.add(new SimpleGrantedAuthority("ROLE_PATIENT"));
-        }
+        List<GrantedAuthority> authorities = user.getRoles().stream()
+                .map(role -> new SimpleGrantedAuthority(role.getRoleName().name()))
+                .collect(Collectors.toList());
         return new UserDetailsImpl(
                 user.getId(),
                 user.getUserName(),
