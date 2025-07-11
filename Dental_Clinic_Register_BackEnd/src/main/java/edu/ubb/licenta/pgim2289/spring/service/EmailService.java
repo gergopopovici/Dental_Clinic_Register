@@ -1,60 +1,15 @@
 package edu.ubb.licenta.pgim2289.spring.service;
 
 import edu.ubb.licenta.pgim2289.spring.model.User;
-import edu.ubb.licenta.pgim2289.spring.model.VerificationToken;
-import edu.ubb.licenta.pgim2289.spring.repository.VerificationTokenJpa;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.stereotype.Service;
 
-import java.util.UUID;
+public interface EmailService {
+    void sendVerificationEmail(User user);
 
-@Service
-public class EmailService {
+    void sendVerificationEmail(String to, String token);
 
-    private final JavaMailSender mailSender;
-    private final VerificationTokenJpa verificationTokenRepository;
+    void sendPasswordResetEmail(String to, String passwordResetLink, String userName);
 
-    @Value("${spring.mail.username}")
-    private String fromEmail;
+    void passwordResetConfirmationEmail(String to, String userName);
 
-    public EmailService(JavaMailSender mailSender, VerificationTokenJpa verificationTokenRepository) {
-        this.mailSender = mailSender;
-        this.verificationTokenRepository = verificationTokenRepository;
-    }
-
-    public void sendVerificationEmail(User user) {
-        String token = UUID.randomUUID().toString();
-        verificationTokenRepository.save(new VerificationToken(token, user));
-        sendVerificationEmail(user.getEmail(), token);
-    }
-
-    public void sendVerificationEmail(String to, String token) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom(fromEmail);
-        message.setTo(to);
-        message.setSubject("Complete Your Registration!");
-        message.setText("To confirm your account, please click the link below:\n\n"
-                + "http://localhost:5175/verify?token=" + token);
-        mailSender.send(message);
-    }
-
-    public void sendPasswordResetEmail(String to, String passwordResetLink, String userName) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom(fromEmail);
-        message.setTo(to);
-        message.setSubject("Complete Your Password Reset!");
-        message.setText("Hello " + userName + "!\n\nHere is your password reset link:\n\n" + passwordResetLink);
-        mailSender.send(message);
-    }
-
-    public void passwordResetConfirmationEmail(String to, String userName) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom(fromEmail);
-        message.setTo(to);
-        message.setSubject("Your Password Reset Confirmation!");
-        message.setText("Hello " + userName + "!\n\nYour password was successfully reset.");
-        mailSender.send(message);
-    }
+    void verificationCodeSent(String verificationCode, String to, String userName);
 }

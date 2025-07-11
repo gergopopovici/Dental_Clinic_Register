@@ -8,7 +8,6 @@ import java.util.Set;
 public class ResponseUserDTO {
     private Long id;
     private String userName;
-    private String password;
     private String email;
     private String phoneNumber;
     private String firstName;

@@ -31,3 +31,9 @@ jwt:
   secret: ${Secret_Key}
   access-token-expiration-ms: 600000 # 10 minutes
   refresh-token-expiration-ms: 1800000 # 30 minutes
+
+logging:
+  level:
+    org:
+      springframework:
+        security: DEBUG
