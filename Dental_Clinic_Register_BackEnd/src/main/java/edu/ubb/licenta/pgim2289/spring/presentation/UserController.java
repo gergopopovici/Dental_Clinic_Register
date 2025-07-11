@@ -23,7 +23,8 @@ public class UserController {
     private final VerificationCodeService verificationCodeService;
     private final EmailService emailService;
 
-    public UserController(UserService userService, VerificationCodeService verificationCodeService, EmailService emailService) {
+    public UserController(UserService userService, VerificationCodeService verificationCodeService,
+                          EmailService emailService) {
         this.userService = userService;
         this.verificationCodeService = verificationCodeService;
         this.emailService = emailService;
@@ -41,27 +42,35 @@ public class UserController {
         User user = userOptional.get();
 
         String verificationCode = verificationCodeService.generateVerificationCode(userId, "password_change_request");
-        emailService.verificationCodeSent(verificationCode, user.getEmail(), user.getUserName());
+        emailService.verificationCodeSent(verificationCode,
+                user.getEmail(), user.getUserName());
 
-        return ResponseEntity.ok(new MessageResponse("A verification code has been sent to your registered email address to change your password."));
+        return ResponseEntity.ok(new MessageResponse("A verification code has been sent to "
+                + "your registered email address to change your password."));
     }
 
     @PreAuthorize("hasAnyRole('DOCTOR', 'PATIENT','ADMIN')")
     @PostMapping("/verify-password-change-code")
-    public ResponseEntity<MessageResponse> verifyPasswordChangeCode(@RequestBody RequestPasswordVerificationDTO request) {
+    public ResponseEntity<MessageResponse> verifyPasswordChangeCode(@RequestBody
+                                                                    RequestPasswordVerificationDTO request) {
         Long userId = SecurityUtils.getCurrentUserId();
 
-        if (!verificationCodeService.checkVerificationCode(userId, request.getVerificationCode(), "password_change_request")) {
-            return ResponseEntity.badRequest().body(new MessageResponse("Error: Invalid or expired verification code!"));
+        if (!verificationCodeService.checkVerificationCode(userId,
+                request.getVerificationCode(),
+                "password_change_request")) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: Invalid or expired "
+                    + "verification code!"));
         }
-        return ResponseEntity.ok(new MessageResponse("Verification code confirmed. You can now set your new password."));
+        return ResponseEntity.ok(new MessageResponse("Verification code confirmed."
+                + " You can now set your new password."));
     }
 
     @PreAuthorize("hasAnyRole('DOCTOR', 'PATIENT','ADMIN')")
     @PutMapping("/update-password")
     public ResponseEntity<MessageResponse> updatePassword(@RequestBody RequestNewPasswordDTO request) {
         Long userId = SecurityUtils.getCurrentUserId();
-        emailService.passwordResetConfirmationEmail(userService.findById(userId).get().getEmail(), userService.findById(userId).get().getUserName());
+        emailService.passwordResetConfirmationEmail(userService.findById(userId).get().getEmail(),
+                userService.findById(userId).get().getUserName());
         return userService.updatePassword(userId, request.getPassword());
     }
 

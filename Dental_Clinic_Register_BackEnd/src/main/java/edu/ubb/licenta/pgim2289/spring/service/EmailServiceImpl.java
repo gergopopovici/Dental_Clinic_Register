@@ -26,12 +26,14 @@ public class EmailServiceImpl implements EmailService {
         this.verificationTokenRepository = verificationTokenRepository;
     }
 
+    @Override
     public void sendVerificationEmail(User user) {
         String token = UUID.randomUUID().toString();
         verificationTokenRepository.save(new VerificationToken(token, user));
         sendVerificationEmail(user.getEmail(), token);
     }
 
+    @Override
     public void sendVerificationEmail(String to, String token) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(fromEmail);
@@ -42,6 +44,7 @@ public class EmailServiceImpl implements EmailService {
         mailSender.send(message);
     }
 
+    @Override
     public void sendPasswordResetEmail(String to, String passwordResetLink, String userName) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(fromEmail);
@@ -51,6 +54,7 @@ public class EmailServiceImpl implements EmailService {
         mailSender.send(message);
     }
 
+    @Override
     public void passwordResetConfirmationEmail(String to, String userName) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(fromEmail);

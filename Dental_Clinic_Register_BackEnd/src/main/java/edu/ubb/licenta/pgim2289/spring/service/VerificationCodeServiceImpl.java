@@ -19,7 +19,7 @@ public class VerificationCodeServiceImpl implements VerificationCodeService {
 
     @Override
     public String generateVerificationCode(Long userId, String purpose) {
-        String code = String.valueOf((100000 + random.nextInt(900000)));
+        String code = String.valueOf(100000 + random.nextInt(900000));
         VerificationCode verificationCode = new VerificationCode();
         verificationCode.setUserId(userId);
         verificationCode.setPurpose(purpose);

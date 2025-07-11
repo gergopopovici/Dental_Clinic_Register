@@ -21,13 +21,13 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/verification")
 public class VerificiatonController {
-    private final VerificationCodeService VerificationCodeService;
+    private final VerificationCodeService verificationCodeService;
     private final EmailService emailService;
     private final UserService userService;
 
 
     public VerificiatonController(VerificationCodeService service, EmailService emailService, UserService userService) {
-        this.VerificationCodeService = service;
+        this.verificationCodeService = service;
         this.emailService = emailService;
         this.userService = userService;
     }
@@ -41,7 +41,7 @@ public class VerificiatonController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body("User with your Id was not found");
         }
-        String code = VerificationCodeService.generateVerificationCode(userId, request.getPurpose());
+        String code = verificationCodeService.generateVerificationCode(userId, request.getPurpose());
         emailService.verificationCodeSent(code, user.get().getEmail(), user.get().getUserName());
         return ResponseEntity.ok("Verification Code sent to your email address");
     }
@@ -50,7 +50,7 @@ public class VerificiatonController {
     @PreAuthorize("hasAnyRole('DOCTOR', 'PATIENT','ADMIN')")
     public ResponseEntity<String> verifyCode(@RequestBody ResponseVerificationDTO request) {
         Long userId = SecurityUtils.getCurrentUserId();
-        boolean valid = VerificationCodeService.checkVerificationCode(userId, request.getCode(), request.getPurpose());
+        boolean valid = verificationCodeService.checkVerificationCode(userId, request.getCode(), request.getPurpose());
         return valid ? ResponseEntity.ok("Code verified.") :
                 ResponseEntity.badRequest().body("Invalid or expired code.");
     }

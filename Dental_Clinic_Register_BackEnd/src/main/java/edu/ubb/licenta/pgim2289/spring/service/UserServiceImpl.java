@@ -30,7 +30,9 @@ public class UserServiceImpl implements UserService {
 
 
     public UserServiceImpl(UserRepository userRepository, PasswordEncoder encoder,
-                           VerificationTokenJpa verificationTokenRepository, RoleRepository roleRepository, PhoneNumberUtilService phoneNumberUtilService) {
+                           VerificationTokenJpa verificationTokenRepository,
+                           RoleRepository roleRepository,
+                           PhoneNumberUtilService phoneNumberUtilService) {
         this.userRepository = userRepository;
         this.encoder = encoder;
         this.verificationTokenRepository = verificationTokenRepository;
