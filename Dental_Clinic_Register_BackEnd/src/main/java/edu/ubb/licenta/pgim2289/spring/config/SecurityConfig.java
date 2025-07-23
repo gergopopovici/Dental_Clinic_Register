@@ -93,6 +93,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS).permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "/api/users/**").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/users/**").authenticated()
                         .anyRequest().authenticated()
                 );
 
