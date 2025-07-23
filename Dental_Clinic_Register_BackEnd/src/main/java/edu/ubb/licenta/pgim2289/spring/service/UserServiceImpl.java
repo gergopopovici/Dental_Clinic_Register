@@ -2,9 +2,7 @@ package edu.ubb.licenta.pgim2289.spring.service;
 
 import edu.ubb.licenta.pgim2289.spring.dto.MessageResponse;
 import edu.ubb.licenta.pgim2289.spring.dto.RequestUserDTO;
-import edu.ubb.licenta.pgim2289.spring.model.Role;
-import edu.ubb.licenta.pgim2289.spring.model.User;
-import edu.ubb.licenta.pgim2289.spring.model.VerificationToken;
+import edu.ubb.licenta.pgim2289.spring.model.*;
 import edu.ubb.licenta.pgim2289.spring.repository.RoleRepository;
 import edu.ubb.licenta.pgim2289.spring.repository.UserRepository;
 import edu.ubb.licenta.pgim2289.spring.repository.VerificationTokenJpa;
@@ -27,17 +25,23 @@ public class UserServiceImpl implements UserService {
     private final VerificationTokenJpa verificationTokenRepository;
     private final RoleRepository roleRepository;
     private final PhoneNumberUtilService phoneNumberUtilService;
+    private final PatientService patientService;
+    private final RefreshTokenService refreshTokenService;
 
 
     public UserServiceImpl(UserRepository userRepository, PasswordEncoder encoder,
                            VerificationTokenJpa verificationTokenRepository,
                            RoleRepository roleRepository,
-                           PhoneNumberUtilService phoneNumberUtilService) {
+                           PhoneNumberUtilService phoneNumberUtilService,
+                           PatientService patientService,
+                           RefreshTokenService refreshTokenService) {
         this.userRepository = userRepository;
         this.encoder = encoder;
         this.verificationTokenRepository = verificationTokenRepository;
         this.roleRepository = roleRepository;
         this.phoneNumberUtilService = phoneNumberUtilService;
+        this.patientService = patientService;
+        this.refreshTokenService = refreshTokenService;
     }
 
     @Override
@@ -144,6 +148,17 @@ public class UserServiceImpl implements UserService {
         user.setFirstName(dto.getFirstName());
         user.setLastName(dto.getLastName());
         user.setMiddleName(dto.getMiddleName());
+        Patient patient = patientService.getPatient(userOptional.get());
+        patient.setGender(dto.getGender());
+        if (!user.getPhoneNumber().equals(dto.getPhoneNumber())
+                && userRepository.existsByPhoneNumber(dto.getPhoneNumber())) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Error:"
+                    + " Phone number already exist!"));
+        }
+        if (!phoneNumberUtilService.isValidPhoneNumber(dto.getPhoneNumber(), "RO")) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: Invalid phone number!"));
+        }
+        user.setPhoneNumber(dto.getPhoneNumber());
         userRepository.save(user);
         return ResponseEntity.ok(new MessageResponse("User updated successfully!"));
     }
@@ -164,6 +179,17 @@ public class UserServiceImpl implements UserService {
         user.setPhoneNumber(phoneNumber);
         userRepository.save(user);
         return ResponseEntity.ok(new MessageResponse("Phone number updated successfully!"));
+    }
+
+    @Override
+    public Optional<User> findByUsername(String username) {
+        return userRepository.findByUserName(username);
+    }
+
+    @Override
+    public Optional<RefreshToken> findByRefreshToken(String token) {
+        return refreshTokenService.findByToken(token);
+
     }
 
 
