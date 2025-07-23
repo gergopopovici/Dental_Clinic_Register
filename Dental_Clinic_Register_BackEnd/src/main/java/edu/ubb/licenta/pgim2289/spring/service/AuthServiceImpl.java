@@ -1,112 +1,119 @@
 package edu.ubb.licenta.pgim2289.spring.service;
 
-import edu.ubb.licenta.pgim2289.spring.config.AuthenticationDependencies;
 import edu.ubb.licenta.pgim2289.spring.dto.*;
-import edu.ubb.licenta.pgim2289.spring.model.*;
+import edu.ubb.licenta.pgim2289.spring.exception.TokenRefreshException;
+import edu.ubb.licenta.pgim2289.spring.model.AuthTokenPair;
+import edu.ubb.licenta.pgim2289.spring.model.User;
 import edu.ubb.licenta.pgim2289.spring.security.UserDetailsImpl;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.stream.Collectors;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
     private final AuthenticationManager authenticationManager;
-    private final UserService userService;
-    private final TokenService tokenService;
-    private final EmailService emailService;
-    private final PasswordResetService passwordResetService;
-    private final ValidationService validationService;
-    private final PatientService patientService;
-
-    public AuthServiceImpl(AuthenticationDependencies deps) {
-        this.authenticationManager = deps.authenticationManager;
-        this.userService = deps.userService;
-        this.tokenService = deps.tokenService;
-        this.emailService = deps.emailService;
-        this.passwordResetService = deps.passwordResetService;
-        this.validationService = deps.validationService;
-        this.patientService = deps.patientService;
-    }
+    private final UserAuthenticationService userAuthService;
+    private final UserRegistrationService userRegistrationService;
+    private final PasswordManagementService passwordManagementService;
+    private final TokenManagementService tokenManagementService;
+    private final CookieManagementService cookieManagementService;
 
     @Override
-    public JwtResponse authenticateUser(LoginRequest loginRequest) {
+    @Transactional
+    public LoginResponse authenticateUser(LoginRequest loginRequest) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         loginRequest.getUsername(),
-                        loginRequest.getPassword()));
+                        loginRequest.getPassword()
+                )
+        );
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 
-        TokenResponse tokenResponse = tokenService.createTokensForUser(userDetails.getId(), authentication);
+        User user = userAuthService.findByUsername(userDetails.getUsername())
+                .orElseThrow(() -> new RuntimeException("User not found after authentication."));
 
-        List<String> roles = userDetails.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.toList());
+        AuthTokenPair tokenPair = tokenManagementService.generateTokenPair(user);
+        cookieManagementService.setAccessTokenCookie(tokenPair.getAccessToken());
 
-        return new JwtResponse(
-                tokenResponse.getAccessToken(),
-                tokenResponse.getRefreshToken(),
-                userDetails.getId(),
-                userDetails.getUsername(),
-                userDetails.getEmail(),
-                roles);
+        return new LoginResponse(
+                null,
+                tokenPair.getRefreshToken(),
+                "Bearer",
+                userDetails.getUsername()
+        );
     }
 
     @Override
     public ResponseEntity<MessageResponse> registerUser(RequestUserDTO dto) {
-        ValidationResult validation = validationService.validateUserRegistration(dto);
-        if (!validation.isValid()) {
-            return ResponseEntity.badRequest().body(new MessageResponse(validation.getErrorMessage()));
-        }
-
-        User savedUser = userService.createUser(dto);
-        patientService.createPatient(dto);
-        emailService.sendVerificationEmail(savedUser);
-
-        return ResponseEntity.ok(new MessageResponse("User registered successfully! "
-                + "Please check your email to verify your account."));
+        return userRegistrationService.registerUser(dto);
     }
 
     @Override
     public ResponseEntity<MessageResponse> verifyAccount(String token) {
-        return userService.verifyUserAccount(token);
+        return userRegistrationService.verifyAccount(token);
     }
 
     @Override
     public ResponseEntity<MessageResponse> forgotPassword(RequestPasswordResetTokenDTO dto) {
-        return passwordResetService.initiateForgotPassword(dto);
+        return passwordManagementService.initiateForgotPassword(dto);
     }
 
     @Override
     public ResponseEntity<MessageResponse> resetPassword(ResponsePasswordResetTokenDTO dto) {
-        return passwordResetService.resetPassword(dto);
+        return passwordManagementService.resetPassword(dto);
     }
 
     @Override
+    @Transactional
     public ResponseEntity<MessageResponse> logoutUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-        if (auth != null) {
-            Object principal = auth.getPrincipal();
+        if (auth != null && auth.getPrincipal() instanceof UserDetailsImpl userDetails) {
+            userAuthService.findByUsername(userDetails.getUsername())
+                    .ifPresent(user -> tokenManagementService
+                            .revokeAllTokensForUser(user.getId()));
 
-            if (principal instanceof UserDetailsImpl userDetails) {
-                tokenService.revokeUserTokens(userDetails.getId());
-            }
-            SecurityContextHolder.clearContext();
+            cookieManagementService.clearAccessTokenCookie();
         }
 
+        SecurityContextHolder.clearContext();
         return ResponseEntity.ok(new MessageResponse("Log out successful!"));
     }
 
+    @Override
+    @Transactional
+    public ResponseEntity<LoginResponse> refreshToken(RequestRefreshTokenDTO
+                                                              refreshTokenRequest) {
+        try {
+            AuthTokenPair tokenPair = tokenManagementService.refreshTokens(
+                    refreshTokenRequest.getRefreshToken());
+            cookieManagementService.setAccessTokenCookie(tokenPair.getAccessToken());
+
+            User user = tokenManagementService.getUserFromRefreshToken(
+                    refreshTokenRequest.getRefreshToken());
+
+            return ResponseEntity.ok(new LoginResponse(
+                    tokenPair.getAccessToken(),
+                    tokenPair.getRefreshToken(),
+                    "Bearer",
+                    user.getUserName()
+            ));
+        } catch (TokenRefreshException e) {
+            cookieManagementService.clearAccessTokenCookie();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new LoginResponse(null, null, "Bearer", null));
+        }
+    }
 }

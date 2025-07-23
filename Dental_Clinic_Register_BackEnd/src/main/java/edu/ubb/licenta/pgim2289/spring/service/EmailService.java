@@ -11,5 +11,9 @@ public interface EmailService {
 
     void passwordResetConfirmationEmail(String to, String userName);
 
-    void verificationCodeSent(String verificationCode, String to, String userName);
+    void sendVerificationCode(String verificationCode, String to, String userName);
+
+    void sendEmailResetEmail(String email, String to, String userName);
+
+    void sendDeletionConfirmationEmail(String to, String userName);
 }

@@ -65,12 +65,33 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void verificationCodeSent(String verificationCode, String to, String userName) {
+    public void sendVerificationCode(String verificationCode, String to, String userName) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(fromEmail);
         message.setTo(to);
         message.setSubject("Your Verification Code!");
         message.setText("Hello " + userName + "!\n\nYour verification code:" + verificationCode);
+        mailSender.send(message);
+    }
+
+    @Override
+    public void sendEmailResetEmail(String email, String to, String userName) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(fromEmail);
+        message.setTo(to);
+        message.setSubject("Your Email was Successfully Reset!");
+        message.setText("Hello " + userName + "!\n\nYour email was successfully "
+                + "reset to your new email address:" + email + ".");
+        mailSender.send(message);
+    }
+
+    @Override
+    public void sendDeletionConfirmationEmail(String to, String userName) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(fromEmail);
+        message.setTo(to);
+        message.setSubject("Your Deletion Confirmation Email!");
+        message.setText("Hello " + userName + "!\n\nYour deletion confirmation email! ");
         mailSender.send(message);
     }
 }

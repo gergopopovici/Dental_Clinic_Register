@@ -4,7 +4,7 @@ import edu.ubb.licenta.pgim2289.spring.dto.*;
 import org.springframework.http.ResponseEntity;
 
 public interface AuthService {
-    JwtResponse authenticateUser(LoginRequest loginRequest);
+    LoginResponse authenticateUser(LoginRequest loginRequest);
 
     ResponseEntity<MessageResponse> registerUser(RequestUserDTO requestUserDTO);
 
@@ -15,4 +15,6 @@ public interface AuthService {
     ResponseEntity<MessageResponse> resetPassword(ResponsePasswordResetTokenDTO dto);
 
     ResponseEntity<MessageResponse> logoutUser();
+
+    ResponseEntity<LoginResponse> refreshToken(RequestRefreshTokenDTO refreshTokenRequest);
 }
