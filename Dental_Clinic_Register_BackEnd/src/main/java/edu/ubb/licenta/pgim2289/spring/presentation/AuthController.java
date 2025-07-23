@@ -20,7 +20,7 @@ public class AuthController {
     }
 
     @PostMapping("/signin")
-    public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<LoginResponse> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
         return ResponseEntity.ok(authService.authenticateUser(loginRequest));
     }
 
@@ -49,5 +49,10 @@ public class AuthController {
     public ResponseEntity<MessageResponse> passwordReset(
             @Valid @RequestBody ResponsePasswordResetTokenDTO passwordResetTokenDTO) {
         return authService.resetPassword(passwordResetTokenDTO);
+    }
+
+    @PostMapping("/refresh-token")
+    public ResponseEntity<LoginResponse> refreshToken(@Valid @RequestBody RequestRefreshTokenDTO refreshTokenRequest) {
+        return authService.refreshToken(refreshTokenRequest);
     }
 }

@@ -7,7 +7,7 @@ import edu.ubb.licenta.pgim2289.spring.model.User;
 import edu.ubb.licenta.pgim2289.spring.service.EmailService;
 import edu.ubb.licenta.pgim2289.spring.service.UserService;
 import edu.ubb.licenta.pgim2289.spring.service.VerificationCodeService;
-import edu.ubb.licenta.pgim2289.spring.utils.SecurityUtils;
+import edu.ubb.licenta.pgim2289.spring.utils.SecurityUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -35,21 +35,21 @@ public class VerificiatonController {
     @PreAuthorize("hasAnyRole('DOCTOR', 'PATIENT','ADMIN')")
     @PostMapping("/request")
     public ResponseEntity<String> requestCode(@RequestBody RequestVerificationDTO request) {
-        Long userId = SecurityUtils.getCurrentUserId();
+        Long userId = SecurityUtil.getCurrentUserId();
         Optional<User> user = userService.findById(userId);
         if (user.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body("User with your Id was not found");
         }
         String code = verificationCodeService.generateVerificationCode(userId, request.getPurpose());
-        emailService.verificationCodeSent(code, user.get().getEmail(), user.get().getUserName());
+        emailService.sendVerificationCode(code, user.get().getEmail(), user.get().getUserName());
         return ResponseEntity.ok("Verification Code sent to your email address");
     }
 
     @PostMapping("/verify")
     @PreAuthorize("hasAnyRole('DOCTOR', 'PATIENT','ADMIN')")
     public ResponseEntity<String> verifyCode(@RequestBody ResponseVerificationDTO request) {
-        Long userId = SecurityUtils.getCurrentUserId();
+        Long userId = SecurityUtil.getCurrentUserId();
         boolean valid = verificationCodeService.checkVerificationCode(userId, request.getCode(), request.getPurpose());
         return valid ? ResponseEntity.ok("Code verified.") :
                 ResponseEntity.badRequest().body("Invalid or expired code.");
