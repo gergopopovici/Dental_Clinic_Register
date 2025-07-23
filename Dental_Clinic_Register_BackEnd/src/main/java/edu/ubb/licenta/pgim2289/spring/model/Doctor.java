@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+
 import java.util.List;
 import java.util.ArrayList;
 
@@ -16,6 +17,7 @@ public class Doctor extends BaseEntity {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", unique = true, nullable = false)
+    @EqualsAndHashCode.Exclude
     private User user;
 
     @Column(name = "Specialization")
