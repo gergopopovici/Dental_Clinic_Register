@@ -65,4 +65,12 @@ public class GlobalExceptionHandler {
         errorMap.put("error", ex.getMessage());
         return errorMap;
     }
+
+    @ExceptionHandler(TokenRefreshException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public Map<String, String> handleTokenRefreshException(TokenRefreshException ex) {
+        Map<String, String> errorMap = new ConcurrentHashMap<>();
+        errorMap.put("error", ex.getMessage());
+        return errorMap;
+    }
 }
