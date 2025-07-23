@@ -33,4 +33,9 @@ public class PatientServiceImpl implements PatientService {
         newPatient.setGender(dto.getGender());
         patientRepository.save(newPatient);
     }
+
+    @Override
+    public Patient getPatient(User user) {
+        return patientRepository.findByUser(user);
+    }
 }
