@@ -4,7 +4,8 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 @Data
-public class RequestPasswordVerificationDTO {
+public class RequestEmailVerificationDTO {
     @NotBlank
     private String verificationCode;
+
 }
