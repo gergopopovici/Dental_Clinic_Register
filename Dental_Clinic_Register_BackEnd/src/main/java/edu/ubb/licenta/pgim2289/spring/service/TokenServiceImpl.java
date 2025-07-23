@@ -39,7 +39,7 @@ public class TokenServiceImpl implements TokenService {
         refreshToken.setToken(UUID.randomUUID().toString());
         refreshTokenRepository.save(refreshToken);
 
-        String jwt = jwtTokenProvider.generateToken(authentication);
+        String jwt = jwtTokenProvider.generateAccessToken(authentication);
 
         return new TokenResponse(jwt, refreshToken.getToken());
     }
