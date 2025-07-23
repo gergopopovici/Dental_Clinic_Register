@@ -5,14 +5,12 @@ import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 
-import java.util.Optional;
 
 public interface RefreshTokenJpa extends JpaRepository<RefreshToken, Long> {
-    Optional<RefreshToken> findByToken(String token);
 
-    // int deleteByUser(User user);
 
     @Transactional
     @Modifying
     void deleteByUserId(Long userId);
+
 }
