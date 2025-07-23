@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { Box, Button, Link, TextField, Typography, CircularProgress, FormControlLabel, Checkbox } from '@mui/material';
 import { loginLeftSvg, loginRightSvg } from '../assets';
 import { useMutation } from '@tanstack/react-query';
-import Cookies from 'js-cookie';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { loginIn } from '../services/AuthorisationService';
-import { Login } from '../models/Login';
+import { getCurrentUserDetails } from '../services/UserService';
+import { Login, LoginResponse } from '../models/Login';
+import { useUser, UserDetails } from '../context/UserContext';
+import axios from 'axios';
 
 function LoginPage() {
   const [hoveredSection, setHoveredSection] = useState<'login' | 'signup' | null>(null);
@@ -16,20 +18,51 @@ function LoginPage() {
   const [searchParams] = useSearchParams();
   const redirect = searchParams.get('redirect') || '/dashboard';
 
-  const loginMutation = useMutation<{ token: string }, Error, Login>({
-    mutationFn: (loginData: Login) => loginIn(loginData),
-    onSuccess: (data) => {
-      const cookieOptions = rememberMe ? { expires: 7 } : undefined;
-      Cookies.set('auth_token', data.token, cookieOptions);
+  const { login } = useUser();
+
+  const fetchUserDetailsMutation = useMutation<UserDetails, Error>({
+    mutationFn: () => getCurrentUserDetails(),
+    onSuccess: (userDetails) => {
+      console.log('User details fetched successfully:', userDetails);
+      login(userDetails);
       navigate(redirect);
     },
     onError: (error) => {
-      console.error('Login failed:', error);
-      alert('Invalid username or password.');
+      console.error('Failed to fetch user details after login:', error);
+      console.log('Error object details (stringified):', JSON.stringify(error, null, 2));
+      if (axios.isAxiosError(error)) {
+        console.error('Axios error response (if available):', error.response);
+        console.error('Axios error data (if available):', error.response?.data);
+      }
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('refresh_token');
+      }
+      alert('Login successful, but failed to load user profile. Please try again.');
+      navigate('/login');
     },
   });
 
-  const isLoading = loginMutation.isPending;
+  const loginMutation = useMutation<LoginResponse, Error, Login>({
+    mutationFn: (loginData: Login) => loginIn(loginData),
+    onSuccess: (data) => {
+      console.log('You were successfully logged in');
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('refresh_token', data.refreshToken);
+      }
+
+      fetchUserDetailsMutation.mutate();
+    },
+    onError: (error) => {
+      console.error('Login failed:', error);
+      if (axios.isAxiosError(error) && error.response && error.response.data && error.response.data.message) {
+        alert(`Login failed: ${error.response.data.message}`);
+      } else {
+        alert('Invalid username or password.');
+      }
+    },
+  });
+
+  const isLoading = loginMutation.isPending || fetchUserDetailsMutation.isPending;
 
   const handleLoginSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
