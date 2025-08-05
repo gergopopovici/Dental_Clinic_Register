@@ -21,6 +21,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { signOut } from '../services/AuthorisationService'; // Assuming signOut is your logout API call
 import { useUser } from '../context/UserContext'; // Your UserContext hook
+import { getAvatar } from '../services/UserService';
 
 const drawerWidth = 240;
 
@@ -85,6 +86,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   const userInitials = (user?.firstName?.[0] || '') + (user?.lastName?.[0] || '');
 
+  const avatarUrl = getAvatar(user?.profilePictureUrl);
+
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh', width: '100%' }}>
       <Drawer
@@ -104,7 +107,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       >
         <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <IconButton sx={{ p: 0 }}>
-            <Avatar alt="Patient Name" sx={{ width: 60, height: 60, mb: 1, bgcolor: 'primary.light' }}>
+            <Avatar
+              alt="Patient Name"
+              src={avatarUrl || undefined}
+              sx={{ width: 60, height: 60, mb: 1, bgcolor: 'primary.light' }}
+            >
               {userInitials}
             </Avatar>
           </IconButton>

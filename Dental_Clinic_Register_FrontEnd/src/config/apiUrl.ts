@@ -15,6 +15,8 @@ const verifyEmailChangeCodeApiUrl = `${api}/api/users/verify-email-change-code`;
 const updateEmailApiUrl = `${api}/api/users/update-email`;
 const refreshTokenApiUrl = `${api}/api/auth/refresh-token`;
 const updateUserApiUrl = `${api}/api/users/update-user-details`;
+const uploadAvatarApiUrl = `${api}/api/users/upload-avatar`;
+const getAvatarApiUrl = `${api}/api/users/avatar/`;
 const apiURL = api;
 
 export {
@@ -34,4 +36,6 @@ export {
   updateEmailApiUrl,
   refreshTokenApiUrl,
   updateUserApiUrl,
+  uploadAvatarApiUrl,
+  getAvatarApiUrl,
 };

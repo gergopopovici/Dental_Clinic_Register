@@ -46,6 +46,10 @@
 # Ignore env
 **/.env
 
+# Local Folder for uploading files
+
+**/uploads
+
 # Logs
 **/logs
 **/*.log
@@ -70,3 +74,5 @@
 **/*.njsproj
 **/*.sln
 **/*.sw?
+
+

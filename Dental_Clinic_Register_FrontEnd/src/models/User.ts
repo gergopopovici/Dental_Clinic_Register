@@ -30,4 +30,5 @@ export interface ResponseUserDTO {
   doctor: boolean;
   administrator: boolean;
   gender: Gender;
+  profilePictureUrl?: string;
 }

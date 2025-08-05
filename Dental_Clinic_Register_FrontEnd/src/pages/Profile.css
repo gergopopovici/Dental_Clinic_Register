@@ -1,0 +1,132 @@
+.profile-settings-container {
+  padding: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.avatar-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.current-avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%; /* Makes the container round */
+  overflow: hidden; /* Clips the image to the circle */
+  background-color: #ddd; /* Default background if no image */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 15px;
+  border: 2px solid #eee;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.profile-avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Ensures the image covers the circle without distortion */
+}
+
+.default-avatar {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 48px;
+  font-weight: bold;
+  color: #555;
+  background-color: #e0e0e0;
+}
+
+.upload-avatar-button {
+  background-color: #007bff;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  font-weight: bold;
+}
+
+.upload-avatar-button:hover {
+  background-color: #0056b3;
+}
+
+/* Cropper Modal */
+.cropper-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.cropper-modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.cropper-container {
+  position: relative;
+  width: 100%;
+  height: 300px; /* Adjust as needed */
+  background: #333;
+}
+
+.cropper-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+}
+
+.cropper-controls input[type='range'] {
+  width: 80%;
+}
+
+.cropper-controls button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  background-color: #28a745;
+  color: white;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.cropper-controls button:hover:not(:disabled) {
+  background-color: #218838;
+}
+
+.cropper-controls button:last-child {
+  background-color: #dc3545;
+}
+
+.cropper-controls button:last-child:hover:not(:disabled) {
+  background-color: #c82333;
+}
+
+.cropper-controls button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
