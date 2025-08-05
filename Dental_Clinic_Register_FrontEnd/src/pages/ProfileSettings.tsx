@@ -1,5 +1,15 @@
-import React, { useEffect, useState } from 'react';
-import { Box, Avatar, Typography, Button, CircularProgress } from '@mui/material';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  Box,
+  Avatar,
+  Typography,
+  Button,
+  CircularProgress,
+  Slider,
+  Dialog,
+  DialogActions,
+  DialogContent,
+} from '@mui/material';
 import { useMutation } from '@tanstack/react-query';
 import {
   deleteUser,
@@ -10,6 +20,8 @@ import {
   updatePassword,
   verifyPasswordChangeCode,
   updateUser,
+  uploadAvatar,
+  getAvatar,
 } from '../services/UserService';
 import { RequestVerificationCodeDTO } from '../models/PasswordVerificationCode';
 import { RequestNewPasswordDTO } from '../models/Password';
@@ -22,6 +34,10 @@ import DeleteModal from '../components/DeleteModal';
 import { signOut } from '../services/AuthorisationService';
 import UpdateUserModal, { UpdateProfileDTO } from '../components/UpdateUserDetailsModal';
 import { RequestUserDTO } from '../models/User';
+import './Profile.css';
+import getCroppedImg from '../utils/cropImage';
+import Cropper from 'react-easy-crop';
+import { Area } from 'react-easy-crop';
 
 function ProfileSettings() {
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
@@ -37,8 +53,15 @@ function ProfileSettings() {
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
   const [newEmail, setNewEmail] = useState('');
+  const [imageSrc, setImageSrc] = useState<string | null>(null);
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
+  const [showCropperModal, setShowCropperModal] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+
   const navigate = useNavigate();
   const { user, isLoading, refreshUser, logout } = useUser();
 
@@ -55,8 +78,8 @@ function ProfileSettings() {
       setErrorMessage('');
       setPasswordChangeStep('verifyCode');
     },
-    onError: () => {
-      setErrorMessage('Failed to send the verification code.');
+    onError: (error: Error) => {
+      setErrorMessage(`Failed to send the verification code: ${error.message || 'Unknown error'}`);
       setSuccessMessage('');
     },
   });
@@ -68,8 +91,8 @@ function ProfileSettings() {
       setErrorMessage('');
       setEmailChangeStep('verifyCode');
     },
-    onError: () => {
-      setErrorMessage('Failed to sent the verification code.');
+    onError: (error: Error) => {
+      setErrorMessage(`Failed to send the verification code: ${error.message || 'Unknown error'}`);
       setSuccessMessage('');
     },
   });
@@ -81,8 +104,8 @@ function ProfileSettings() {
       setErrorMessage('');
       setPasswordChangeStep('enterNewPassword');
     },
-    onError: () => {
-      setErrorMessage('Invalid or expired code.');
+    onError: (error: Error) => {
+      setErrorMessage(`Invalid or expired code: ${error.message || 'Unknown error'}`);
       setSuccessMessage('');
     },
   });
@@ -90,12 +113,12 @@ function ProfileSettings() {
   const verifyEmailAddressMutation = useMutation({
     mutationFn: emailChangeCodeVerification,
     onSuccess: () => {
-      setSuccessMessage('Code verified successfully. Please set your new password.');
+      setSuccessMessage('Code verified successfully. Please set your new email address.');
       setErrorMessage('');
       setEmailChangeStep('enterNewEmailAddress');
     },
-    onError: () => {
-      setErrorMessage('Invalid or expired code.');
+    onError: (error: Error) => {
+      setErrorMessage(`Invalid or expired code: ${error.message || 'Unknown error'}`);
       setSuccessMessage('');
     },
   });
@@ -103,14 +126,14 @@ function ProfileSettings() {
   const deleteUserMutation = useMutation({
     mutationFn: deleteUser,
     onSuccess: async () => {
-      setSuccessMessage('We are sorry to see you go!Your account was deleted successfully.');
+      setSuccessMessage('We are sorry to see you go! Your account was deleted successfully.');
       setErrorMessage('');
       await signOut();
       logout();
       navigate('/login');
     },
-    onError: () => {
-      setErrorMessage('There was an error please try again later!');
+    onError: (error: Error) => {
+      setErrorMessage(`There was an error deleting your account: ${error.message || 'Unknown error'}`);
       setSuccessMessage('');
     },
   });
@@ -151,8 +174,8 @@ function ProfileSettings() {
       setConfirmNewPassword('');
       await refreshUser();
     },
-    onError: () => {
-      setErrorMessage('Failed to update password.');
+    onError: (error: Error) => {
+      setErrorMessage(`Failed to update password: ${error.message || 'Unknown error'}`);
       setSuccessMessage('');
     },
   });
@@ -168,8 +191,8 @@ function ProfileSettings() {
       setNewEmail('');
       await refreshUser();
     },
-    onError: () => {
-      setErrorMessage('Failed to update the email address.');
+    onError: (error: Error) => {
+      setErrorMessage(`Failed to update the email address: ${error.message || 'Unknown error'}`);
       setSuccessMessage('');
     },
   });
@@ -182,9 +205,31 @@ function ProfileSettings() {
       setIsUpdateUserModalOpen(false);
       await refreshUser();
     },
-    onError: (error) => {
+    onError: (error: Error) => {
       console.error('Error updating user details:', error);
       setErrorMessage(`Failed to update user details: ${error.message || error}`);
+      setSuccessMessage('');
+    },
+  });
+
+  const uploadAvatarMutation = useMutation({
+    mutationFn: uploadAvatar,
+    onSuccess: async () => {
+      setSuccessMessage('Avatar uploaded successfully!');
+      setErrorMessage('');
+      setShowCropperModal(false);
+      setImageSrc(null);
+      setZoom(1);
+      setCrop({ x: 0, y: 0 });
+      setCroppedAreaPixels(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+      await refreshUser();
+    },
+    onError: (error: Error) => {
+      console.error('Error uploading avatar:', error);
+      setErrorMessage(`Failed to upload avatar: ${error.message || 'Unknown error'}`);
       setSuccessMessage('');
     },
   });
@@ -337,8 +382,62 @@ function ProfileSettings() {
     updateEmailMutation.mutate(requestDTO);
   };
 
-  const handleAvatarClickForUpload = () => {
-    console.log('Avatar clicked: Open upload picture menu/dialog for Profile Settings');
+  const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const file = e.target.files[0];
+      if (!file.type.startsWith('image/')) {
+        setErrorMessage('Please select an image file.');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.addEventListener('load', () => {
+        setImageSrc(reader.result as string);
+        setShowCropperModal(true);
+        setErrorMessage('');
+      });
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const onCropComplete = useCallback((_croppedArea: Area, croppedAreaPixels: Area) => {
+    setCroppedAreaPixels(croppedAreaPixels);
+  }, []);
+
+  const handleUploadCroppedImage = async () => {
+    if (!imageSrc || !croppedAreaPixels) {
+      setErrorMessage('No image or crop area defined.');
+      return;
+    }
+    if (typeof imageSrc !== 'string') {
+      setErrorMessage('Image source is not a valid string.');
+      return;
+    }
+    try {
+      const croppedImageBlob = await getCroppedImg(imageSrc, croppedAreaPixels);
+      const avatarFile = new File([croppedImageBlob], `avatar_${user?.id || 'unknown'}_${Date.now()}.png`, {
+        type: 'image/png',
+      });
+
+      uploadAvatarMutation.mutate(avatarFile);
+    } catch (error: unknown) {
+      console.error('Error during cropping or preparing for upload:', error);
+      setErrorMessage(
+        `Failed to process image for upload: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+    }
+  };
+
+  const closeCropperModal = () => {
+    setShowCropperModal(false);
+    setImageSrc(null);
+    setCrop({ x: 0, y: 0 });
+    setZoom(1);
+    setCroppedAreaPixels(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+    setErrorMessage('');
   };
 
   if (isLoading) {
@@ -355,15 +454,14 @@ function ProfileSettings() {
   }
 
   const fullName = [user.firstName, user.middleName, user.lastName].filter(Boolean).join(' ');
-  console.log(fullName);
-  console.log(user.middleName);
-
   const userRolesDisplay =
     user.roles && user.roles.length > 0
       ? user.roles.map((role) => role.replace('ROLE_', '').replace(/_/g, ' ')).join(', ')
       : 'No Roles';
 
-  const userInitials = (user.firstName?.[0] || '') + (user.lastName?.[0] || '');
+  const userInitials = (user?.firstName?.[0] || '') + (user?.lastName?.[0] || '');
+
+  const avatarUrl = getAvatar(user.profilePictureUrl);
 
   return (
     <Box
@@ -393,7 +491,6 @@ function ProfileSettings() {
           }}
         >
           <Box
-            onClick={handleAvatarClickForUpload}
             sx={{
               cursor: 'pointer',
               borderRadius: '50%',
@@ -401,10 +498,12 @@ function ProfileSettings() {
               '&:hover': {
                 opacity: 0.8,
               },
+              position: 'relative',
             }}
           >
             <Avatar
               alt="User Profile"
+              src={avatarUrl || undefined}
               sx={{
                 width: 100,
                 height: 100,
@@ -412,8 +511,35 @@ function ProfileSettings() {
                 bgcolor: 'primary.main',
               }}
             >
-              {userInitials}
+              {!avatarUrl && userInitials}
             </Avatar>
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={onFileChange}
+              accept="image/*"
+              style={{ display: 'none' }}
+            />
+            <Button
+              variant="contained"
+              onClick={() => fileInputRef.current?.click()}
+              sx={{
+                position: 'absolute',
+                bottom: 0,
+                right: 0,
+                transform: 'translate(25%, 25%)',
+                borderRadius: '50%',
+                minWidth: 0,
+                width: 36,
+                height: 36,
+                p: 0,
+                boxShadow: 3,
+              }}
+            >
+              <Typography variant="caption" sx={{ fontSize: '1.2rem' }}>
+                +
+              </Typography>
+            </Button>
           </Box>
           <Typography variant="h4" sx={{ marginBottom: '4px', fontWeight: 'bold', color: 'black' }}>
             {fullName}
@@ -422,6 +548,17 @@ function ProfileSettings() {
             {userRolesDisplay}
           </Typography>
         </Box>
+
+        {successMessage && (
+          <Typography color="success.main" sx={{ mb: 2, textAlign: 'center' }}>
+            {successMessage}
+          </Typography>
+        )}
+        {errorMessage && (
+          <Typography color="error.main" sx={{ mb: 2, textAlign: 'center' }}>
+            {errorMessage}
+          </Typography>
+        )}
 
         <Box sx={{ marginBottom: '32px', width: '100%' }}>
           <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold' }}>
@@ -567,11 +704,11 @@ function ProfileSettings() {
               Change
             </Button>
           </Box>
-          <Button
+          <Box
             sx={{
               display: 'flex',
-              mt: 2,
               gap: 2,
+              mt: 2,
             }}
           >
             <Button variant="contained" onClick={handleOpenPasswordModal} sx={{ mt: 2, textTransform: 'none' }}>
@@ -580,7 +717,7 @@ function ProfileSettings() {
             <Button variant="contained" onClick={handleOpenUpdateUserModal} sx={{ mt: 2, textTransform: 'none' }}>
               Update Profile
             </Button>
-          </Button>
+          </Box>
         </Box>
 
         <Box sx={{ width: '100%', mt: 4 }}>
@@ -600,6 +737,66 @@ function ProfileSettings() {
           </Button>
         </Box>
       </Box>
+
+      {/* Cropper Dialog - Now using MUI Dialog components */}
+      <Dialog open={showCropperModal} onClose={closeCropperModal} maxWidth="sm" fullWidth>
+        <Typography variant="h6" sx={{ p: 2 }}>
+          Crop Your Avatar
+        </Typography>
+        <DialogContent dividers sx={{ position: 'relative', width: '100%', height: 400, backgroundColor: '#333' }}>
+          {imageSrc && (
+            <Cropper
+              image={imageSrc}
+              crop={crop}
+              zoom={zoom}
+              aspect={1}
+              cropShape="round"
+              onCropChange={setCrop}
+              onZoomChange={setZoom}
+              onCropComplete={onCropComplete}
+              showGrid={false}
+              restrictPosition={true}
+            />
+          )}{' '}
+        </DialogContent>{' '}
+        <DialogActions sx={{ flexDirection: 'column', alignItems: 'center', p: 2 }}>
+          <Box sx={{ width: '80%', mb: 2 }}>
+            <Typography gutterBottom>Zoom</Typography>
+            <Slider
+              value={zoom}
+              min={1}
+              max={3}
+              step={0.1}
+              onChange={(_, value) => setZoom(value as number)}
+              aria-labelledby="zoom-slider"
+            />
+          </Box>
+          <Box sx={{ display: 'flex', justifyContent: 'space-around', gap: 2, width: '100%' }}>
+            <Button
+              variant="outlined"
+              onClick={closeCropperModal}
+              disabled={uploadAvatarMutation.isPending}
+              sx={{ width: '45%' }}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="contained"
+              onClick={handleUploadCroppedImage}
+              disabled={uploadAvatarMutation.isPending}
+              sx={{ width: '45%' }}
+            >
+              {uploadAvatarMutation.isPending ? <CircularProgress size={24} /> : 'Upload'}
+            </Button>
+          </Box>
+          {uploadAvatarMutation.isError && (
+            <Typography color="error.main" sx={{ mt: 2, textAlign: 'center' }}>
+              {uploadAvatarMutation.error.message || 'Error uploading image.'}
+            </Typography>
+          )}
+        </DialogActions>
+      </Dialog>
+
       <PasswordChangeModal
         open={isPasswordModalOpen}
         onClose={handleClosePasswordModal}
@@ -620,6 +817,7 @@ function ProfileSettings() {
         successMessage={successMessage}
         errorMessage={errorMessage}
       />
+
       <EmailChangeModal
         open={isEmailChangeModalOpen}
         onClose={handleCloseEmailModal}
@@ -638,14 +836,16 @@ function ProfileSettings() {
         successMessage={successMessage}
         errorMessage={errorMessage}
       />
+
       <DeleteModal
         open={isDeleteModalOpen}
         onClose={handleCloseDeleteModal}
-        successMessage={successMessage}
-        errorMessage={errorMessage}
-        isLoadingDelete={deleteUserMutation.isPending}
         onDelete={deleteFunction}
+        successMessage={''}
+        errorMessage={''}
+        isLoadingDelete={false}
       />
+
       <UpdateUserModal
         open={isUpdateUserModalOpen}
         onClose={handleCloseUpdateUserModal}

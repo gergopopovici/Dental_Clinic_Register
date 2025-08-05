@@ -1,34 +1,44 @@
 package edu.ubb.licenta.pgim2289.spring.presentation;
 
 import edu.ubb.licenta.pgim2289.spring.dto.*;
+import edu.ubb.licenta.pgim2289.spring.exception.FileStorageException;
 import edu.ubb.licenta.pgim2289.spring.model.Patient;
 import edu.ubb.licenta.pgim2289.spring.model.User;
-import edu.ubb.licenta.pgim2289.spring.service.EmailService;
-import edu.ubb.licenta.pgim2289.spring.service.PatientService;
-import edu.ubb.licenta.pgim2289.spring.service.UserService;
-import edu.ubb.licenta.pgim2289.spring.service.VerificationCodeService;
+import edu.ubb.licenta.pgim2289.spring.service.*;
 import edu.ubb.licenta.pgim2289.spring.utils.SecurityUtil;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/users")
+@Slf4j
 public class UserController {
     private final UserService userService;
     private final VerificationCodeService verificationCodeService;
     private final EmailService emailService;
     private final PatientService patientService;
+    private final FileStorageService fileStorageService;
 
     public UserController(UserService userService, VerificationCodeService verificationCodeService,
-                          EmailService emailService, PatientService patientService) {
+                          EmailService emailService, PatientService patientService,
+                          FileStorageService fileStorageService) {
         this.userService = userService;
         this.verificationCodeService = verificationCodeService;
         this.emailService = emailService;
         this.patientService = patientService;
+        this.fileStorageService = fileStorageService;
     }
 
     @PreAuthorize("hasAnyRole('DOCTOR', 'PATIENT','ADMIN')")
@@ -111,7 +121,7 @@ public class UserController {
     }
 
     @PreAuthorize("hasAnyRole('DOCTOR','PATIENT','ADMIN')")
-    @PostMapping("/update-email")
+    @PutMapping("/update-email")
     public ResponseEntity<MessageResponse> updateEmail(@RequestBody
                                                        RequestNewEmailDTO request) {
         Long userId = SecurityUtil.getCurrentUserId();
@@ -134,6 +144,47 @@ public class UserController {
         }
         emailService.sendDeletionConfirmationEmail(userOptional.get().getEmail(), userOptional.get().getUserName());
         return userService.deleteUser(userId);
+    }
+
+    @PreAuthorize("hasAnyRole('DOCTOR', 'PATIENT','ADMIN')")
+    @PostMapping("/upload-avatar")
+    public ResponseEntity<MessageResponse> uploadAvatar(@RequestParam("file") MultipartFile file) {
+        Long userId = SecurityUtil.getCurrentUserId();
+        if (userId == null) {
+            return ResponseEntity.status(401).body(new MessageResponse("User not authenticated."));
+        }
+
+        try {
+            String newFileName = userService.updateProfilePicture(userId, file);
+
+            String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
+                    .path("/api/users/avatar/")
+                    .path(newFileName)
+                    .toUriString();
+
+            return ResponseEntity.ok(new MessageResponse("Avatar uploaded successfully! URL: " + fileDownloadUri));
+        } catch (FileStorageException ex) {
+            log.error("Error uploading avatar: " + ex.getMessage());
+            return ResponseEntity.status(500).body(new MessageResponse("Could not upload avatar: " + ex.getMessage()));
+        }
+    }
+
+
+    @GetMapping("/avatar/{fileName:.+}")
+    public ResponseEntity<Resource> downloadAvatar(@PathVariable String fileName) {
+        Resource resource = fileStorageService.loadFileAsResource(fileName);
+        String contentType;
+        try {
+            contentType = Files.probeContentType(resource.getFile().toPath());
+        } catch (IOException ex) {
+            return null;
+        }
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\""
+                        + resource.getFilename() + "\"")
+                .body(resource);
     }
 
     @PreAuthorize("hasAnyRole('DOCTOR','PATIENT','ADMIN')")
@@ -168,6 +219,7 @@ public class UserController {
         userDTO.setLastName(user.getLastName());
         userDTO.setEnabled(user.getEnabled());
         userDTO.setGender(patient.getGender());
+        userDTO.setProfilePictureUrl(user.getProfilePictureUrl());
         userDTO.setRoles(user.getRoles().stream()
                 .map(role -> role.getRoleName().name())
                 .collect(Collectors.toSet()));

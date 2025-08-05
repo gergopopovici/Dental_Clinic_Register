@@ -2,10 +2,12 @@ import {
   apiURL,
   deleteUserAccountApiUrl,
   emailChangeRequestApiUrl,
+  getAvatarApiUrl,
   passwordRequestApiUrl,
   updateEmailApiUrl,
   updatePasswordApiUrl,
   updateUserApiUrl,
+  uploadAvatarApiUrl,
   verifyEmailChangeCodeApiUrl,
   verifyPasswordChangeCodeApiUrl,
 } from '../config/apiUrl';
@@ -104,4 +106,26 @@ export const deleteUser = async () => {
     console.error('Error in deleteUser:', error);
     throw error;
   }
+};
+
+export const uploadAvatar = async (file: string | Blob) => {
+  try {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await apiClient.post(uploadAvatarApiUrl, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error in uploadAvatar:', error);
+    throw error;
+  }
+};
+export const getAvatar = (profilePictureFileName: string | null | undefined): string | undefined => {
+  if (profilePictureFileName) {
+    return `${getAvatarApiUrl}${profilePictureFileName}`;
+  }
+  return undefined;
 };

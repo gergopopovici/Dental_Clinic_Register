@@ -73,4 +73,12 @@ public class GlobalExceptionHandler {
         errorMap.put("error", ex.getMessage());
         return errorMap;
     }
+
+    @ExceptionHandler(FileStorageException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Map<String, String> handleFileStorageException(FileStorageException ex) {
+        Map<String, String> errorMap = new ConcurrentHashMap<>();
+        errorMap.put("error", ex.getMessage());
+        return errorMap;
+    }
 }

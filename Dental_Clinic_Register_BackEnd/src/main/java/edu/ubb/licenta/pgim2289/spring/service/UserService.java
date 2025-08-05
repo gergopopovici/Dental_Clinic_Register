@@ -5,6 +5,7 @@ import edu.ubb.licenta.pgim2289.spring.dto.RequestUserDTO;
 import edu.ubb.licenta.pgim2289.spring.model.RefreshToken;
 import edu.ubb.licenta.pgim2289.spring.model.User;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Optional;
 
@@ -29,4 +30,6 @@ public interface UserService {
     Optional<User> findByUsername(String username);
 
     Optional<RefreshToken> findByRefreshToken(String token);
+
+    String updateProfilePicture(Long userId, MultipartFile fileName);
 }

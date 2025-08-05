@@ -16,5 +16,6 @@ public class ResponseUserDTO {
     private String lastName;
     private Boolean enabled;
     private Patient.Gender gender;
+    private String profilePictureUrl;
     private Set<String> roles;
 }

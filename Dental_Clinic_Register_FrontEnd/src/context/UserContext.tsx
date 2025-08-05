@@ -13,6 +13,7 @@ enum Gender {
 }
 
 export interface UserDetails {
+  profilePictureUrl: string;
   id?: number;
   username: string;
   email: string;

@@ -14,7 +14,7 @@ import {
   MenuItem,
   SelectChangeEvent,
 } from '@mui/material';
-import { useUser } from '../context/UserContext'; // Assuming this path is correct
+import { useUser } from '../context/UserContext';
 
 export enum Gender {
   // eslint-disable-next-line no-unused-vars
@@ -25,7 +25,6 @@ export enum Gender {
   OTHER = 'OTHER',
 }
 
-// Define a new DTO specifically for updating profile details
 export interface UpdateProfileDTO {
   firstName: string;
   middleName: string;
@@ -37,9 +36,9 @@ export interface UpdateProfileDTO {
 interface UpdateUserModalProps {
   open: boolean;
   onClose: () => void;
-  // Use the new UpdateProfileDTO for the onSubmit callback
   // eslint-disable-next-line no-unused-vars
   onSubmit: (updatedUser: UpdateProfileDTO) => void;
+
   isLoadingUpdate: boolean;
   successMessage: string;
   errorMessage: string;
@@ -55,16 +54,14 @@ function UpdateUserModal({
 }: UpdateUserModalProps) {
   const { user } = useUser();
 
-  // State to manage form inputs, initialized with user data using the new DTO
   const [formData, setFormData] = useState<UpdateProfileDTO>({
     firstName: '',
     middleName: '',
     lastName: '',
     phoneNumber: '',
-    gender: Gender.OTHER, // Default to 'OTHER' or handle null explicitly
+    gender: Gender.OTHER,
   });
 
-  // Effect to update form data when the modal opens or user data changes
   useEffect(() => {
     if (user) {
       setFormData({
@@ -75,7 +72,7 @@ function UpdateUserModal({
         gender: user.gender || Gender.OTHER,
       });
     }
-  }, [user, open]); // Re-initialize when user data changes or modal opens
+  }, [user, open]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | { name?: string; value: unknown }>,
@@ -91,7 +88,7 @@ function UpdateUserModal({
     const { name, value } = event.target;
     setFormData((prevData) => ({
       ...prevData,
-      [name as string]: value as Gender, // Cast value to Gender enum
+      [name as string]: value as Gender,
     }));
   };
 
@@ -123,7 +120,7 @@ function UpdateUserModal({
           variant="outlined"
           value={formData.middleName}
           onChange={handleChange}
-          placeholder={user?.middleName ? '' : '-'} // Display dash if middleName is null
+          placeholder={user?.middleName ? '' : '-'}
           sx={{ mb: 2 }}
         />
         <TextField
