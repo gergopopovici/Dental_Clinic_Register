@@ -6,10 +6,12 @@ import edu.ubb.licenta.pgim2289.spring.model.*;
 import edu.ubb.licenta.pgim2289.spring.repository.RoleRepository;
 import edu.ubb.licenta.pgim2289.spring.repository.UserRepository;
 import edu.ubb.licenta.pgim2289.spring.repository.VerificationTokenJpa;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.Instant;
 import java.util.HashSet;
@@ -27,6 +29,7 @@ public class UserServiceImpl implements UserService {
     private final PhoneNumberUtilService phoneNumberUtilService;
     private final PatientService patientService;
     private final RefreshTokenService refreshTokenService;
+    private final FileStorageService fileStorageService;
 
 
     public UserServiceImpl(UserRepository userRepository, PasswordEncoder encoder,
@@ -34,7 +37,7 @@ public class UserServiceImpl implements UserService {
                            RoleRepository roleRepository,
                            PhoneNumberUtilService phoneNumberUtilService,
                            PatientService patientService,
-                           RefreshTokenService refreshTokenService) {
+                           RefreshTokenService refreshTokenService, FileStorageService fileStorageService) {
         this.userRepository = userRepository;
         this.encoder = encoder;
         this.verificationTokenRepository = verificationTokenRepository;
@@ -42,6 +45,7 @@ public class UserServiceImpl implements UserService {
         this.phoneNumberUtilService = phoneNumberUtilService;
         this.patientService = patientService;
         this.refreshTokenService = refreshTokenService;
+        this.fileStorageService = fileStorageService;
     }
 
     @Override
@@ -192,6 +196,25 @@ public class UserServiceImpl implements UserService {
 
     }
 
+    @Transactional
+    @Override
+    public String updateProfilePicture(Long userId, MultipartFile fileName) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        String oldProfilePictureFileName = user.getProfilePictureUrl();
+
+        String newFileName = fileStorageService.storeFile(fileName);
+
+        user.setProfilePictureUrl(newFileName);
+        userRepository.save(user); // Save the updated user
+
+        if (oldProfilePictureFileName != null && !oldProfilePictureFileName.isEmpty()) {
+            fileStorageService.deleteFile(oldProfilePictureFileName);
+        }
+
+        return newFileName;
+    }
 
     public User registerUser(User user, Set<String> roleNames) {
         Set<Role> roles = new HashSet<>();

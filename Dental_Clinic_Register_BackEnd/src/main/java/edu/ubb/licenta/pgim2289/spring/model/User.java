@@ -7,6 +7,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -15,7 +16,7 @@ import java.util.Set;
 @Table(name = "user")
 @Data
 @NoArgsConstructor
-public class User extends BaseEntity {
+public class User extends BaseEntity implements Serializable {
 
     @Column(name = "user_name", unique = true, nullable = false)
     private String userName;
@@ -41,6 +42,9 @@ public class User extends BaseEntity {
 
     @Column(name = "enabled", nullable = false)
     private Boolean enabled = false;
+
+    @Column(name = "profile_picture_url")
+    private String profilePictureUrl;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
@@ -72,6 +76,5 @@ public class User extends BaseEntity {
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     @Transient
-    private VerificationToken verificationToken;
-
+    private VerificationToken verificationToken; // NOPMD - NonSerializableClass;
 }

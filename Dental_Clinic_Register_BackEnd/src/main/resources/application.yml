@@ -1,6 +1,10 @@
 spring:
   config:
     import: optional:file:.env[.properties]
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/${DB_NAME}
@@ -26,7 +30,9 @@ spring:
           auth: true
           starttls:
             enable: true
-
+file:
+  upload:
+    upload-dir: ./uploads/avatars
 jwt:
   secret: ${Secret_Key}
   access-token-expiration-ms: 600000 # 10 minutes
