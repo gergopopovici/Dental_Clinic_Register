@@ -1,4 +1,5 @@
 import { Box, Typography } from '@mui/material';
+import DenturesScene from '../components/DenturesScene';
 
 function BracesPage() {
   return (
@@ -9,6 +10,7 @@ function BracesPage() {
       <Typography variant="body1" sx={{ mb: 3 }}>
         Use the controls to select a placement mode, then click on the 3D model to add components.
       </Typography>
+      <DenturesScene />
     </Box>
   );
 }
