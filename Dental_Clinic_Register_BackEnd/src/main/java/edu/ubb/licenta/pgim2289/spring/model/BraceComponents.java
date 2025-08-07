@@ -23,16 +23,18 @@ public class BraceComponents extends BaseEntity {
     private double positionY;
     @Column(name = "positionZ")
     private double positionZ;
-    @Column(name="startPositionX")
+    @Column(name = "startPositionX")
     private double startPositionX;
-    @Column(name="startPositionY")
+    @Column(name = "startPositionY")
     private double startPositionY;
     @Column(name = "startPositionZ")
     private double startPositionZ;
-    @Column(name= "endPositionX")
+    @Column(name = "endPositionX")
     private double endPositionX;
     @Column(name = "endPositionY")
     private double endPositionY;
     @Column(name = "endPositionZ")
     private double endPositionZ;
+    @Column(name = "colour")
+    private String colour;
 }
