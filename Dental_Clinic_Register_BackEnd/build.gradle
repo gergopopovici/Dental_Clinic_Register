@@ -52,7 +52,7 @@ dependencies {
     // Other Dependencies
     implementation("org.springframework.security:spring-security-core:6.5.0")
     implementation("com.zaxxer:HikariCP:6.3.0")
-    runtimeOnly("com.mysql:mysql-connector-j:9.3.0")
+    implementation("com.mysql:mysql-connector-j:9.3.0")
     implementation("org.slf4j:slf4j-api:2.0.17")
     runtimeOnly("ch.qos.logback:logback-classic:1.5.18")
 

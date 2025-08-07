@@ -17,6 +17,7 @@ import DashboardLayout from './components/DashboardLayout'; // Your DashboardLay
 import { UserProvider } from './context/UserContext';
 
 import { Box, Typography } from '@mui/material';
+import BracesPage from './pages/Braces';
 
 const DashboardPage = () => (
   <Box>
@@ -68,6 +69,7 @@ function App() {
                 <Route path="/dashboard" element={<DashboardPage />} />
                 <Route path="/appointments" element={<AppointmentsPage />} />
                 <Route path="/profile" element={<ProfileSettings />} />
+                <Route path="/braces" element={<BracesPage />} />
               </Route>
             </Route>
 

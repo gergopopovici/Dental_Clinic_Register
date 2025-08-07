@@ -81,4 +81,20 @@ public class GlobalExceptionHandler {
         errorMap.put("error", ex.getMessage());
         return errorMap;
     }
+
+    @ExceptionHandler(TreatmentPlanException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public Map<String, String> handleTreatmentPlanException(TreatmentPlanException ex) {
+        Map<String, String> errorMap = new ConcurrentHashMap<>();
+        errorMap.put("error", ex.getMessage());
+        return errorMap;
+    }
+
+    @ExceptionHandler(BraceComponentException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public Map<String, String> handleBraceComponentException(BraceComponentException ex) {
+        Map<String, String> errorMap = new ConcurrentHashMap<>();
+        errorMap.put("error", ex.getMessage());
+        return errorMap;
+    }
 }
