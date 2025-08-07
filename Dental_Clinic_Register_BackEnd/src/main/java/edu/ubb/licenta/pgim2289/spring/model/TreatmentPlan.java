@@ -44,6 +44,9 @@ public class TreatmentPlan extends BaseEntity {
     )
     private Set<Service> services = new HashSet<>();
 
+    @OneToMany(mappedBy = "treatmentPlan", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<BraceComponents> braceComponents = new HashSet<>();
+
     public enum TreatmentPlanStatus {
         ACTIVE, COMPLETED, SUSPENDED, CANCELLED
     }
