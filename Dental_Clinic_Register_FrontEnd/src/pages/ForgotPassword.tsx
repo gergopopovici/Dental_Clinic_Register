@@ -16,20 +16,23 @@ import { useMutation } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 import { requestPasswordReset } from '../services/AuthorisationService';
 import { genericBackground } from '../assets';
+import { useTranslation } from 'react-i18next';
+import LanguageSelector from '../components/LanguageSelector';
 
 function ForgotPassword() {
   const [email, setEmail] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const { t } = useTranslation();
 
   const resetMutation = useMutation({
     mutationFn: requestPasswordReset,
     onSuccess: () => {
-      setSuccessMessage('If the email exists, a password reset link has been sent.');
+      setSuccessMessage(t('passwordResetEmailSent'));
       setErrorMessage('');
     },
     onError: (error: AxiosError<{ message: string }>) => {
-      const message = error.response?.data?.message || 'Something went wrong. Please try again later.';
+      const message = error.response?.data?.message || t('passwordResetFailed');
       setErrorMessage(message);
       setSuccessMessage('');
     },
@@ -56,6 +59,18 @@ function ForgotPassword() {
         backgroundSize: 'contain',
       }}
     >
+      <Box
+        sx={{
+          position: 'absolute',
+          top: 24,
+          right: 24,
+          zIndex: 1000,
+          backgroundColor: 'rgba(0, 0, 0, 0.6)',
+          borderRadius: '4px',
+        }}
+      >
+        <LanguageSelector />
+      </Box>
       <Box display="flex" flexGrow={1} justifyContent="center" alignItems="center">
         <Card sx={{ maxWidth: 400, width: '90%', p: 3 }}>
           <Box display={'flex'} justifyContent={'center'} mb={2}>
@@ -65,10 +80,10 @@ function ForgotPassword() {
           </Box>
           <CardContent>
             <Typography variant={'h5'} align={'center'} gutterBottom>
-              Forgot your password?
+              {t('forgotPassword')}
             </Typography>
             <Typography variant={'body2'} align={'center'} mb={3}>
-              Enter your email and we&apos;ll send you a link to reset your password.
+              {t('passwordResetInstructions')}
             </Typography>
 
             {successMessage && (
@@ -84,7 +99,7 @@ function ForgotPassword() {
 
             <form onSubmit={handleSubmit}>
               <TextField
-                label={'Email Address'}
+                label={t('emailAddress')}
                 type={'email'}
                 variant={'outlined'}
                 fullWidth
@@ -100,7 +115,18 @@ function ForgotPassword() {
                 fullWidth
                 disabled={resetMutation.isPending}
               >
-                {resetMutation.isPending ? <CircularProgress size={24} color="inherit" /> : 'Send Reset Link'}
+                {resetMutation.isPending ? <CircularProgress size={24} color="inherit" /> : t('sendResetLink')}
+              </Button>
+              <Button
+                variant="text"
+                color="primary"
+                fullWidth
+                sx={{ mt: 2 }}
+                onClick={() => {
+                  window.location.href = '/login';
+                }}
+              >
+                {t('backToLogin')}
               </Button>
             </form>
             <Box component="footer" textAlign="center" py={2}>

@@ -23,6 +23,7 @@ import { signOut } from '../services/AuthorisationService'; // Assuming signOut 
 import { useUser } from '../context/UserContext'; // Your UserContext hook
 import { getAvatar } from '../services/UserService';
 import LanguageSelector from './LanguageSelector';
+import { useTranslation } from 'react-i18next';
 
 const drawerWidth = 240;
 
@@ -34,14 +35,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, isLoading, logout } = useUser();
+  const { t } = useTranslation();
 
   const menuItems = [
-    { label: 'Dashboard', path: '/dashboard', icon: <DashboardIcon /> },
-    { label: 'Appointments', path: '/appointments', icon: <EventNoteIcon /> },
-    { label: 'My Profile', path: '/profile', icon: <PersonIcon /> },
-    { label: 'Logout', icon: <LogoutIcon />, action: () => logoutMutation.mutate() },
+    { label: t('dashboard'), path: '/dashboard', icon: <DashboardIcon /> },
+    { label: t('appointments'), path: '/appointments', icon: <EventNoteIcon /> },
+    { label: t('myProfile'), path: '/profile', icon: <PersonIcon /> },
+    { label: t('logout'), icon: <LogoutIcon />, action: () => logoutMutation.mutate() },
   ];
-
   useEffect(() => {
     console.log('DashboardLayout useEffect: isLoading:', isLoading, 'user:', user);
     if (!isLoading && !user) {
@@ -82,9 +83,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   const userRolesDisplay =
     user?.roles && user.roles.length > 0
-      ? user.roles.map((role) => role.replace('ROLE_', '').replace(/_/g, ' ')).join(', ')
-      : 'No Roles';
-
+      ? user.roles
+          .map((role) => {
+            const roleKey = role.replace('ROLE_', '').toLowerCase();
+            return t(roleKey);
+          })
+          .join(', ')
+      : t('noRoles');
   const userInitials = (user?.firstName?.[0] || '') + (user?.lastName?.[0] || '');
 
   const avatarUrl = getAvatar(user?.profilePictureUrl);

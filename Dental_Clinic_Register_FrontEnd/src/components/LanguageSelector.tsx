@@ -1,14 +1,26 @@
 import { Box, MenuItem, Select } from '@mui/material';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import Flag from 'react-world-flags';
 
 function LanguageSelector() {
-  const [lang, setLang] = useState('en');
+  const { i18n } = useTranslation();
+
+  const [lang, setLang] = useState(() => localStorage.getItem('applanguage') || 'en');
+
+  const handleChange = (e: { target: { value: string } }) => {
+    const newLanguage = e.target.value;
+    setLang(newLanguage);
+    setTimeout(() => {
+      i18n.changeLanguage(newLanguage);
+    }, 50);
+    localStorage.setItem('applanguage', newLanguage);
+  };
 
   return (
     <Select
       value={lang}
-      onChange={(e) => setLang(e.target.value)}
+      onChange={handleChange}
       size="small"
       sx={{
         minWidth: 120,

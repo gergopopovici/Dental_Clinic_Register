@@ -10,7 +10,7 @@ import {
   DialogActions,
   DialogContent,
 } from '@mui/material';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   deleteUser,
   emailChangeCodeVerification,
@@ -38,6 +38,7 @@ import './Profile.css';
 import getCroppedImg from '../utils/cropImage';
 import Cropper from 'react-easy-crop';
 import { Area } from 'react-easy-crop';
+import { useTranslation } from 'react-i18next';
 
 function ProfileSettings() {
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
@@ -61,6 +62,8 @@ function ProfileSettings() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const { t } = useTranslation();
+  const queryClient = useQueryClient();
 
   const navigate = useNavigate();
   const { user, isLoading, refreshUser, logout } = useUser();
@@ -74,12 +77,12 @@ function ProfileSettings() {
   const requestPasswordMutation = useMutation({
     mutationFn: passwordRequest,
     onSuccess: () => {
-      setSuccessMessage('Verification code sent to your email address.');
+      setSuccessMessage(t('verificationCodeSent'));
       setErrorMessage('');
       setPasswordChangeStep('verifyCode');
     },
     onError: (error: Error) => {
-      setErrorMessage(`Failed to send the verification code: ${error.message || 'Unknown error'}`);
+      setErrorMessage(t('failedToSendVerificationCode') + (error.message ? `: ${error.message}` : ''));
       setSuccessMessage('');
     },
   });
@@ -87,12 +90,12 @@ function ProfileSettings() {
   const requestEmailMutation = useMutation({
     mutationFn: emailChangeRequest,
     onSuccess: () => {
-      setSuccessMessage('Verification code sent to your email address.');
+      setSuccessMessage(t('verificationCodeSent'));
       setErrorMessage('');
       setEmailChangeStep('verifyCode');
     },
     onError: (error: Error) => {
-      setErrorMessage(`Failed to send the verification code: ${error.message || 'Unknown error'}`);
+      setErrorMessage(t('failedToSendVerificationCode') + (error.message ? `: ${error.message}` : ''));
       setSuccessMessage('');
     },
   });
@@ -100,12 +103,12 @@ function ProfileSettings() {
   const verifyCodeMutation = useMutation({
     mutationFn: verifyPasswordChangeCode,
     onSuccess: () => {
-      setSuccessMessage('Code verified successfully. Please set your new password.');
+      setSuccessMessage(t('codeVerifiedPassword'));
       setErrorMessage('');
       setPasswordChangeStep('enterNewPassword');
     },
     onError: (error: Error) => {
-      setErrorMessage(`Invalid or expired code: ${error.message || 'Unknown error'}`);
+      setErrorMessage(t('failedToVerifyCode') + (error.message ? `: ${error.message}` : ''));
       setSuccessMessage('');
     },
   });
@@ -113,12 +116,12 @@ function ProfileSettings() {
   const verifyEmailAddressMutation = useMutation({
     mutationFn: emailChangeCodeVerification,
     onSuccess: () => {
-      setSuccessMessage('Code verified successfully. Please set your new email address.');
+      setSuccessMessage(t('codeVerifiedEmail'));
       setErrorMessage('');
       setEmailChangeStep('enterNewEmailAddress');
     },
     onError: (error: Error) => {
-      setErrorMessage(`Invalid or expired code: ${error.message || 'Unknown error'}`);
+      setErrorMessage(t('failedtoSetEmail') + (error.message ? `: ${error.message}` : ''));
       setSuccessMessage('');
     },
   });
@@ -126,14 +129,14 @@ function ProfileSettings() {
   const deleteUserMutation = useMutation({
     mutationFn: deleteUser,
     onSuccess: async () => {
-      setSuccessMessage('We are sorry to see you go! Your account was deleted successfully.');
+      setSuccessMessage(t('accountDeleted'));
       setErrorMessage('');
       await signOut();
       logout();
       navigate('/login');
     },
     onError: (error: Error) => {
-      setErrorMessage(`There was an error deleting your account: ${error.message || 'Unknown error'}`);
+      setErrorMessage(t('failedToDeleteAccount') + (error.message ? `: ${error.message}` : ''));
       setSuccessMessage('');
     },
   });
@@ -165,7 +168,7 @@ function ProfileSettings() {
   const updatePasswordMutation = useMutation({
     mutationFn: updatePassword,
     onSuccess: async () => {
-      setSuccessMessage('Password updated successfully!');
+      setSuccessMessage(t('passwordUpdated'));
       setErrorMessage('');
       setIsPasswordModalOpen(false);
       setPasswordChangeStep('initial');
@@ -175,7 +178,7 @@ function ProfileSettings() {
       await refreshUser();
     },
     onError: (error: Error) => {
-      setErrorMessage(`Failed to update password: ${error.message || 'Unknown error'}`);
+      setErrorMessage(t('failedToUpdatePassword') + (error.message ? `: ${error.message}` : ''));
       setSuccessMessage('');
     },
   });
@@ -183,7 +186,7 @@ function ProfileSettings() {
   const updateEmailMutation = useMutation({
     mutationFn: updateEmail,
     onSuccess: async () => {
-      setSuccessMessage('Email was updated successfully');
+      setSuccessMessage(t('emailUpdated'));
       setErrorMessage('');
       setIsEmailChangeModalOpen(false);
       setEmailChangeStep('initial');
@@ -192,7 +195,7 @@ function ProfileSettings() {
       await refreshUser();
     },
     onError: (error: Error) => {
-      setErrorMessage(`Failed to update the email address: ${error.message || 'Unknown error'}`);
+      setErrorMessage(t('failedToUpdateEmail') + (error.message ? `: ${error.message}` : ''));
       setSuccessMessage('');
     },
   });
@@ -200,14 +203,18 @@ function ProfileSettings() {
   const updateUserMutation = useMutation({
     mutationFn: updateUser,
     onSuccess: async () => {
-      setSuccessMessage('User details updated successfully!');
+      setSuccessMessage(t('userDetailsUpdated'));
       setErrorMessage('');
       setIsUpdateUserModalOpen(false);
-      await refreshUser();
+      await queryClient.invalidateQueries({ queryKey: ['user'] });
+
+      if (refreshUser) {
+        await refreshUser();
+      }
     },
     onError: (error: Error) => {
       console.error('Error updating user details:', error);
-      setErrorMessage(`Failed to update user details: ${error.message || error}`);
+      setErrorMessage(t('failedToUpdateUserDetails') + (error.message ? `: ${error.message}` : ''));
       setSuccessMessage('');
     },
   });
@@ -215,7 +222,7 @@ function ProfileSettings() {
   const uploadAvatarMutation = useMutation({
     mutationFn: uploadAvatar,
     onSuccess: async () => {
-      setSuccessMessage('Avatar uploaded successfully!');
+      setSuccessMessage(t('avatarUploaded'));
       setErrorMessage('');
       setShowCropperModal(false);
       setImageSrc(null);
@@ -293,7 +300,7 @@ function ProfileSettings() {
 
   const handleUpdateUserSubmit = (updatedProfile: UpdateProfileDTO) => {
     if (!user) {
-      setErrorMessage('User data not available.');
+      setErrorMessage(t('userNotFound'));
       return;
     }
 
@@ -328,7 +335,7 @@ function ProfileSettings() {
   const handleVerifyCodeSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!verificationCode) {
-      setErrorMessage('Please enter the verification code.');
+      setErrorMessage(t('pleaseEnterVerificationCode'));
       return;
     }
     const requestDto: RequestVerificationCodeDTO = {
@@ -340,7 +347,7 @@ function ProfileSettings() {
   const handleVerifyCodeSubmitEmail = (e: React.FormEvent) => {
     e.preventDefault();
     if (!verificationCode) {
-      setErrorMessage('Please enter the verification code.');
+      setErrorMessage(t('pleaseEnterVerificationCode'));
       return;
     }
     const requestEmail: RequestVerificationCodeDTO = {
@@ -352,11 +359,11 @@ function ProfileSettings() {
   const handleNewPasswordSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (newPassword !== confirmNewPassword) {
-      setErrorMessage('New passwords do not match.');
+      setErrorMessage(t('passwordsNotMatching'));
       return;
     }
     if (!newPassword || newPassword.length < 8) {
-      setErrorMessage('Password must be at least 8 characters long.');
+      setErrorMessage(t('passwordTooShort'));
       return;
     }
 
@@ -369,11 +376,11 @@ function ProfileSettings() {
   const handleNewEmailSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newEmail) {
-      setErrorMessage('Email is required');
+      setErrorMessage(t('emailIsRequired'));
       return;
     }
     if (!isValidEmail(newEmail)) {
-      setErrorMessage('Invalid email format');
+      setErrorMessage(t('invalidEmailFormat'));
       return;
     }
     const requestDTO: RequestNewEmailDTO = {
@@ -386,7 +393,7 @@ function ProfileSettings() {
     if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0];
       if (!file.type.startsWith('image/')) {
-        setErrorMessage('Please select an image file.');
+        setErrorMessage(t('selectImageFile'));
         return;
       }
 
@@ -406,11 +413,11 @@ function ProfileSettings() {
 
   const handleUploadCroppedImage = async () => {
     if (!imageSrc || !croppedAreaPixels) {
-      setErrorMessage('No image or crop area defined.');
+      setErrorMessage(t('noImageOrCropAreaDefined'));
       return;
     }
     if (typeof imageSrc !== 'string') {
-      setErrorMessage('Image source is not a valid string.');
+      setErrorMessage(t('imageNotString'));
       return;
     }
     try {
@@ -422,9 +429,7 @@ function ProfileSettings() {
       uploadAvatarMutation.mutate(avatarFile);
     } catch (error: unknown) {
       console.error('Error during cropping or preparing for upload:', error);
-      setErrorMessage(
-        `Failed to process image for upload: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      );
+      setErrorMessage(t('failedToUpload') + (error instanceof Error && error.message ? `: ${error.message}` : ''));
     }
   };
 
@@ -456,8 +461,13 @@ function ProfileSettings() {
   const fullName = [user.firstName, user.middleName, user.lastName].filter(Boolean).join(' ');
   const userRolesDisplay =
     user.roles && user.roles.length > 0
-      ? user.roles.map((role) => role.replace('ROLE_', '').replace(/_/g, ' ')).join(', ')
-      : 'No Roles';
+      ? user.roles
+          .map((role) => {
+            const roleKey = role.replace('ROLE_', '').toLowerCase();
+            return t(roleKey);
+          })
+          .join(', ')
+      : t('noRoles');
 
   const userInitials = (user?.firstName?.[0] || '') + (user?.lastName?.[0] || '');
 
@@ -562,7 +572,7 @@ function ProfileSettings() {
 
         <Box sx={{ marginBottom: '32px', width: '100%' }}>
           <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold' }}>
-            Account settings
+            {t('AccountSettings')}
           </Typography>
           <Box
             sx={{
@@ -578,7 +588,7 @@ function ProfileSettings() {
           >
             <Box>
               <Typography variant="body1" sx={{ fontWeight: 'bold', marginBottom: '4px', color: 'black' }}>
-                First Name
+                {t('firstName')}
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 {user.firstName}
@@ -600,7 +610,7 @@ function ProfileSettings() {
             {user.middleName ? (
               <Box>
                 <Typography variant="body1" sx={{ fontWeight: 'bold', marginBottom: '4px', color: 'black' }}>
-                  Middle Name
+                  {t('middleName')}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
                   {user.middleName}
@@ -609,7 +619,7 @@ function ProfileSettings() {
             ) : (
               <Box>
                 <Typography variant="body1" sx={{ fontWeight: 'bold', marginBottom: '4px', color: 'black' }}>
-                  Middle Name
+                  {t('middleName')}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
                   -
@@ -631,7 +641,7 @@ function ProfileSettings() {
           >
             <Box>
               <Typography variant="body1" sx={{ fontWeight: 'bold', marginBottom: '4px', color: 'black' }}>
-                Last Name
+                {t('lastName')}
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 {user.lastName}
@@ -652,7 +662,7 @@ function ProfileSettings() {
           >
             <Box>
               <Typography variant="body1" sx={{ fontWeight: 'bold', marginBottom: '4px', color: 'black' }}>
-                Phone Number
+                {t('phoneNumber')}
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 {user.phoneNumber}
@@ -673,10 +683,10 @@ function ProfileSettings() {
           >
             <Box>
               <Typography variant="body1" sx={{ fontWeight: 'bold', marginBottom: '4px', color: 'black' }}>
-                Gender
+                {t('gender')}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                {user.gender === 'FEMALE' ? 'Female' : user.gender === 'MALE' ? 'Male' : 'Other'}
+                {user.gender === 'FEMALE' ? t('female') : user.gender === 'MALE' ? t('male') : t('other')}
               </Typography>
             </Box>
           </Box>
@@ -694,14 +704,14 @@ function ProfileSettings() {
           >
             <Box>
               <Typography variant="body1" sx={{ fontWeight: 'bold', marginBottom: '4px', color: 'black' }}>
-                Email address
+                {t('email')}
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 {user.email}
               </Typography>
             </Box>
             <Button variant="contained" onClick={handleOpenEmailModal} sx={{ textTransform: 'none' }}>
-              Change
+              {t('change')}
             </Button>
           </Box>
           <Box
@@ -712,20 +722,20 @@ function ProfileSettings() {
             }}
           >
             <Button variant="contained" onClick={handleOpenPasswordModal} sx={{ mt: 2, textTransform: 'none' }}>
-              Change Password
+              {t('changePassword')}
             </Button>
             <Button variant="contained" onClick={handleOpenUpdateUserModal} sx={{ mt: 2, textTransform: 'none' }}>
-              Update Profile
+              {t('updateProfile')}
             </Button>
           </Box>
         </Box>
 
         <Box sx={{ width: '100%', mt: 4 }}>
           <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold' }}>
-            Delete account
+            {t('deleteAccount')}
           </Typography>
           <Typography variant="body1" color="text.secondary" sx={{ marginBottom: '16px' }}>
-            Would you like to delete your account?
+            {t('wouldyouliketodeletetheaccount')}
           </Typography>
           <Button
             variant="contained"
@@ -733,15 +743,14 @@ function ProfileSettings() {
             sx={{ mt: 2, textTransform: 'none' }}
             color="error"
           >
-            I want to delete my account
+            {t('iwanttodeletetheaccount')}
           </Button>
         </Box>
       </Box>
 
-      {/* Cropper Dialog - Now using MUI Dialog components */}
       <Dialog open={showCropperModal} onClose={closeCropperModal} maxWidth="sm" fullWidth>
         <Typography variant="h6" sx={{ p: 2 }}>
-          Crop Your Avatar
+          {t('cropYourAvatar')}
         </Typography>
         <DialogContent dividers sx={{ position: 'relative', width: '100%', height: 400, backgroundColor: '#333' }}>
           {imageSrc && (
@@ -761,7 +770,7 @@ function ProfileSettings() {
         </DialogContent>{' '}
         <DialogActions sx={{ flexDirection: 'column', alignItems: 'center', p: 2 }}>
           <Box sx={{ width: '80%', mb: 2 }}>
-            <Typography gutterBottom>Zoom</Typography>
+            <Typography gutterBottom>{t('zoom')}</Typography>
             <Slider
               value={zoom}
               min={1}
@@ -778,7 +787,7 @@ function ProfileSettings() {
               disabled={uploadAvatarMutation.isPending}
               sx={{ width: '45%' }}
             >
-              Cancel
+              {t('cancel')}
             </Button>
             <Button
               variant="contained"
@@ -786,7 +795,7 @@ function ProfileSettings() {
               disabled={uploadAvatarMutation.isPending}
               sx={{ width: '45%' }}
             >
-              {uploadAvatarMutation.isPending ? <CircularProgress size={24} /> : 'Upload'}
+              {uploadAvatarMutation.isPending ? <CircularProgress size={24} /> : t('upload')}
             </Button>
           </Box>
           {uploadAvatarMutation.isError && (

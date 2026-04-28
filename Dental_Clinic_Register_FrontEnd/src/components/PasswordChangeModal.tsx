@@ -11,6 +11,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 
 interface PasswordChangeModalProps {
   open: boolean;
@@ -64,17 +65,17 @@ function PasswordChangeModal({
   errorMessage,
 }: PasswordChangeModalProps) {
   const isLoading = isLoadingRequest || isLoadingVerify || isLoadingUpdate;
-
+  const { t } = useTranslation();
   const renderContent = () => {
     switch (step) {
       case 'initial':
         return (
           <Box>
             <Typography variant="body1" sx={{ mb: 2 }}>
-              Click 'Send Code' to receive a verification code on your registered email address to change your password.
+              {t('clickSendCodePassword')}
             </Typography>
             <Button variant="contained" onClick={onRequestCode} disabled={isLoading} sx={{ textTransform: 'none' }}>
-              Send Code
+              {t('sendCode')}
             </Button>
           </Box>
         );
@@ -83,10 +84,10 @@ function PasswordChangeModal({
         return (
           <form onSubmit={onVerifyCodeSubmit}>
             <Typography variant="body1" sx={{ mb: 2 }}>
-              Please enter the 6-digit verification code sent to your **registered** email.
+              {t('pleaseentertheverificationcode')}
             </Typography>
             <TextField
-              label="Verification Code"
+              label={t('verificationCode')}
               value={verificationCode}
               onChange={(e) => onVerificationCodeChange(e.target.value)}
               fullWidth
@@ -97,14 +98,14 @@ function PasswordChangeModal({
             <DialogActions sx={{ pt: 2, pb: 0, px: 0 }}>
               {onBack && (
                 <Button onClick={onBack} disabled={isLoading} sx={{ textTransform: 'none' }}>
-                  Back
+                  {t('back')}
                 </Button>
               )}
               <Button onClick={onClose} disabled={isLoading} sx={{ textTransform: 'none' }}>
-                Cancel
+                {t('cancel')}
               </Button>
               <Button type="submit" variant="contained" disabled={isLoading} sx={{ textTransform: 'none' }}>
-                Verify Code
+                {t('verifyCode')}
               </Button>
             </DialogActions>
           </form>
@@ -113,10 +114,10 @@ function PasswordChangeModal({
         return (
           <form onSubmit={onNewPasswordSubmit}>
             <Typography variant="body1" sx={{ mb: 2 }}>
-              Enter and confirm your new password.
+              {t('enterAndConfirmNewPassword')}
             </Typography>
             <TextField
-              label="New Password"
+              label={t('newPassword')}
               type="password"
               value={newPassword}
               onChange={(e) => onNewPasswordChange(e.target.value)}
@@ -126,7 +127,7 @@ function PasswordChangeModal({
               disabled={isLoading}
             />
             <TextField
-              label="Confirm New Password"
+              label={t('confirmNewPassword')}
               type="password"
               value={confirmNewPassword}
               onChange={(e) => onConfirmNewPasswordChange(e.target.value)}
@@ -138,14 +139,14 @@ function PasswordChangeModal({
             <DialogActions sx={{ pt: 2, pb: 0, px: 0 }}>
               {onBack && (
                 <Button onClick={onBack} disabled={isLoading} sx={{ textTransform: 'none' }}>
-                  Back
+                  {t('back')}
                 </Button>
-                )}
+              )}
               <Button onClick={onClose} disabled={isLoading} sx={{ textTransform: 'none' }}>
-                Cancel
+                {t('cancel')}
               </Button>
               <Button type="submit" variant="contained" disabled={isLoading} sx={{ textTransform: 'none' }}>
-                Save Password
+                {t('savePassword')}
               </Button>
             </DialogActions>
           </form>
@@ -158,13 +159,13 @@ function PasswordChangeModal({
   const getTitle = () => {
     switch (step) {
       case 'initial':
-        return 'Change Password';
+        return t('changePassword');
       case 'verifyCode':
-        return 'Verify Password Change';
+        return t('verifyPasswordChange');
       case 'enterNewPassword':
-        return 'Set New Password';
+        return t('setNewPassword');
       default:
-        return 'Password Settings';
+        return t('passwordSettings');
     }
   };
 
@@ -185,7 +186,7 @@ function PasswordChangeModal({
         {isLoading && (
           <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
             <CircularProgress size={24} />
-            <Typography sx={{ ml: 1 }}>Processing...</Typography>
+            <Typography sx={{ ml: 1 }}>{t('processing')}</Typography>
           </Box>
         )}
         {renderContent()}

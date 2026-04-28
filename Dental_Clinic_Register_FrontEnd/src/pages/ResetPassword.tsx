@@ -18,24 +18,26 @@ import { AxiosError } from 'axios';
 import { resetPassword } from '../services/AuthorisationService';
 import { ResponsePasswordResetTokenDTO } from '../models/ForgotPassword';
 import { genericBackground } from '../assets';
+import { useTranslation } from 'react-i18next';
+import LanguageSelector from '../components/LanguageSelector';
 
 function ResetPassword() {
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token') || '';
-
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const { t } = useTranslation();
 
   const resetMutation = useMutation({
     mutationFn: (data: ResponsePasswordResetTokenDTO) => resetPassword(data),
     onSuccess: () => {
-      setSuccessMessage('Your password has been reset successfully.');
+      setSuccessMessage(t('passwordResetSuccess'));
       setErrorMessage('');
     },
     onError: (error: AxiosError<{ message: string }>) => {
-      const message = error.response?.data?.message || 'An error occurred.';
+      const message = error.response?.data?.message || t('passwordResetFailed');
       setErrorMessage(message);
       setSuccessMessage('');
     },
@@ -45,17 +47,17 @@ function ResetPassword() {
     e.preventDefault();
 
     if (!token) {
-      setErrorMessage('Invalid or missing token.');
+      setErrorMessage(t('invalidToken'));
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      setErrorMessage("Passwords don't match.");
+      setErrorMessage(t('passwordsNotMatching'));
       return;
     }
 
     if (newPassword.length < 8) {
-      setSuccessMessage('Password must be at least 8 characters.');
+      setErrorMessage(t('passwordTooShort'));
       return;
     }
 
@@ -84,6 +86,18 @@ function ResetPassword() {
         backgroundSize: 'contain',
       }}
     >
+      <Box
+        sx={{
+          position: 'absolute',
+          top: 24,
+          right: 24,
+          zIndex: 1000,
+          backgroundColor: 'rgba(0, 0, 0, 0.6)',
+          borderRadius: '4px',
+        }}
+      >
+        <LanguageSelector />
+      </Box>
       <Box display="flex" flexGrow={1} justifyContent="center" alignItems="center">
         <Card sx={{ maxWidth: 400, width: '90%', p: 3 }}>
           <Box display={'flex'} justifyContent={'center'} mb={2}>
@@ -93,7 +107,7 @@ function ResetPassword() {
           </Box>
           <CardContent>
             <Typography variant={'h5'} align={'center'} gutterBottom>
-              Reset Password
+              {t('resetYourPassword')}
             </Typography>
 
             {successMessage && (
@@ -109,7 +123,7 @@ function ResetPassword() {
 
             <form onSubmit={handleSubmit}>
               <TextField
-                label={'New Password'}
+                label={t('newPassword')}
                 type={'password'}
                 fullWidth
                 required
@@ -118,7 +132,7 @@ function ResetPassword() {
                 sx={{ mb: 2 }}
               />
               <TextField
-                label={'Confirm Password'}
+                label={t('confirmNewPassword')}
                 type={'password'}
                 fullWidth
                 required
@@ -133,7 +147,7 @@ function ResetPassword() {
                 fullWidth
                 disabled={resetMutation.isPending}
               >
-                {resetMutation.isPending ? <CircularProgress size={24} color="inherit" /> : 'Reset Password'}
+                {resetMutation.isPending ? <CircularProgress size={24} color="inherit" /> : t('resetYourPassword')}
               </Button>
             </form>
             <Box component="footer" textAlign="center" py={2}>

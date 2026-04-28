@@ -22,6 +22,8 @@ import { Gender, RequestUserDTO } from '../models/User';
 import { signup } from '../services/AuthorisationService';
 import { AxiosError } from 'axios';
 import { registerPageBackground } from '../assets';
+import { useTranslation } from 'react-i18next';
+import LanguageSelector from '../components/LanguageSelector';
 
 function Register() {
   const [username, setUsername] = useState('');
@@ -38,6 +40,7 @@ function Register() {
   const [gender, setGender] = useState<Gender | ''>('');
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const { t } = useTranslation();
 
   const registerMutation = useMutation({
     mutationFn: (data: RequestUserDTO) => signup(data),
@@ -144,6 +147,18 @@ function Register() {
       }}
     >
       <Box
+        sx={{
+          position: 'absolute',
+          top: 24,
+          right: 24,
+          zIndex: 1000,
+          backgroundColor: 'rgba(0, 0, 0, 0.6)',
+          borderRadius: '4px',
+        }}
+      >
+        <LanguageSelector />
+      </Box>
+      <Box
         display="flex"
         flexGrow={1}
         justifyContent="center"
@@ -172,7 +187,7 @@ function Register() {
           </Box>
           <CardContent>
             <Typography variant={'h5'} align={'center'} gutterBottom>
-              Welcome to Our Clinic! Please fill out the form below!
+              {t('welcomeRegisterMessage')}
             </Typography>
 
             {successMessage && (
@@ -187,10 +202,10 @@ function Register() {
             )}
             <form onSubmit={handleSubmit}>
               <Typography variant="body2" sx={{ mt: 1, mb: 1, fontWeight: 'bold' }}>
-                User name:
+                {t('username')}:
               </Typography>
               <TextField
-                label={'User name'}
+                label={t('username')}
                 type={'text'}
                 fullWidth={true}
                 required={true}
@@ -199,10 +214,10 @@ function Register() {
                 sx={{ mb: 2 }}
               />
               <Typography variant="body2" sx={{ mt: 1, mb: 1, fontWeight: 'bold' }}>
-                Password:
+                {t('password')}:
               </Typography>
               <TextField
-                label={'Password'}
+                label={t('password')}
                 type={'password'}
                 fullWidth={true}
                 required={true}
@@ -211,10 +226,10 @@ function Register() {
                 sx={{ mb: 2 }}
               />
               <Typography variant="body2" sx={{ mt: 1, mb: 1, fontWeight: 'bold' }}>
-                Confirm Password:
+                {t('confirmPassword')}:
               </Typography>
               <TextField
-                label={'Confirm Password'}
+                label={t('confirmPassword')}
                 type={'password'}
                 fullWidth={true}
                 required={true}
@@ -223,10 +238,10 @@ function Register() {
                 sx={{ mb: 2 }}
               />
               <Typography variant="body2" sx={{ mt: 1, mb: 1, fontWeight: 'bold' }}>
-                Email:
+                {t('email')}:
               </Typography>
               <TextField
-                label={'Email'}
+                label={t('email')}
                 type={'email'}
                 fullWidth={true}
                 required={true}
@@ -235,10 +250,10 @@ function Register() {
                 sx={{ mb: 2 }}
               />
               <Typography variant="body2" sx={{ mt: 1, mb: 1, fontWeight: 'bold' }}>
-                Phone Number:
+                {t('phoneNumber')}:
               </Typography>
               <TextField
-                label={'Phone Number'}
+                label={t('phoneNumber')}
                 type={'tel'}
                 fullWidth={true}
                 required={true}
@@ -247,10 +262,10 @@ function Register() {
                 sx={{ mb: 2 }}
               />
               <Typography variant="body2" sx={{ mt: 1, mb: 1, fontWeight: 'bold' }}>
-                First Name:
+                {t('firstName')}:
               </Typography>
               <TextField
-                label={'First Name'}
+                label={t('firstName')}
                 type={'text'}
                 fullWidth={true}
                 required={true}
@@ -259,10 +274,10 @@ function Register() {
                 sx={{ mb: 2 }}
               />
               <Typography variant="body2" sx={{ mt: 1, mb: 1, fontWeight: 'bold' }}>
-                Middle Name:
+                {t('middleName')}:
               </Typography>
               <TextField
-                label={'Middle Name'}
+                label={t('middleName')}
                 type={'text'}
                 fullWidth={true}
                 required={false}
@@ -271,10 +286,10 @@ function Register() {
                 sx={{ mb: 2 }}
               />
               <Typography variant="body2" sx={{ mt: 1, mb: 1, fontWeight: 'bold' }}>
-                Last Name:
+                {t('lastName')}:
               </Typography>
               <TextField
-                label={'Last Name'}
+                label={t('lastName')}
                 type={'text'}
                 fullWidth={true}
                 required={true}
@@ -283,11 +298,11 @@ function Register() {
                 sx={{ mb: 2 }}
               />
               <Typography variant="body2" sx={{ mt: 1, mb: 1, fontWeight: 'bold' }}>
-                Date of Birth:
+                {t('dateOfBirth')}:
               </Typography>
               <Box display="flex" gap={1} mb={2}>
                 <TextField
-                  label="Day"
+                  label={t('day')}
                   type="number"
                   InputProps={{
                     inputProps: {
@@ -301,7 +316,7 @@ function Register() {
                   required
                 />
                 <TextField
-                  label="Month"
+                  label={t('month')}
                   type="number"
                   InputProps={{
                     inputProps: {
@@ -315,7 +330,7 @@ function Register() {
                   required
                 />
                 <TextField
-                  label="Year"
+                  label={t('year')}
                   type="number"
                   InputProps={{
                     inputProps: {
@@ -330,20 +345,20 @@ function Register() {
                 />
               </Box>
               <Typography variant="body2" sx={{ mt: 1, mb: 1, fontWeight: 'bold' }}>
-                Gender:
+                {t('gender')}:
               </Typography>
               <FormControl fullWidth sx={{ mb: 2 }} required>
-                <InputLabel id="gender-select-label">Gender</InputLabel>
+                <InputLabel id="gender-select-label">{t('gender')}</InputLabel>
                 <Select
                   labelId="gender-select-label"
                   id="gender-select"
                   value={gender}
-                  label="Gender"
+                  label={t('gender')}
                   onChange={handleGenderChange}
                 >
-                  <MenuItem value="MALE">Male</MenuItem>
-                  <MenuItem value="FEMALE">Female</MenuItem>
-                  <MenuItem value="OTHER">Other</MenuItem>
+                  <MenuItem value="MALE">{t('male')}</MenuItem>
+                  <MenuItem value="FEMALE">{t('female')}</MenuItem>
+                  <MenuItem value="OTHER">{t('other')}</MenuItem>
                 </Select>
               </FormControl>
               <Button
@@ -353,7 +368,18 @@ function Register() {
                 fullWidth
                 disabled={registerMutation.isPending}
               >
-                {registerMutation.isPending ? <CircularProgress size={24} color="inherit" /> : 'Register'}
+                {registerMutation.isPending ? <CircularProgress size={24} color="inherit" /> : t('registerButton')}
+              </Button>
+              <Button
+                variant="text"
+                color="primary"
+                fullWidth
+                sx={{ mt: 2 }}
+                onClick={() => {
+                  window.location.href = '/login';
+                }}
+              >
+                {t('alreadyHaveAnAccount')}
               </Button>
             </form>
             <Box component="footer" textAlign="center" py={2}>

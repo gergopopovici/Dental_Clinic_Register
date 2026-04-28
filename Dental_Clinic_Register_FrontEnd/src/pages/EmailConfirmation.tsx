@@ -6,10 +6,13 @@ import { useMutation } from '@tanstack/react-query';
 import { verifyAccount } from '../services/AuthorisationService';
 import { useEffect, useState } from 'react';
 import { genericBackground2 } from '../assets';
+import { useTranslation } from 'react-i18next';
+import LanguageSelector from '../components/LanguageSelector';
 
 function EmailConfirmation() {
   const [searchparams] = useSearchParams();
   const token = searchparams.get('token');
+  const { t } = useTranslation();
 
   const verifyMutation = useMutation({
     mutationFn: verifyAccount,
@@ -37,7 +40,7 @@ function EmailConfirmation() {
           <CircularProgress size={28} sx={{ color: 'white' }} />
         </Avatar>
         <Typography variant="body2" align="center" mt={2}>
-          Verifying your email...
+          {t('verifyingEmail')}
         </Typography>
       </>
     );
@@ -48,10 +51,10 @@ function EmailConfirmation() {
           <CheckIcon fontSize="large" />
         </Avatar>
         <Typography variant="h5" align="center" gutterBottom>
-          Email Confirmed!
+          {t('emailConfirmed')}
         </Typography>
         <Typography variant="body2" align="center" mb={3}>
-          Account verified successfully! You can now log in.
+          {t('accountVerified')}
         </Typography>
       </>
     );
@@ -62,10 +65,10 @@ function EmailConfirmation() {
           <ErrorIcon fontSize="large" />
         </Avatar>
         <Typography variant="h5" align="center" color="error" gutterBottom>
-          Verification Failed
+          {t('verificationFailed')}
         </Typography>
         <Typography variant="body2" align="center" mb={3}>
-          Invalid or expired verification link. Please try again or contact support.
+          {t('emailConfirmationFailed')}
         </Typography>
       </>
     );
@@ -85,6 +88,18 @@ function EmailConfirmation() {
         backgroundSize: 'contain',
       }}
     >
+      <Box
+        sx={{
+          position: 'absolute',
+          top: 24,
+          right: 24,
+          zIndex: 1000,
+          backgroundColor: 'rgba(0, 0, 0, 0.6)',
+          borderRadius: '4px',
+        }}
+      >
+        <LanguageSelector />
+      </Box>
       <Card sx={{ maxWidth: 400, width: '90%', p: 3 }}>
         <Box display="flex" flexDirection="column" alignItems="center" mb={2}>
           {content}

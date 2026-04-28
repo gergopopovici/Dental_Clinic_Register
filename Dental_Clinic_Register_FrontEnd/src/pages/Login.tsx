@@ -8,6 +8,8 @@ import { getCurrentUserDetails } from '../services/UserService';
 import { Login, LoginResponse } from '../models/Login';
 import { useUser, UserDetails } from '../context/UserContext';
 import axios from 'axios';
+import LanguageSelector from '../components/LanguageSelector';
+import { useTranslation } from 'react-i18next';
 
 function LoginPage() {
   const [hoveredSection, setHoveredSection] = useState<'login' | 'signup' | null>(null);
@@ -17,6 +19,7 @@ function LoginPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const redirect = searchParams.get('redirect') || '/dashboard';
+  const { t } = useTranslation();
 
   const { login } = useUser();
 
@@ -37,7 +40,7 @@ function LoginPage() {
       if (typeof window !== 'undefined') {
         localStorage.removeItem('refresh_token');
       }
-      alert('Login successful, but failed to load user profile. Please try again.');
+      alert(t('loginSuccessfulButFailedToFetchUserData'));
       navigate('/login');
     },
   });
@@ -55,9 +58,9 @@ function LoginPage() {
     onError: (error) => {
       console.error('Login failed:', error);
       if (axios.isAxiosError(error) && error.response && error.response.data && error.response.data.message) {
-        alert(`Login failed: ${error.response.data.message}`);
+        alert(`${t('loginFailed')}: ${error.response.data.message}`);
       } else {
-        alert('Invalid username or password.');
+        alert(t('loginCredentialsInvalid'));
       }
     },
   });
@@ -97,7 +100,7 @@ function LoginPage() {
       >
         <CircularProgress />
         <Typography variant="h6" sx={{ ml: 2 }}>
-          Logging in...
+          {t('loggingIn')}
         </Typography>
       </Box>
     );
@@ -105,6 +108,18 @@ function LoginPage() {
 
   return (
     <Box sx={{ height: '100vh', width: '100vw', overflow: 'hidden' }}>
+      <Box
+        sx={{
+          position: 'absolute',
+          top: 24,
+          right: 24,
+          zIndex: 1000,
+          backgroundColor: 'rgba(0, 0, 0, 0.6)',
+          borderRadius: '4px',
+        }}
+      >
+        <LanguageSelector />
+      </Box>
       <Box
         sx={{
           display: 'flex',
@@ -142,10 +157,10 @@ function LoginPage() {
             }}
           >
             <Typography variant="h4" gutterBottom sx={{ textAlign: 'center', mb: 3 }}>
-              Welcome Back!
+              {t('welcomeBack')}
             </Typography>
             <TextField
-              label="Username"
+              label={t('username')}
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               fullWidth
@@ -153,7 +168,7 @@ function LoginPage() {
               sx={{ mb: 2 }}
             />
             <TextField
-              label="Password"
+              label={t('password')}
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -165,15 +180,15 @@ function LoginPage() {
               control={
                 <Checkbox checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} color="primary" />
               }
-              label={'Remember Me'}
+              label={t('rememberMe')}
             ></FormControlLabel>
             <Box sx={{ width: '100%', textAlign: 'right', mb: 2 }}>
               <Link href="/forgot-password" underline="hover">
-                Forgot your password?
+                {t('forgotPassword')}
               </Link>
             </Box>
             <Button variant="contained" color="primary" type="submit" sx={{ py: 1.5, fontWeight: 'bold' }}>
-              Login
+              {t('login')}
             </Button>
             <Box display="flex" justifyContent="center" mt={2}>
               <Typography variant="body2" sx={{ color: 'red', textAlign: 'center' }}>
@@ -220,10 +235,10 @@ function LoginPage() {
             }}
           >
             <Typography variant="h4" gutterBottom>
-              Are you new to our clinic?
+              {t('newHere')}
             </Typography>
             <Typography variant="body1" sx={{ mb: 3 }}>
-              Create an account to get started!
+              {t('createAccount')}
             </Typography>
             <Button
               variant="outlined"
@@ -231,7 +246,7 @@ function LoginPage() {
               sx={{ py: 1.5, px: 5, fontWeight: 'bold' }}
               onClick={() => navigate('/register')}
             >
-              Sign Up
+              {t('signUp')}
             </Button>
             <Typography variant="body2" sx={{ mt: 2, color: 'red' }}>
               <Link

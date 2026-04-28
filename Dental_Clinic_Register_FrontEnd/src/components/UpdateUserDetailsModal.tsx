@@ -15,6 +15,7 @@ import {
   SelectChangeEvent,
 } from '@mui/material';
 import { useUser } from '../context/UserContext';
+import { useTranslation } from 'react-i18next';
 
 export enum Gender {
   // eslint-disable-next-line no-unused-vars
@@ -53,6 +54,7 @@ function UpdateUserModal({
   errorMessage,
 }: UpdateUserModalProps) {
   const { user } = useUser();
+  const { t } = useTranslation();
 
   const [formData, setFormData] = useState<UpdateProfileDTO>({
     firstName: '',
@@ -98,12 +100,12 @@ function UpdateUserModal({
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>Update User Details</DialogTitle>
+      <DialogTitle>{t('updateUserDetails')}</DialogTitle>
       <DialogContent dividers>
         <TextField
           margin="dense"
           name="firstName"
-          label="First Name"
+          label={t('firstName')}
           type="text"
           fullWidth
           variant="outlined"
@@ -114,7 +116,7 @@ function UpdateUserModal({
         <TextField
           margin="dense"
           name="middleName"
-          label="Middle Name"
+          label={t('middleName')}
           type="text"
           fullWidth
           variant="outlined"
@@ -126,7 +128,7 @@ function UpdateUserModal({
         <TextField
           margin="dense"
           name="lastName"
-          label="Last Name"
+          label={t('lastName')}
           type="text"
           fullWidth
           variant="outlined"
@@ -137,7 +139,7 @@ function UpdateUserModal({
         <TextField
           margin="dense"
           name="phoneNumber"
-          label="Phone Number"
+          label={t('phoneNumber')}
           type="text"
           fullWidth
           variant="outlined"
@@ -146,17 +148,17 @@ function UpdateUserModal({
           sx={{ mb: 2 }}
         />
         <FormControl fullWidth margin="dense" sx={{ mb: 2 }}>
-          <InputLabel id="gender-label">Gender</InputLabel>
+          <InputLabel id="gender-label">{t('gender')}</InputLabel>
           <Select
             labelId="gender-label"
             name="gender"
             value={formData.gender}
-            label="Gender"
+            label={t('gender')}
             onChange={handleSelectChange}
           >
-            <MenuItem value={Gender.FEMALE}>Female</MenuItem>
-            <MenuItem value={Gender.MALE}>Male</MenuItem>
-            <MenuItem value={Gender.OTHER}>Other</MenuItem>
+            <MenuItem value={Gender.FEMALE}>{t('female')}</MenuItem>
+            <MenuItem value={Gender.MALE}>{t('male')}</MenuItem>
+            <MenuItem value={Gender.OTHER}>{t('other')}</MenuItem>
           </Select>
         </FormControl>
 
@@ -173,7 +175,7 @@ function UpdateUserModal({
       </DialogContent>
       <DialogActions sx={{ pt: 2, pb: 0, px: 0 }}>
         <Button onClick={onClose} disabled={isLoadingUpdate}>
-          Cancel
+          {t('cancel')}
         </Button>
         <Button
           onClick={handleSubmit}
@@ -182,7 +184,7 @@ function UpdateUserModal({
           disabled={isLoadingUpdate}
           startIcon={isLoadingUpdate ? <CircularProgress size={20} /> : null}
         >
-          {isLoadingUpdate ? 'Updating...' : 'Submit'}
+          {isLoadingUpdate ? t('updating') : t('submit')}
         </Button>
       </DialogActions>
     </Dialog>

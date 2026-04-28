@@ -29,7 +29,6 @@ export const useUserQuery = () => {
     gcTime: 10 * 60 * 1000,
     enabled: hasRefreshToken,
     retry: (failureCount: number, error: unknown) => {
-      // Don't retry on 401 or 403 errors - let the interceptor handle
       if (axios.isAxiosError(error) && (error.response?.status === 401 || error.response?.status === 403)) {
         return false;
       }

@@ -11,6 +11,7 @@ import {
   Typography,
 } from '@mui/material';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 interface EmailChangeModalProps {
   open: boolean;
   onClose: () => void;
@@ -57,16 +58,17 @@ function EmailChangeModal({
   errorMessage,
 }: EmailChangeModalProps) {
   const isLoading = isLoadingRequest || isLoadingVerify || isLoadingUpdate;
+  const { t } = useTranslation();
   const renderContent = () => {
     switch (step) {
       case 'initial':
         return (
           <Box>
             <Typography variant="body1" sx={{ mb: 2 }}>
-              Click 'Send Code' to receive a verification code on your registered email address to change your password.
+              {t('clickSendCode')}
             </Typography>
             <Button variant="contained" onClick={onRequestCode} disabled={isLoading} sx={{ textTransform: 'none' }}>
-              Send Code
+              {t('sendCode')}
             </Button>
           </Box>
         );
@@ -74,10 +76,10 @@ function EmailChangeModal({
         return (
           <form onSubmit={onVerifyCodeSubmit}>
             <Typography variant="body1" sx={{ mb: 2 }}>
-              Please enter the 6-digit verification code sent to your **registered** email.
+              {t('pleaseentertheverificationcode')}
             </Typography>
             <TextField
-              label="Verification Code"
+              label={t('verificationCode')}
               value={verificationCode}
               onChange={(e) => onVerificationCodeChange(e.target.value)}
               fullWidth
@@ -88,14 +90,14 @@ function EmailChangeModal({
             <DialogActions sx={{ pt: 2, pb: 0, px: 0 }}>
               {onBack && (
                 <Button onClick={onBack} disabled={isLoading} sx={{ textTransform: 'none' }}>
-                  Back
+                  {t('back')}
                 </Button>
               )}
               <Button onClick={onClose} disabled={isLoading} sx={{ textTransform: 'none' }}>
-                Cancel
+                {t('cancel')}
               </Button>
               <Button type="submit" variant="contained" disabled={isLoading} sx={{ textTransform: 'none' }}>
-                Verify Code
+                {t('verifyCode')}
               </Button>
             </DialogActions>
           </form>
@@ -104,10 +106,10 @@ function EmailChangeModal({
         return (
           <form onSubmit={onNewEmailSubmit}>
             <Typography variant="body1" sx={{ mb: 2 }}>
-              Enter your new Email address
+              {t('pleaseenterthenewemailaddress')}
             </Typography>
             <TextField
-              label="Email Address"
+              label={t('emailAddress')}
               value={newEmail}
               fullWidth
               required
@@ -118,14 +120,14 @@ function EmailChangeModal({
             <DialogActions sx={{ pt: 2, pb: 0, px: 0 }}>
               {onBack && (
                 <Button onSubmit={onClose} disabled={isLoading} sx={{ textTransform: 'none' }}>
-                  Back
+                  {t('back')}
                 </Button>
               )}
               <Button onClick={onClose} disabled={isLoading} sx={{ textTransform: 'none' }}>
-                Cancel
+                {t('cancel')}
               </Button>
               <Button type="submit" variant="contained" disabled={isLoading} sx={{ textTransform: 'none' }}>
-                Save Email Address
+                {t('saveEmailAddress')}
               </Button>
             </DialogActions>
           </form>
@@ -137,13 +139,13 @@ function EmailChangeModal({
   const getTitle = () => {
     switch (step) {
       case 'initial':
-        return 'Change Email Address';
+        return t('changeEmailAddress');
       case 'verifyCode':
-        return 'Verify Email Change';
+        return t('verifyEmailChange');
       case 'enterNewEmailAddress':
-        return 'Set New Email Address';
+        return t('setNewEmailAddress');
       default:
-        return 'Email Settings';
+        return t('emailSettings');
     }
   };
   return (
@@ -163,7 +165,7 @@ function EmailChangeModal({
         {isLoading && (
           <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
             <CircularProgress size={24} />
-            <Typography sx={{ ml: 1 }}>Processing...</Typography>
+            <Typography sx={{ ml: 1 }}>{t('processing')}</Typography>
           </Box>
         )}
         {renderContent()}
