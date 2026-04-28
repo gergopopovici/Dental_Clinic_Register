@@ -75,6 +75,5 @@ public class User extends BaseEntity implements Serializable {
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    @Transient
-    private VerificationToken verificationToken; // NOPMD - NonSerializableClass;
+    private VerificationToken verificationToken;
 }
