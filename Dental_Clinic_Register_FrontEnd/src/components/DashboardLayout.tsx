@@ -22,6 +22,7 @@ import { useMutation } from '@tanstack/react-query';
 import { signOut } from '../services/AuthorisationService'; // Assuming signOut is your logout API call
 import { useUser } from '../context/UserContext'; // Your UserContext hook
 import { getAvatar } from '../services/UserService';
+import LanguageSelector from './LanguageSelector';
 
 const drawerWidth = 240;
 
@@ -161,6 +162,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             );
           })}
         </List>
+        <Box sx={{ mt: 'auto', p: 2, display: 'flex', justifyContent: 'center' }}>
+          <LanguageSelector />
+        </Box>
       </Drawer>
 
       <Box

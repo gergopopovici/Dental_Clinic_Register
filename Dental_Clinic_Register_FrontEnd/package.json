@@ -25,6 +25,7 @@
     "react-easy-crop": "^5.5.0",
     "react-i18next": "^15.5.3",
     "react-router-dom": "^7.6.2",
+    "react-world-flags": "^1.6.0",
     "three": "^0.179.1"
   },
   "devDependencies": {
@@ -32,6 +33,7 @@
     "@types/js-cookie": "^3.0.6",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
+    "@types/react-world-flags": "^1.6.0",
     "@vitejs/plugin-react": "^4.5.2",
     "eslint": "^9.29.0",
     "eslint-plugin-react-hooks": "^5.2.0",
