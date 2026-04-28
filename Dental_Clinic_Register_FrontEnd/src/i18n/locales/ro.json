@@ -116,5 +116,8 @@
   "emailConfirmationFailed": "Verificarea emailului a eșuat. Vă rugăm să încercați din nou sau să contactați asistența pentru ajutor.",
   "verificationFailed": "Verificare eșuată",
   "invalidToken": "Token invalid sau lipsă.",
-  "resetYourPassword": "Resetează-ți parola"
+  "resetYourPassword": "Resetează-ți parola",
+  "passwordResetSuccess": "Resetearea parolei a fost reușită! Vă puteți autentifica acum cu noua parolă.",
+  "accountRegisteredSuccessfully": "Contul dvs. a fost înregistrat cu succes! Vă rugăm să verificați emailul pentru a vă confirma contul.",
+  "errorMessage": "A apărut o eroare. Vă rugăm să încercați din nou."
 }

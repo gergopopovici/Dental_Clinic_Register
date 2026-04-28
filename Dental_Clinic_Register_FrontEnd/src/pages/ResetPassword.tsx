@@ -149,6 +149,17 @@ function ResetPassword() {
               >
                 {resetMutation.isPending ? <CircularProgress size={24} color="inherit" /> : t('resetYourPassword')}
               </Button>
+              <Button
+                variant="text"
+                color="primary"
+                fullWidth
+                sx={{ mt: 2 }}
+                onClick={() => {
+                  window.location.href = '/login';
+                }}
+              >
+                {t('backToLogin')}
+              </Button>
             </form>
             <Box component="footer" textAlign="center" py={2}>
               <Link

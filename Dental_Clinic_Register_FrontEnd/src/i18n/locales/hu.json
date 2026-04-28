@@ -116,5 +116,8 @@
   "emailConfirmationFailed": "Az e-mail cím megerősítése sikertelen. Kérem, próbálja újra vagy vegye fel a kapcsolatot az ügyfélszolgálattal.",
   "verificationFailed": "Ellenőrzés sikertelen",
   "invalidToken": "Érvénytelen vagy hiányzó token.",
-  "resetYourPassword": "Állítsa vissza a jelszavát"
+  "resetYourPassword": "Állítsa vissza a jelszavát",
+  "passwordResetSuccess": "A jelszó visszaállítása sikeres! Most már bejelentkezhet az új jelszavával.",
+  "accountRegisteredSuccessfully": "A fiókod sikeresen regisztrálva! Kérem, ellenőrizze az e-mailjét a fiók megerősítéséhez.",
+  "errorMessage": "Hiba történt. Kérem, próbálja újra."
 }

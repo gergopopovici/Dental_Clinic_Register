@@ -116,5 +116,8 @@
   "emailConfirmationFailed": "Email verification failed. Please try again or contact support for assistance.",
   "verificationFailed": "Verification Failed",
   "invalidToken": "Invalid or missing token.",
-  "resetYourPassword": "Reset Your Password"
+  "resetYourPassword": "Reset Your Password",
+  "passwordResetSuccess": "Password reset successful! You can now log in with your new password.",
+  "accountRegisteredSuccessfully": "Your account has been successfully registered. Please check your email to verify your account.",
+  "errorMessage": "An error occurred. Please try again."
 }

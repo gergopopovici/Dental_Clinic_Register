@@ -1,4 +1,4 @@
-import { Avatar, Box, Card, Typography, CircularProgress } from '@mui/material';
+import { Avatar, Box, Card, Typography, CircularProgress, Button } from '@mui/material';
 import CheckIcon from '@mui/icons-material/Check';
 import ErrorIcon from '@mui/icons-material/Error';
 import { Navigate, useSearchParams } from 'react-router-dom';
@@ -56,6 +56,17 @@ function EmailConfirmation() {
         <Typography variant="body2" align="center" mb={3}>
           {t('accountVerified')}
         </Typography>
+        <Button
+          variant="text"
+          color="primary"
+          fullWidth
+          sx={{ mt: 2 }}
+          onClick={() => {
+            window.location.href = '/login';
+          }}
+        >
+          {t('backToLogin')}
+        </Button>
       </>
     );
   } else if (verifyMutation.isError) {

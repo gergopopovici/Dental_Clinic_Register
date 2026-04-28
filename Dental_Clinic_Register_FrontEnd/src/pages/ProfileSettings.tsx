@@ -131,6 +131,7 @@ function ProfileSettings() {
     onSuccess: async () => {
       setSuccessMessage(t('accountDeleted'));
       setErrorMessage('');
+      setIsDeleteModalOpen(false);
       await signOut();
       logout();
       navigate('/login');
@@ -852,7 +853,7 @@ function ProfileSettings() {
         onDelete={deleteFunction}
         successMessage={''}
         errorMessage={''}
-        isLoadingDelete={false}
+        isLoadingDelete={deleteUserMutation.isPending}
       />
 
       <UpdateUserModal

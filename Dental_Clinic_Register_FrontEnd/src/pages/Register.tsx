@@ -45,7 +45,7 @@ function Register() {
   const registerMutation = useMutation({
     mutationFn: (data: RequestUserDTO) => signup(data),
     onSuccess: () => {
-      setSuccessMessage('Your account has been successfully registered.');
+      setSuccessMessage(t('accountRegisteredSuccessfully'));
       setErrorMessage('');
     },
     onError: (error: AxiosError<{ message: string }>) => {
