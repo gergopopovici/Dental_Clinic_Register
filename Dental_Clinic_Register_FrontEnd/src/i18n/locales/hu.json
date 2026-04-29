@@ -124,5 +124,8 @@
   "failedToFetchAdminStats": "Nem sikerült lekérni az adminisztrációs statisztikákat. Kérem, próbálja újra.",
   "totalPatients": "Összes páciens",
   "totalDoctors": "Összes fogorvos",
-  "totalBannedUsers": "Összes deaktivált felhasználó"
+  "totalBannedUsers": "Összes deaktivált felhasználó",
+  "inviteNewDoctor": "Új fogorvos meghívása",
+  "doctorEmailAddress": "Fogorvos e-mail címe",
+  "sendInviteLink": "Meghívó link küldése"
 }

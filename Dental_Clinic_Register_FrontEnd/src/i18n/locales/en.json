@@ -124,5 +124,8 @@
   "failedToFetchAdminStats": "Failed to fetch admin statistics. Please try again.",
   "totalPatients": "Total Patients",
   "totalDoctors": "Total Dentists",
-  "totalBannedUsers": "Total deactivated users"
+  "totalBannedUsers": "Total deactivated users",
+  "inviteNewDoctor": "Invite New Dentist",
+  "doctorEmailAddress": "Dentist's Email Address",
+  "sendInviteLink": "Send Invite Link"
 }

@@ -124,5 +124,8 @@
   "failedToFetchAdminStats": "Nu s-au putut obține statisticile de administrare. Vă rugăm să încercați din nou.",
   "totalPatients": "Total Pacienți",
   "totalDoctors": "Total Dentiști",
-  "totalBannedUsers": "Total utilizatori dezactivați"
+  "totalBannedUsers": "Total utilizatori dezactivați",
+  "inviteNewDoctor": "Invită un nou dentist",
+  "doctorEmailAddress": "Adresa de email a dentistului",
+  "sendInviteLink": "Trimite link de invitație"
 }

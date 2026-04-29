@@ -1,11 +1,11 @@
-import { Box, Card, CardContent, CircularProgress, Grid, Typography } from '@mui/material';
+import { Box, Button, Card, CardContent, CircularProgress, Grid, Paper, TextField, Typography } from '@mui/material';
 import PeopleIcon from '@mui/icons-material/People';
 import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
 import BlockIcon from '@mui/icons-material/Block';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
 import { useTranslation } from 'react-i18next';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getAdminStats } from '../services/UserService';
 
@@ -13,6 +13,11 @@ function AdminDashboard() {
   const navigate = useNavigate();
   const { user, isLoading } = useUser();
   const { t } = useTranslation();
+  const [inviteEmail, setInviteEmail] = useState('');
+  const handleSendInviteMock = () => {
+    alert(t('inviteSentTo') + ` ${inviteEmail}`);
+    setInviteEmail('');
+  };
 
   const {
     data: stats,
@@ -99,6 +104,35 @@ function AdminDashboard() {
             </Grid>
           </Grid>
         )}
+        <Paper sx={{ mt: 4, p: 3, bgcolor: '#1e1e1e', color: 'white' }}>
+          <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
+            {t('inviteNewDoctor')}
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <TextField
+              fullWidth
+              variant="outlined"
+              placeholder={t('doctorEmailAddress')}
+              value={inviteEmail}
+              onChange={(e) => setInviteEmail(e.target.value)}
+              sx={{
+                input: { color: 'white' },
+                bgcolor: '#2c2c2c',
+                borderRadius: 1,
+                '& .MuiOutlinedInput-notchedOutline': { borderColor: '#444' },
+              }}
+            />
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleSendInviteMock}
+              disabled={!inviteEmail}
+              sx={{ px: 4, whiteSpace: 'nowrap' }}
+            >
+              {t('sendInviteLink')}
+            </Button>
+          </Box>
+        </Paper>
       </Box>
     </Box>
   );
