@@ -3,6 +3,7 @@ package edu.ubb.licenta.pgim2289.spring.repository;
 import edu.ubb.licenta.pgim2289.spring.model.User;
 import jakarta.validation.constraints.Email;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 import java.util.Optional;
 
@@ -19,4 +20,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByUserName(String userName);
 
     User findByEmail(@Email String email);
+
+    @Query("SELECT COUNT(u) FROM User u JOIN u.roles r WHERE r.roleName = 2")
+    long countPatients();
+    @Query("SELECT COUNT(u) FROM User u JOIN u.roles r WHERE r.roleName = 1")
+    long countDoctors();
+    long countByEnabledFalse();
 }

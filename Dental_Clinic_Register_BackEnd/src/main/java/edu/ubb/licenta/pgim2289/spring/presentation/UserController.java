@@ -226,4 +226,13 @@ public class UserController {
 
         return ResponseEntity.ok(userDTO);
     }
+    @PreAuthorize("hasAnyRole('ADMIN')")
+    @GetMapping("/admin/stats")
+    public ResponseEntity<AdminStatsDTO>getAdminStats(){
+        return ResponseEntity.ok(new AdminStatsDTO(
+                userService.countPatients(),
+                userService.countDoctors(),
+                userService.countBanned()
+        ));
+    }
 }

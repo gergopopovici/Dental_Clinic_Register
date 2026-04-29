@@ -32,4 +32,8 @@ public interface UserService {
     Optional<RefreshToken> findByRefreshToken(String token);
 
     String updateProfilePicture(Long userId, MultipartFile fileName);
+
+    long countPatients();
+    long countDoctors();
+    long countBanned();
 }

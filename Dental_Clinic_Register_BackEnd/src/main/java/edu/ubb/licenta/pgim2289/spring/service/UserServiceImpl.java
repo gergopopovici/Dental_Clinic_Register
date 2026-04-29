@@ -216,6 +216,21 @@ public class UserServiceImpl implements UserService {
         return newFileName;
     }
 
+    @Override
+    public long countPatients() {
+        return userRepository.countPatients();
+    }
+
+    @Override
+    public long countDoctors() {
+        return userRepository.countDoctors();
+    }
+
+    @Override
+    public long countBanned() {
+        return userRepository.countByEnabledFalse();
+    }
+
     public User registerUser(User user, Set<String> roleNames) {
         Set<Role> roles = new HashSet<>();
         for (String roleName : roleNames) {
