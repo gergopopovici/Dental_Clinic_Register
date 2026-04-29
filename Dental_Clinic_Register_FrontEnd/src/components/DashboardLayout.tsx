@@ -36,12 +36,28 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const location = useLocation();
   const { user, isLoading, logout } = useUser();
   const { t } = useTranslation();
+  const isAdmin = user?.roles?.includes('ROLE_ADMIN');
+  const isPatient = user?.roles?.includes('ROLE_PATIENT');
+  // const isDoctor = user?.roles?.includes('ROLE_DOCTOR');
 
   const menuItems = [
-    { label: t('dashboard'), path: '/dashboard', icon: <DashboardIcon /> },
-    { label: t('appointments'), path: '/appointments', icon: <EventNoteIcon /> },
-    { label: t('myProfile'), path: '/profile', icon: <PersonIcon /> },
-    { label: t('logout'), icon: <LogoutIcon />, action: () => logoutMutation.mutate() },
+    { label: t('dashboard'), path: '/dashboard', icon: <DashboardIcon />, showForAdmin: false, showForPatient: true },
+    {
+      label: t('appointments'),
+      path: '/appointments',
+      icon: <EventNoteIcon />,
+      showForAdmin: false,
+      showForPatient: true,
+    },
+    { label: t('myProfile'), path: '/profile', icon: <PersonIcon />, showForAdmin: true, showForPatient: true },
+    { label: t('adminPanel'), path: '/admin', icon: <DashboardIcon />, showForAdmin: true, showForPatient: false },
+    {
+      label: t('logout'),
+      icon: <LogoutIcon />,
+      action: () => logoutMutation.mutate(),
+      showForAdmin: true,
+      showForPatient: true,
+    },
   ];
   useEffect(() => {
     console.log('DashboardLayout useEffect: isLoading:', isLoading, 'user:', user);
@@ -132,40 +148,42 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         <Divider sx={{ borderColor: 'rgba(255, 255, 255, 0.12)' }} />
 
         <List>
-          {menuItems.map(({ label, path, icon, action }) => {
-            const isActive = path ? location.pathname === path : false;
+          {menuItems
+            .filter((item) => (isAdmin && item.showForAdmin) || (isPatient && item.showForPatient))
+            .map(({ label, path, icon, action }) => {
+              const isActive = path ? location.pathname === path : false;
 
-            const handleClick = () => {
-              if (action) {
-                action();
-              } else if (path) {
-                navigate(path);
-              }
-            };
+              const handleClick = () => {
+                if (action) {
+                  action();
+                } else if (path) {
+                  navigate(path);
+                }
+              };
 
-            return (
-              <ListItem key={label} disablePadding>
-                <ListItemButton
-                  selected={isActive}
-                  onClick={handleClick}
-                  sx={{
-                    '&.Mui-selected': {
-                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                      '&:hover': {
-                        backgroundColor: 'rgba(255, 255, 255, 0.15)',
+              return (
+                <ListItem key={label} disablePadding>
+                  <ListItemButton
+                    selected={isActive}
+                    onClick={handleClick}
+                    sx={{
+                      '&.Mui-selected': {
+                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                        '&:hover': {
+                          backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                        },
                       },
-                    },
-                    '&:hover': {
-                      backgroundColor: 'rgba(255, 255, 255, 0.08)',
-                    },
-                  }}
-                >
-                  <ListItemIcon sx={{ color: 'white' }}>{icon}</ListItemIcon>
-                  <ListItemText primary={label} sx={{ color: 'white' }} />
-                </ListItemButton>
-              </ListItem>
-            );
-          })}
+                      '&:hover': {
+                        backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                      },
+                    }}
+                  >
+                    <ListItemIcon sx={{ color: 'white' }}>{icon}</ListItemIcon>
+                    <ListItemText primary={label} sx={{ color: 'white' }} />
+                  </ListItemButton>
+                </ListItem>
+              );
+            })}
         </List>
         <Box sx={{ mt: 'auto', p: 2, display: 'flex', justifyContent: 'center' }}>
           <LanguageSelector />

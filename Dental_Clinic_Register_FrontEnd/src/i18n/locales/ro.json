@@ -119,5 +119,10 @@
   "resetYourPassword": "Resetează-ți parola",
   "passwordResetSuccess": "Resetearea parolei a fost reușită! Vă puteți autentifica acum cu noua parolă.",
   "accountRegisteredSuccessfully": "Contul dvs. a fost înregistrat cu succes! Vă rugăm să verificați emailul pentru a vă confirma contul.",
-  "errorMessage": "A apărut o eroare. Vă rugăm să încercați din nou."
+  "errorMessage": "A apărut o eroare. Vă rugăm să încercați din nou.",
+  "adminPanel": "Panou de Administrare",
+  "failedToFetchAdminStats": "Nu s-au putut obține statisticile de administrare. Vă rugăm să încercați din nou.",
+  "totalPatients": "Total Pacienți",
+  "totalDoctors": "Total Dentiști",
+  "totalBannedUsers": "Total utilizatori dezactivați"
 }

@@ -2,6 +2,7 @@ import {
   apiURL,
   deleteUserAccountApiUrl,
   emailChangeRequestApiUrl,
+  getAdminStatsApiUrl,
   getAvatarApiUrl,
   passwordRequestApiUrl,
   updateEmailApiUrl,
@@ -129,3 +130,13 @@ export const getAvatar = (profilePictureFileName: string | null | undefined): st
   }
   return undefined;
 };
+
+export const getAdminStats = async()=>{
+  try{
+    const response = await apiClient.get(getAdminStatsApiUrl);
+    return response.data;
+  } catch (error) {
+    console.error('Error in getAdminStats:', error);
+    throw error;
+  }
+}

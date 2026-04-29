@@ -119,5 +119,10 @@
   "resetYourPassword": "Állítsa vissza a jelszavát",
   "passwordResetSuccess": "A jelszó visszaállítása sikeres! Most már bejelentkezhet az új jelszavával.",
   "accountRegisteredSuccessfully": "A fiókod sikeresen regisztrálva! Kérem, ellenőrizze az e-mailjét a fiók megerősítéséhez.",
-  "errorMessage": "Hiba történt. Kérem, próbálja újra."
+  "errorMessage": "Hiba történt. Kérem, próbálja újra.",
+  "adminPanel": "Adminisztrációs panel",
+  "failedToFetchAdminStats": "Nem sikerült lekérni az adminisztrációs statisztikákat. Kérem, próbálja újra.",
+  "totalPatients": "Összes páciens",
+  "totalDoctors": "Összes fogorvos",
+  "totalBannedUsers": "Összes deaktivált felhasználó"
 }

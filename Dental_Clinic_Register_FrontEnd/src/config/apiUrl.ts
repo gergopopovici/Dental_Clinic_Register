@@ -17,6 +17,7 @@ const refreshTokenApiUrl = `${api}/api/auth/refresh-token`;
 const updateUserApiUrl = `${api}/api/users/update-user-details`;
 const uploadAvatarApiUrl = `${api}/api/users/upload-avatar`;
 const getAvatarApiUrl = `${api}/api/users/avatar/`;
+const getAdminStatsApiUrl = `${api}/api/users/admin/stats`;
 const apiURL = api;
 
 export {
@@ -38,4 +39,5 @@ export {
   updateUserApiUrl,
   uploadAvatarApiUrl,
   getAvatarApiUrl,
+  getAdminStatsApiUrl,
 };

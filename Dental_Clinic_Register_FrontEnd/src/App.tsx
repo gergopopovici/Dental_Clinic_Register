@@ -19,6 +19,7 @@ import { UserProvider } from './context/UserContext';
 
 import { Box, Typography } from '@mui/material';
 import BracesPage from './pages/Braces';
+import AdminDashboard from './pages/Admin';
 
 const DashboardPage = () => (
   <Box>
@@ -71,6 +72,7 @@ function App() {
                 <Route path="/appointments" element={<AppointmentsPage />} />
                 <Route path="/profile" element={<ProfileSettings />} />
                 <Route path="/braces" element={<BracesPage />} />
+                <Route path="/admin" element={<AdminDashboard />} />
               </Route>
             </Route>
 
