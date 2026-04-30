@@ -16,4 +16,6 @@ public interface EmailService {
     void sendEmailResetEmail(String email, String to, String userName);
 
     void sendDeletionConfirmationEmail(String to, String userName);
+
+    void sendDoctorInviteEmail(String to, String frontEnd);
 }

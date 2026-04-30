@@ -97,4 +97,12 @@ public class GlobalExceptionHandler {
         errorMap.put("error", ex.getMessage());
         return errorMap;
     }
+
+    @ExceptionHandler(InvalidInviteTokenException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Map<String, String> handleInvalidInviteToken(InvalidInviteTokenException ex) {
+        Map<String, String> errorMap = new ConcurrentHashMap<>();
+        errorMap.put("error", ex.getMessageKey());
+        return errorMap;
+    }
 }

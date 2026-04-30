@@ -18,6 +18,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -226,13 +227,20 @@ public class UserController {
 
         return ResponseEntity.ok(userDTO);
     }
+
     @PreAuthorize("hasAnyRole('ADMIN')")
     @GetMapping("/admin/stats")
-    public ResponseEntity<AdminStatsDTO>getAdminStats(){
+    public ResponseEntity<AdminStatsDTO> getAdminStats() {
         return ResponseEntity.ok(new AdminStatsDTO(
                 userService.countPatients(),
                 userService.countDoctors(),
                 userService.countBanned()
         ));
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN')")
+    @GetMapping("/admin/users")
+    public ResponseEntity<List<UserManagmentDTO>> getAllUsersForAdmin() {
+        return ResponseEntity.ok(userService.getAllUsersForAdmin());
     }
 }

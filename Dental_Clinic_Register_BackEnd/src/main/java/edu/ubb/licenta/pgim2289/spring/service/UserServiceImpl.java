@@ -2,6 +2,7 @@ package edu.ubb.licenta.pgim2289.spring.service;
 
 import edu.ubb.licenta.pgim2289.spring.dto.MessageResponse;
 import edu.ubb.licenta.pgim2289.spring.dto.RequestUserDTO;
+import edu.ubb.licenta.pgim2289.spring.dto.UserManagmentDTO;
 import edu.ubb.licenta.pgim2289.spring.model.*;
 import edu.ubb.licenta.pgim2289.spring.repository.RoleRepository;
 import edu.ubb.licenta.pgim2289.spring.repository.UserRepository;
@@ -15,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.Instant;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -191,6 +193,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public Boolean emailExistsChecker(String email) {
+        return userRepository.existsByEmail(email);
+    }
+
+    @Override
     public Optional<RefreshToken> findByRefreshToken(String token) {
         return refreshTokenService.findByToken(token);
 
@@ -229,6 +236,24 @@ public class UserServiceImpl implements UserService {
     @Override
     public long countBanned() {
         return userRepository.countByEnabledFalse();
+    }
+
+    @Override
+    public List<UserManagmentDTO> getAllUsersForAdmin() {
+        return userRepository.findAll().stream().map(user -> {
+            String fullName = user.getFirstName() + " " + user.getLastName();
+            String role = user.getRoles().isEmpty() ? "NONE" :
+                    user.getRoles().iterator().next().getRoleName().name();
+
+            return new UserManagmentDTO(
+                    user.getId(),
+                    user.getUserName(),
+                    fullName,
+                    user.getEmail(),
+                    role,
+                    user.getEnabled()
+            );
+        }).toList();
     }
 
     public User registerUser(User user, Set<String> roleNames) {

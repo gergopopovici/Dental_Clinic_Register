@@ -94,4 +94,17 @@ public class EmailServiceImpl implements EmailService {
         message.setText("Hello " + userName + "!\n\nYour deletion confirmation email! ");
         mailSender.send(message);
     }
+
+    @Override
+    public void sendDoctorInviteEmail(String to, String frontEnd) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(fromEmail);
+        message.setTo(to);
+        message.setSubject("Doctor Registration Invitation");
+        message.setText("Hello!\n\nYou have been invited to register as a Doctor in our clinic system.\n\n"
+                + "Please click the link below to set up your account:\n\n"
+                + frontEnd + "\n\n"
+                + "Note: This invitation link is valid for 24 hours.");
+        mailSender.send(message);
+    }
 }
