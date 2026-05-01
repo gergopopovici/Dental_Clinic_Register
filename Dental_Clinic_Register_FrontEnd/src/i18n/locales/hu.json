@@ -139,5 +139,6 @@
   "error.role.not_found":"Hiba: A szerep nem található a rendszerben.",
   "success.doctor.registered": "Fogorvos sikeresen regisztrálva!",
   "success.user.registered": "Felhasználó sikeresen regisztrálva!",
-  "error.unknown":"Ismeretlen hiba történt. Kérem, próbálja újra."
+  "error.unknown":"Ismeretlen hiba történt. Kérem, próbálja újra.",
+  "error.signup.invalid_phone": "Hiba: Érvénytelen román telefonszám!"
 }

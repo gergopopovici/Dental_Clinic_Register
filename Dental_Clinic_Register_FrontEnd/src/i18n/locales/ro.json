@@ -139,5 +139,6 @@
   "error.role.not_found": "Eroare: Rolul nu este găsit în sistem.",
   "success.doctor.registered": "Dentist înregistrat cu succes!",
   "success.user.registered": "Utilizator înregistrat cu succes!",
-  "error.unknown": "A apărut o eroare necunoscută. Vă rugăm să încercați din nou."
+  "error.unknown": "A apărut o eroare necunoscută. Vă rugăm să încercați din nou.",
+  "error.signup.invalid_phone": "Eroare: Număr de telefon românesc invalid!"
 }

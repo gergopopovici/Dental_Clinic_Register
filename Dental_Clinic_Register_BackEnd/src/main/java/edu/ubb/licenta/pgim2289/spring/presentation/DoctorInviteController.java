@@ -29,7 +29,7 @@ public class DoctorInviteController {
         this.doctorInviteService = doctorInviteService;
     }
 
-    @PreAuthorize("hasAnyRole('Admin')")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @PostMapping("/send")
     public ResponseEntity<MessageResponse> inviteDoctor(@RequestBody RequestNewEmailDTO requestNewEmailDTO) {
         String email = requestNewEmailDTO.getEmail();

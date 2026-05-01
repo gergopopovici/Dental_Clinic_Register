@@ -139,5 +139,6 @@
   "error.role.not_found": "Error: Role is not found in the system.",
   "success.doctor.registered": "Doctor registered successfully!",
   "success.user.registered": "User registered successfully!",
-  "error.unknown": "An unknown error occurred. Please try again."
+  "error.unknown": "An unknown error occurred. Please try again.",
+  "error.signup.invalid_phone": "Error: Invalid Romanian phone number!"
 }

@@ -7,6 +7,7 @@ import lombok.Data;
 import java.time.Instant;
 
 @Entity
+@Table(name = "Doctor_invite")
 @Data
 public class DoctorInvite {
     @Id
