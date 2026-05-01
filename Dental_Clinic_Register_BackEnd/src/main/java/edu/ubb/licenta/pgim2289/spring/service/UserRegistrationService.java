@@ -8,4 +8,6 @@ public interface UserRegistrationService {
     ResponseEntity<MessageResponse> registerUser(RequestUserDTO dto);
 
     ResponseEntity<MessageResponse> verifyAccount(String token);
+
+    ResponseEntity<MessageResponse> registerDoctor(RequestUserDTO dto);
 }

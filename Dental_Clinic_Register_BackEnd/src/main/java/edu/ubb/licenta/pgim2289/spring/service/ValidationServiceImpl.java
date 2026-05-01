@@ -20,14 +20,14 @@ public class ValidationServiceImpl implements ValidationService {
     @Override
     public ValidationResult validateUserRegistration(RequestUserDTO dto) {
         if (userRepository.existsByUserName(dto.getUsername())) {
-            return ValidationResult.invalid("Error: Username is already taken!");
+            return ValidationResult.invalid("error.signup.username_taken");
         }
         if (userRepository.existsByEmail(dto.getEmail())) {
-            return ValidationResult.invalid("Error: Email is already in use!");
+            return ValidationResult.invalid("error.signup.email_in_use");
         }
         if (!phoneNumberUtilService.isValidPhoneNumber(dto.getPhoneNumber(),
                 "RO")) {
-            return ValidationResult.invalid("Error: Invalid Romanian phone number!");
+            return ValidationResult.invalid("error.signup.invalid_phone");
         }
         return ValidationResult.success();
     }

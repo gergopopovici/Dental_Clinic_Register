@@ -34,4 +34,6 @@ public class RequestUserDTO {
     private LocalDate dateOfBirth;
     @NotNull(message = "Gender cannot be empty")
     private Patient.Gender gender;
+    private String specialisation;
+    private String licenceNumber;
 }

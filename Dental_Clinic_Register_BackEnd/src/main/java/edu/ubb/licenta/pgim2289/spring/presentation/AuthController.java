@@ -55,4 +55,10 @@ public class AuthController {
     public ResponseEntity<LoginResponse> refreshToken(@Valid @RequestBody RequestRefreshTokenDTO refreshTokenRequest) {
         return authService.refreshToken(refreshTokenRequest);
     }
+    @PostMapping("/register-doctor")
+    public ResponseEntity<?> registerDoctor(
+            @RequestParam("inviteToken") String inviteToken,
+            @Valid @RequestBody RequestUserDTO requestUserDTO) {
+        return authService.registerDoctor(inviteToken, requestUserDTO);
+    }
 }

@@ -3,6 +3,7 @@ package edu.ubb.licenta.pgim2289.spring.service;
 import edu.ubb.licenta.pgim2289.spring.dto.*;
 import edu.ubb.licenta.pgim2289.spring.exception.TokenRefreshException;
 import edu.ubb.licenta.pgim2289.spring.model.AuthTokenPair;
+import edu.ubb.licenta.pgim2289.spring.model.DoctorInvite;
 import edu.ubb.licenta.pgim2289.spring.model.User;
 import edu.ubb.licenta.pgim2289.spring.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,7 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordManagementService passwordManagementService;
     private final TokenManagementService tokenManagementService;
     private final CookieManagementService cookieManagementService;
+    private final DoctorInviteService doctorInviteService;
 
     @Override
     @Transactional
@@ -115,5 +117,18 @@ public class AuthServiceImpl implements AuthService {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(new LoginResponse(null, null, "Bearer", null));
         }
+    }
+
+    @Override
+    public ResponseEntity<?> registerDoctor(String inviteToken, RequestUserDTO requestUserDTO) {
+        DoctorInvite invite = doctorInviteService.validateToken(inviteToken);
+        if (!invite.getEmail().equalsIgnoreCase(requestUserDTO.getEmail())) {
+            return ResponseEntity.badRequest().body(new MessageResponse("error.invite.email_mismatch"));
+        }
+        ResponseEntity<MessageResponse> response = userRegistrationService.registerDoctor(requestUserDTO);
+        if (response.getStatusCode().is2xxSuccessful()) {
+            doctorInviteService.markAsUsed(invite);
+        }
+        return response;
     }
 }
