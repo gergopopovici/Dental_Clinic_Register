@@ -9,4 +9,6 @@ public interface DoctorInviteRepository extends JpaRepository<DoctorInvite, Long
     Optional<DoctorInvite> findByToken(String token);
 
     void deleteByEmail(String email);
+
+    Optional<DoctorInvite> findByEmail(String email);
 }

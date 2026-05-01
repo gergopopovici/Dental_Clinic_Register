@@ -3,6 +3,7 @@ package edu.ubb.licenta.pgim2289.spring.service;
 import edu.ubb.licenta.pgim2289.spring.exception.InvalidInviteTokenException;
 import edu.ubb.licenta.pgim2289.spring.model.DoctorInvite;
 import edu.ubb.licenta.pgim2289.spring.repository.DoctorInviteRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -17,9 +18,10 @@ public class DoctorInviteServiceImpl implements DoctorInviteService {
     }
 
     @Override
+    @Transactional
     public void saveInvite(String email, String token) {
-        doctorInviteRepository.deleteByEmail(email);
-        DoctorInvite invite = new DoctorInvite();
+        DoctorInvite invite = doctorInviteRepository.findByEmail(email)
+                .orElse(new DoctorInvite());
         invite.setEmail(email);
         invite.setToken(token);
         invite.setExpiryDate(Instant.now().plus(24, ChronoUnit.HOURS));

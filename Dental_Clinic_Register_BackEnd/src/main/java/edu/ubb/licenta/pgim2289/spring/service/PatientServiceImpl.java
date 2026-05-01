@@ -26,11 +26,9 @@ public class PatientServiceImpl implements PatientService {
     @Override
     public void createPatient(RequestUserDTO dto) {
         Patient newPatient = new Patient();
-        newPatient.setPatientBirthDate(dto.getDateOfBirth());
         Optional<User> user = userRepository.findByUserName(dto.getUsername());
         user.ifPresent(newPatient::setUser);
         newPatient.setPatientIdentifier(sequenceGenerator.getNextPatientIdentifier());
-        newPatient.setGender(dto.getGender());
         patientRepository.save(newPatient);
     }
 

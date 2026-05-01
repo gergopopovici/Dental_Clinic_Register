@@ -23,7 +23,4 @@ public class RequestPatientDTO {
     @NotNull()
     private LocalDate dateOfBirth;
 
-    @NotNull()
-    private Patient.Gender gender;
-
 }

@@ -140,5 +140,7 @@
   "success.doctor.registered": "Doctor registered successfully!",
   "success.user.registered": "User registered successfully!",
   "error.unknown": "An unknown error occurred. Please try again.",
-  "error.signup.invalid_phone": "Error: Invalid Romanian phone number!"
+  "error.signup.invalid_phone": "Error: Invalid Romanian phone number!",
+  "licenseNumber": "License Number",
+  "specialisation": "Specialisation"
 }

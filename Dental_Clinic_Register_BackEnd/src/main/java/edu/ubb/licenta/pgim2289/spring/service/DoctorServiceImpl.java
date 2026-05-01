@@ -17,8 +17,9 @@ public class DoctorServiceImpl implements DoctorService {
     @Override
     public void createDoctor(User user, RequestUserDTO requestUserDTO) {
         Doctor doctor = new Doctor();
+        user.setEnabled(true);
         doctor.setUser(user);
-        doctor.setLicenseNumber(requestUserDTO.getLicenceNumber());
+        doctor.setLicenseNumber(requestUserDTO.getLicenseNumber());
         doctor.setSpecialization(requestUserDTO.getSpecialisation());
         doctorRepository.save(doctor);
     }

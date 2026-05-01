@@ -16,8 +16,6 @@ public class ResponsePatientDTO {
     private Long id;
     private ResponseUserDTO user;
     private String patientIdentifier;
-    private LocalDate dateOfBirth;
-    private Patient.Gender gender;
 
     @Data
     public static class ResponseTreatmentPlanDTO {

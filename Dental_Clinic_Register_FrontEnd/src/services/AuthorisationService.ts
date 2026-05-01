@@ -7,6 +7,7 @@ import {
   signUpApiUrl,
   verifyAccountApiUrl,
   refreshTokenApiUrl,
+  registerDoctorApiUrl,
 } from '../config/apiUrl';
 import { Login, LoginResponse } from '../models/Login';
 import { RequestPasswordResetTokenDTO, ResponsePasswordResetTokenDTO } from '../models/ForgotPassword';
@@ -49,6 +50,21 @@ export const requestPasswordReset = async (data: RequestPasswordResetTokenDTO) =
 export const resetPassword = async (data: ResponsePasswordResetTokenDTO) => {
   try {
     const response = await axios.post(resetPasswordApiUrl, data, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error response:', error);
+    throw error;
+  }
+};
+
+export const registerDoctor = async (data: RequestUserDTO, token: string) => {
+  try {
+    const response = await axios.post(registerDoctorApiUrl, data, {
+      params: { inviteToken: token }, 
       headers: {
         'Content-Type': 'application/json',
       },
@@ -137,4 +153,5 @@ export const refreshAccessToken = async (refreshToken: string): Promise<LoginRes
     }
     throw error;
   }
+  
 };

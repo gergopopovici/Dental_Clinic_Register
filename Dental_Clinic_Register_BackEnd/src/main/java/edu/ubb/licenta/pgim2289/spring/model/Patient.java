@@ -21,13 +21,4 @@ public class Patient extends BaseEntity {
     private User user;
     @Column(name = "patient_identifier", nullable = false)
     private String patientIdentifier;
-    @Column(name = "patient_birth_date", nullable = false)
-    private LocalDate patientBirthDate;
-    @Enumerated(EnumType.STRING)
-    @Column(name = "gender")
-    private Gender gender;
-
-    public enum Gender {
-        MALE, FEMALE, OTHER
-    }
 }

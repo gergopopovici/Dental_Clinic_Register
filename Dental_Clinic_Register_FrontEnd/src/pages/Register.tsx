@@ -18,14 +18,18 @@ import {
 import AppRegistrationIcon from '@mui/icons-material/AppRegistration';
 import { FormEvent, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
+import { useSearchParams } from 'react-router-dom';
 import { Gender, RequestUserDTO } from '../models/User';
-import { signup } from '../services/AuthorisationService';
+import { signup, registerDoctor } from '../services/AuthorisationService';
 import { AxiosError } from 'axios';
 import { registerPageBackground } from '../assets';
 import { useTranslation } from 'react-i18next';
 import LanguageSelector from '../components/LanguageSelector';
 
 function Register() {
+  const [searchParams] = useSearchParams();
+  const inviteToken = searchParams.get('inviteToken');
+
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
@@ -38,6 +42,9 @@ function Register() {
   const [dobMonth, setDobMonth] = useState('');
   const [dobYear, setDobYear] = useState('');
   const [gender, setGender] = useState<Gender | ''>('');
+  const [licenseNumber, setLicenseNumber] = useState('');
+  const [specialisation, setSpecialisation] = useState('');
+
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const { t } = useTranslation();
@@ -45,12 +52,25 @@ function Register() {
   const registerMutation = useMutation({
     mutationFn: (data: RequestUserDTO) => signup(data),
     onSuccess: () => {
-      setSuccessMessage(t('accountRegisteredSuccessfully'));
+      setSuccessMessage(t('success.user.registered'));
       setErrorMessage('');
     },
     onError: (error: AxiosError<{ message: string }>) => {
-      const message = error.response?.data?.message || 'An error occurred.';
-      setErrorMessage(message);
+      const message = error.response?.data?.message || 'error.unknown';
+      setErrorMessage(t(message));
+      setSuccessMessage('');
+    },
+  });
+
+  const doctorRegisterMutation = useMutation({
+    mutationFn: (data: RequestUserDTO) => registerDoctor(data, inviteToken as string),
+    onSuccess: () => {
+      setSuccessMessage(t('success.doctor.registered'));
+      setErrorMessage('');
+    },
+    onError: (error: AxiosError<{ message: string }>) => {
+      const message = error.response?.data?.message || 'error.unknown';
+      setErrorMessage(t(message));
       setSuccessMessage('');
     },
   });
@@ -58,11 +78,11 @@ function Register() {
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (password !== passwordConfirm) {
-      setErrorMessage('Passwords do not match');
+      setErrorMessage(t('passwordsNotMatching'));
       return;
     }
     if (password.length < 8) {
-      setErrorMessage('Password must be at least 8 characters');
+      setErrorMessage(t('passwordTooShort'));
       return;
     }
     let dateOfBirth: string | null = null;
@@ -80,12 +100,12 @@ function Register() {
         dayNum < 1 ||
         dayNum > 31
       ) {
-        setErrorMessage('Please enter a valid date of birth.');
+        setErrorMessage(t('errorMessage'));
         return;
       }
       const date = new Date(yearNum, monthNum - 1, dayNum);
       if (date.getFullYear() !== yearNum || date.getMonth() !== monthNum - 1 || date.getDate() !== dayNum) {
-        setErrorMessage('Please enter a valid date of birth (e.g., Feb 30th is invalid).');
+        setErrorMessage(t('errorMessage'));
         return;
       }
       const formattedMonth = String(monthNum).padStart(2, '0');
@@ -93,13 +113,14 @@ function Register() {
       dateOfBirth = `${yearNum}-${formattedMonth}-${formattedDay}`;
     } catch (error) {
       console.error('Error formatting date of birth:', error);
-      setErrorMessage('Invalid date of birth format.');
+      setErrorMessage(t('errorMessage'));
       return;
     }
     if (!gender) {
-      setErrorMessage('Please select your gender.');
+      setErrorMessage(t('errorMessage'));
       return;
     }
+
     const data: RequestUserDTO = {
       username,
       password,
@@ -110,14 +131,23 @@ function Register() {
       lastName,
       dateOfBirth,
       gender,
-      roles: ['ROLE_PATIENT'],
+      licenseNumber: inviteToken ? licenseNumber : undefined,
+      specialisation: inviteToken ? specialisation : undefined,
+      roles: inviteToken ? ['ROLE_DOCTOR'] : ['ROLE_PATIENT'],
     };
-    registerMutation.mutate(data);
+
+    if (inviteToken) {
+      doctorRegisterMutation.mutate(data);
+    } else {
+      registerMutation.mutate(data);
+    }
   };
 
   const handleGenderChange = (event: SelectChangeEvent<Gender | ''>) => {
     setGender(event.target.value as Gender);
   };
+
+  const isPending = registerMutation.isPending || doctorRegisterMutation.isPending;
 
   return (
     <Box
@@ -361,14 +391,39 @@ function Register() {
                   <MenuItem value="OTHER">{t('other')}</MenuItem>
                 </Select>
               </FormControl>
-              <Button
-                type={'submit'}
-                variant={'contained'}
-                color={'primary'}
-                fullWidth
-                disabled={registerMutation.isPending}
-              >
-                {registerMutation.isPending ? <CircularProgress size={24} color="inherit" /> : t('registerButton')}
+
+              {/* DOCTOR SPECIFIC FIELDS */}
+              {inviteToken && (
+                <>
+                  <Typography variant="body2" sx={{ mt: 1, mb: 1, fontWeight: 'bold' }}>
+                    {t('licenseNumber')}:
+                  </Typography>
+                  <TextField
+                    label={t('licenseNumber')}
+                    type={'text'}
+                    fullWidth={true}
+                    required={true}
+                    value={licenseNumber}
+                    onChange={(e) => setLicenseNumber(e.target.value)}
+                    sx={{ mb: 2 }}
+                  />
+                  <Typography variant="body2" sx={{ mt: 1, mb: 1, fontWeight: 'bold' }}>
+                    {t('specialisation')}:
+                  </Typography>
+                  <TextField
+                    label={t('specialisation')}
+                    type={'text'}
+                    fullWidth={true}
+                    required={true}
+                    value={specialisation}
+                    onChange={(e) => setSpecialisation(e.target.value)}
+                    sx={{ mb: 2 }}
+                  />
+                </>
+              )}
+
+              <Button type={'submit'} variant={'contained'} color={'primary'} fullWidth disabled={isPending}>
+                {isPending ? <CircularProgress size={24} color="inherit" /> : t('registerButton')}
               </Button>
               <Button
                 variant="text"

@@ -140,5 +140,7 @@
   "success.doctor.registered": "Fogorvos sikeresen regisztrálva!",
   "success.user.registered": "Felhasználó sikeresen regisztrálva!",
   "error.unknown":"Ismeretlen hiba történt. Kérem, próbálja újra.",
-  "error.signup.invalid_phone": "Hiba: Érvénytelen román telefonszám!"
+  "error.signup.invalid_phone": "Hiba: Érvénytelen román telefonszám!",
+  "licenseNumber": "Engedélyszám",
+  "specialisation": "Szakirány"
 }

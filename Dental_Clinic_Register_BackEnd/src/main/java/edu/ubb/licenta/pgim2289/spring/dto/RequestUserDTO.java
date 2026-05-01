@@ -1,5 +1,6 @@
 package edu.ubb.licenta.pgim2289.spring.dto;
 
+import edu.ubb.licenta.pgim2289.spring.model.Gender;
 import edu.ubb.licenta.pgim2289.spring.model.Patient;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -33,7 +34,7 @@ public class RequestUserDTO {
     @NotNull(message = "Date of birth cannot be empty")
     private LocalDate dateOfBirth;
     @NotNull(message = "Gender cannot be empty")
-    private Patient.Gender gender;
+    private Gender gender;
     private String specialisation;
-    private String licenceNumber;
+    private String licenseNumber;
 }

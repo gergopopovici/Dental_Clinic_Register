@@ -38,25 +38,48 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const { t } = useTranslation();
   const isAdmin = user?.roles?.includes('ROLE_ADMIN');
   const isPatient = user?.roles?.includes('ROLE_PATIENT');
-  // const isDoctor = user?.roles?.includes('ROLE_DOCTOR');
+  const isDoctor = user?.roles?.includes('ROLE_DOCTOR');
 
   const menuItems = [
-    { label: t('dashboard'), path: '/dashboard', icon: <DashboardIcon />, showForAdmin: false, showForPatient: true },
+    {
+      label: t('dashboard'),
+      path: '/dashboard',
+      icon: <DashboardIcon />,
+      showForAdmin: false,
+      showForPatient: true,
+      showForDoctor: true,
+    },
     {
       label: t('appointments'),
       path: '/appointments',
       icon: <EventNoteIcon />,
       showForAdmin: false,
       showForPatient: true,
+      showForDoctor: true,
     },
-    { label: t('myProfile'), path: '/profile', icon: <PersonIcon />, showForAdmin: true, showForPatient: true },
-    { label: t('adminPanel'), path: '/admin', icon: <DashboardIcon />, showForAdmin: true, showForPatient: false },
+    {
+      label: t('myProfile'),
+      path: '/profile',
+      icon: <PersonIcon />,
+      showForAdmin: true,
+      showForPatient: true,
+      showForDoctor: true,
+    },
+    {
+      label: t('adminPanel'),
+      path: '/admin',
+      icon: <DashboardIcon />,
+      showForAdmin: true,
+      showForPatient: false,
+      showForDoctor: false,
+    },
     {
       label: t('logout'),
       icon: <LogoutIcon />,
       action: () => logoutMutation.mutate(),
       showForAdmin: true,
       showForPatient: true,
+      showForDoctor: true,
     },
   ];
   useEffect(() => {
@@ -149,7 +172,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
         <List>
           {menuItems
-            .filter((item) => (isAdmin && item.showForAdmin) || (isPatient && item.showForPatient))
+            .filter(
+              (item) =>
+                (isAdmin && item.showForAdmin) ||
+                (isPatient && item.showForPatient) ||
+                (isDoctor && item.showForDoctor),
+            )
             .map(({ label, path, icon, action }) => {
               const isActive = path ? location.pathname === path : false;
 

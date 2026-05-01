@@ -29,16 +29,14 @@ public class UserController {
     private final UserService userService;
     private final VerificationCodeService verificationCodeService;
     private final EmailService emailService;
-    private final PatientService patientService;
     private final FileStorageService fileStorageService;
 
     public UserController(UserService userService, VerificationCodeService verificationCodeService,
-                          EmailService emailService, PatientService patientService,
+                          EmailService emailService,
                           FileStorageService fileStorageService) {
         this.userService = userService;
         this.verificationCodeService = verificationCodeService;
         this.emailService = emailService;
-        this.patientService = patientService;
         this.fileStorageService = fileStorageService;
     }
 
@@ -209,7 +207,6 @@ public class UserController {
             return ResponseEntity.notFound().build();
         }
         User user = userOptional.get();
-        Patient patient = patientService.getPatient(user);
         ResponseUserDTO userDTO = new ResponseUserDTO();
         userDTO.setId(user.getId());
         userDTO.setUserName(user.getUserName());
@@ -218,8 +215,9 @@ public class UserController {
         userDTO.setFirstName(user.getFirstName());
         userDTO.setMiddleName(user.getMiddleName());
         userDTO.setLastName(user.getLastName());
+        userDTO.setGender(user.getGender());
+        userDTO.setLocalDate(user.getDateOfBirth());
         userDTO.setEnabled(user.getEnabled());
-        userDTO.setGender(patient.getGender());
         userDTO.setProfilePictureUrl(user.getProfilePictureUrl());
         userDTO.setRoles(user.getRoles().stream()
                 .map(role -> role.getRoleName().name())

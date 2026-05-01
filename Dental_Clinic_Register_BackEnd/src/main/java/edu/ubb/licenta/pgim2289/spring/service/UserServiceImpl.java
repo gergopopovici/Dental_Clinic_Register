@@ -60,6 +60,8 @@ public class UserServiceImpl implements UserService {
         user.setMiddleName(dto.getMiddleName());
         user.setLastName(dto.getLastName());
         user.setPhoneNumber(dto.getPhoneNumber());
+        user.setGender(dto.getGender());
+        user.setDateOfBirth(dto.getDateOfBirth());
         Set<String> roleNamesForNewUser = dto.getRoles();
         log.info("roleNamesForNewUser: {}", roleNamesForNewUser);
         log.info("All roles from the Role entity: {}", roleRepository.findAll());
@@ -154,8 +156,8 @@ public class UserServiceImpl implements UserService {
         user.setFirstName(dto.getFirstName());
         user.setLastName(dto.getLastName());
         user.setMiddleName(dto.getMiddleName());
-        Patient patient = patientService.getPatient(userOptional.get());
-        patient.setGender(dto.getGender());
+        user.setDateOfBirth(dto.getDateOfBirth());
+        user.setGender(dto.getGender());
         if (!user.getPhoneNumber().equals(dto.getPhoneNumber())
                 && userRepository.existsByPhoneNumber(dto.getPhoneNumber())) {
             return ResponseEntity.badRequest().body(new MessageResponse("Error:"

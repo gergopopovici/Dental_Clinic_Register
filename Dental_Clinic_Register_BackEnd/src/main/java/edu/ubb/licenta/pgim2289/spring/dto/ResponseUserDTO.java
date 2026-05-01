@@ -1,8 +1,10 @@
 package edu.ubb.licenta.pgim2289.spring.dto;
 
+import edu.ubb.licenta.pgim2289.spring.model.Gender;
 import edu.ubb.licenta.pgim2289.spring.model.Patient;
 import lombok.Data;
 
+import java.time.LocalDate;
 import java.util.Set;
 
 @Data
@@ -15,7 +17,8 @@ public class ResponseUserDTO {
     private String middleName;
     private String lastName;
     private Boolean enabled;
-    private Patient.Gender gender;
+    private Gender gender;
+    private LocalDate LocalDate;
     private String profilePictureUrl;
     private Set<String> roles;
 }

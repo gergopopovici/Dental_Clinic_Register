@@ -16,6 +16,8 @@ export interface RequestUserDTO {
   dateOfBirth: string;
   gender: Gender;
   roles: string[];
+  licenseNumber?: string;
+  specialisation?: string;
 }
 
 export interface ResponseUserDTO {
@@ -31,4 +33,6 @@ export interface ResponseUserDTO {
   administrator: boolean;
   gender: Gender;
   profilePictureUrl?: string;
+  licenseNumber?: string;
+  specialisation?: string;
 }
