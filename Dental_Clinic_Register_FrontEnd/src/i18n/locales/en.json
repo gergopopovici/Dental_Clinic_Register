@@ -127,5 +127,17 @@
   "totalBannedUsers": "Total deactivated users",
   "inviteNewDoctor": "Invite New Dentist",
   "doctorEmailAddress": "Dentist's Email Address",
-  "sendInviteLink": "Send Invite Link"
+  "sendInviteLink": "Send Invite Link",
+  "error.invite.invalid": "This invite link is invalid or does not exist.",
+  "error.invite.used": "This invite link has already been used.",
+  "error.invite.expired": "This invite link has expired. Please request a new one.",
+  "error.invite.user_exists": "A user with this email already exists. Please ask the dentist to use a different email address.",
+  "success.invite.sent": "Invite link sent successfully to the dentist's email address.",
+  "error.invite.email_mismatch": "The email address provided does not match the one associated with the invite link.",
+  "error.signup.username_taken": "Error: Username is already taken!",
+  "error.signup.email_in_use": "Error: Email is already in use!",
+  "error.role.not_found": "Error: Role is not found in the system.",
+  "success.doctor.registered": "Doctor registered successfully!",
+  "success.user.registered": "User registered successfully!",
+  "error.unknown": "An unknown error occurred. Please try again."
 }

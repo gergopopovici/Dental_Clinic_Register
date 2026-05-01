@@ -127,5 +127,17 @@
   "totalBannedUsers": "Összes deaktivált felhasználó",
   "inviteNewDoctor": "Új fogorvos meghívása",
   "doctorEmailAddress": "Fogorvos e-mail címe",
-  "sendInviteLink": "Meghívó link küldése"
+  "sendInviteLink": "Meghívó link küldése",
+  "error.invite.invalid": "Ez a meghívó link érvénytelen vagy nem létezik.",
+  "error.invite.used": "Ez a meghívó link már használatban van.",
+  "error.invite.expired": "Ez a meghívó link lejárt. Kérem, kérjen egy újat.",
+  "error.invite.user_exists": "Ezzel az e-mail címmel már létezik egy felhasználó. Kérem, kérje meg a fogorvost, hogy használjon egy másik e-mail címet.",
+  "success.invite.sent": "Meghívó link sikeresen elküldve a fogorvos e-mail címére.",
+  "error.invite.email_mismatch": "A megadott e-mail cím nem egyezik a meghívó linkhez társított e-mail címmel.",
+  "error.signup.username_taken": "Hiba: Ez a felhasználónév már foglalt!",
+  "error.signup.email_in_use": "Hiba: Ez az e-mail cím már használatban van!",
+  "error.role.not_found":"Hiba: A szerep nem található a rendszerben.",
+  "success.doctor.registered": "Fogorvos sikeresen regisztrálva!",
+  "success.user.registered": "Felhasználó sikeresen regisztrálva!",
+  "error.unknown":"Ismeretlen hiba történt. Kérem, próbálja újra."
 }

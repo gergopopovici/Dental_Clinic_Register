@@ -127,5 +127,17 @@
   "totalBannedUsers": "Total utilizatori dezactivați",
   "inviteNewDoctor": "Invită un nou dentist",
   "doctorEmailAddress": "Adresa de email a dentistului",
-  "sendInviteLink": "Trimite link de invitație"
+  "sendInviteLink": "Trimite link de invitație",
+  "error.invite.invalid": "Acest link de invitație este invalid sau nu există.",
+  "error.invite.used": "Acest link de invitație a fost deja folosit.",
+  "error.invite.expired": "Acest link de invitație a expirat. Vă rugăm să solicitați altul.",
+  "error.invite.user_exists": "Un utilizator cu acest email deja există. Vă rugăm să cereți dentistului să folosească o altă adresă de email.",
+  "success.invite.sent": "Link de invitație trimis cu succes la adresa de email a dentistului.",
+  "error.invite.email_mismatch": "Adresa de email furnizată nu se potrivește cu cea asociată cu linkul de invitație.",
+  "error.signup.username_taken": "Eroare: Numele de utilizator este deja folosit!",
+  "error.signup.email_in_use": "Eroare: Emailul este deja în uz!",
+  "error.role.not_found": "Eroare: Rolul nu este găsit în sistem.",
+  "success.doctor.registered": "Dentist înregistrat cu succes!",
+  "success.user.registered": "Utilizator înregistrat cu succes!",
+  "error.unknown": "A apărut o eroare necunoscută. Vă rugăm să încercați din nou."
 }

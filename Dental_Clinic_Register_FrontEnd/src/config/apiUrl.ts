@@ -18,6 +18,7 @@ const updateUserApiUrl = `${api}/api/users/update-user-details`;
 const uploadAvatarApiUrl = `${api}/api/users/upload-avatar`;
 const getAvatarApiUrl = `${api}/api/users/avatar/`;
 const getAdminStatsApiUrl = `${api}/api/users/admin/stats`;
+const sendDoctorInviteApiUrl = `${api}/api/admin/invites/send`;
 const apiURL = api;
 
 export {
@@ -40,4 +41,5 @@ export {
   uploadAvatarApiUrl,
   getAvatarApiUrl,
   getAdminStatsApiUrl,
+  sendDoctorInviteApiUrl
 };
