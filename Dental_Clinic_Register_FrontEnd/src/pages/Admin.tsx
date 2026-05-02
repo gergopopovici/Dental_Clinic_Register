@@ -149,7 +149,6 @@ function AdminDashboard() {
           </Grid>
         )}
 
-        {/* Invite Doctor Section */}
         <Paper sx={{ mt: 4, p: 3, bgcolor: '#1e1e1e', color: 'white' }}>
           <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
             {t('inviteNewDoctor')}

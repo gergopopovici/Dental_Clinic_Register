@@ -133,7 +133,7 @@ public class UserController {
         return userService.updateEmail(userId, request.getEmail());
     }
 
-    @PreAuthorize("hasAnyRole('DOCTOR','PATIENT','ADMIN')")
+    @PreAuthorize("hasAnyRole('PATIENT','ADMIN')")
     @DeleteMapping("/delete")
     public ResponseEntity<MessageResponse> delete() {
         Long userId = SecurityUtil.getCurrentUserId();
@@ -222,6 +222,11 @@ public class UserController {
         userDTO.setRoles(user.getRoles().stream()
                 .map(role -> role.getRoleName().name())
                 .collect(Collectors.toSet()));
+
+        if (user.getDoctorDetails() != null) {
+            userDTO.setLicenseNumber(user.getDoctorDetails().getLicenseNumber());
+            userDTO.setSpecialisation(user.getDoctorDetails().getSpecialization());
+        }
 
         return ResponseEntity.ok(userDTO);
     }

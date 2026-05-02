@@ -21,4 +21,6 @@ public class ResponseUserDTO {
     private LocalDate LocalDate;
     private String profilePictureUrl;
     private Set<String> roles;
+    private String specialisation;
+    private String licenseNumber;
 }

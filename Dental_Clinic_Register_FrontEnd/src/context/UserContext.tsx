@@ -24,6 +24,8 @@ export interface UserDetails {
   enabled?: boolean;
   gender: Gender;
   roles: string[];
+  licenseNumber?: string;
+  specialisation?: string;
 }
 
 interface UserContextType {

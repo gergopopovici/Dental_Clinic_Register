@@ -715,6 +715,61 @@ function ProfileSettings() {
               {t('change')}
             </Button>
           </Box>
+          {user.licenseNumber && (
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '16px',
+                border: '1px solid #e0e0e0',
+                borderRadius: '4px',
+                width: '100%',
+                mb: 2,
+                bgcolor: '#f5f5f5',
+              }}
+            >
+              <Box>
+                <Typography variant="body1" sx={{ fontWeight: 'bold', marginBottom: '4px', color: 'black' }}>
+                  {t('licenseNumber')}
+                </Typography>
+                <Typography variant="body2" color="text.primary" sx={{ fontWeight: '500' }}>
+                  {user.licenseNumber}
+                </Typography>
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+                  * {t('contactAdminToUpdateCredentials')}
+                </Typography>
+              </Box>
+            </Box>
+          )}
+
+          {user.specialisation && (
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '16px',
+                border: '1px solid #e0e0e0',
+                borderRadius: '4px',
+                width: '100%',
+                mb: 2,
+                bgcolor: '#f5f5f5',
+              }}
+            >
+              <Box>
+                <Typography variant="body1" sx={{ fontWeight: 'bold', marginBottom: '4px', color: 'black' }}>
+                  {t('specialisation')}
+                </Typography>
+                <Typography variant="body2" color="text.primary" sx={{ fontWeight: '500' }}>
+                  {user.specialisation}
+                </Typography>
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+                  * {t('contactAdminToUpdateCredentials')}
+                </Typography>
+              </Box>
+            </Box>
+          )}
           <Box
             sx={{
               display: 'flex',
@@ -730,23 +785,24 @@ function ProfileSettings() {
             </Button>
           </Box>
         </Box>
-
-        <Box sx={{ width: '100%', mt: 4 }}>
-          <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold' }}>
-            {t('deleteAccount')}
-          </Typography>
-          <Typography variant="body1" color="text.secondary" sx={{ marginBottom: '16px' }}>
-            {t('wouldyouliketodeletetheaccount')}
-          </Typography>
-          <Button
-            variant="contained"
-            onClick={handleOpenDeleteModal}
-            sx={{ mt: 2, textTransform: 'none' }}
-            color="error"
-          >
-            {t('iwanttodeletetheaccount')}
-          </Button>
-        </Box>
+        {!user.specialisation && (
+          <Box sx={{ width: '100%', mt: 4 }}>
+            <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold' }}>
+              {t('deleteAccount')}
+            </Typography>
+            <Typography variant="body1" color="text.secondary" sx={{ marginBottom: '16px' }}>
+              {t('wouldyouliketodeletetheaccount')}
+            </Typography>
+            <Button
+              variant="contained"
+              onClick={handleOpenDeleteModal}
+              sx={{ mt: 2, textTransform: 'none' }}
+              color="error"
+            >
+              {t('iwanttodeletetheaccount')}
+            </Button>
+          </Box>
+        )}
       </Box>
 
       <Dialog open={showCropperModal} onClose={closeCropperModal} maxWidth="sm" fullWidth>

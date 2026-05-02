@@ -14,6 +14,8 @@ interface UserDetails {
   lastName: string;
   enabled?: boolean;
   roles: string[];
+  licenseNumber?: string;
+  specialisation?: string;
 }
 
 export const useUserQuery = () => {
