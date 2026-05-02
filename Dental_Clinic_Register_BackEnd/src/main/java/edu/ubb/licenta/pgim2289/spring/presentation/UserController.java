@@ -139,7 +139,7 @@ public class UserController {
         Long userId = SecurityUtil.getCurrentUserId();
         Optional<User> userOptional = userService.findById(userId);
         if (userOptional.isEmpty()) {
-            return ResponseEntity.badRequest().body(new MessageResponse("Error: User not found!"));
+            return ResponseEntity.badRequest().body(new MessageResponse("error.user.not_found"));
         }
         emailService.sendDeletionConfirmationEmail(userOptional.get().getEmail(), userOptional.get().getUserName());
         return userService.deleteUser(userId);

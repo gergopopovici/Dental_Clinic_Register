@@ -15,10 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.Instant;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -104,10 +101,17 @@ public class UserServiceImpl implements UserService {
     @Override
     public ResponseEntity<MessageResponse> deleteUser(Long id) {
         if (userRepository.existsById(id)) {
-            userRepository.deleteById(id);
-            return ResponseEntity.ok(new MessageResponse("User deleted successfully!"));
+            Optional<User> userOptional = userRepository.findById(id);
+            User user = userOptional.get();
+            String scrambledEmail = "deleted_" + UUID.randomUUID().toString() + "@anonymised.com";
+            user.setEmail(scrambledEmail);
+            user.setFirstName("Deleted");
+            user.setLastName("Patient");
+            user.setPhoneNumber(UUID.randomUUID().toString().substring(0,10));
+            user.setEnabled(false);
+            return ResponseEntity.ok(new MessageResponse("success.user.deleted"));
         } else {
-            return ResponseEntity.badRequest().body(new MessageResponse("Error: User not found!"));
+            return ResponseEntity.badRequest().body(new MessageResponse("error.user.not_found"));
         }
     }
 
