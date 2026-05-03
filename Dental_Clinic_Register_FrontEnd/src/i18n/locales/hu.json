@@ -143,5 +143,17 @@
   "error.signup.invalid_phone": "Hiba: Érvénytelen román telefonszám!",
   "licenseNumber": "Engedélyszám",
   "specialisation": "Szakirány",
-  "contactAdminToUpdateCredentials": "Kérem, vegye fel a kapcsolatot az adminisztrátorral ezen adatok frissítéséhez."
+  "contactAdminToUpdateCredentials": "Kérem, vegye fel a kapcsolatot az adminisztrátorral ezen adatok frissítéséhez.",
+  "inviteNewAdmin": "Új adminisztrátor meghívása",
+  "adminEmailAddress": "Adminisztrátor e-mail címe",
+  "sendAdminInviteLink": "Adminisztrátor meghívó link küldése",
+  "error.invite.admin_invalid": "Ez a meghívó link az adminisztrátor számára érvénytelen vagy nem létezik.",
+  "error.invite.admin_used": "Ez a meghívó link az adminisztrátor számára már használatban van.",
+  "error.invite.admin_expired": "Ez a meghívó link az adminisztrátor számára lejárt. Kérem, kérjen egy újat.",
+  "error.invite.admin_user_exists": "Ezzel az e-mail címmel már létezik egy felhasználó. Kérem, kérje meg az adminisztrátort, hogy használjon egy másik e-mail címet.",
+  "success.admin_invite.sent": "Adminisztrátor meghívó link sikeresen elküldve az adminisztrátor e-mail címére.",
+  "error.invite.admin_email_mismatch": "A megadott e-mail cím nem egyezik a meghívó linkhez társított adminisztrátor e-mail címmel.",
+  "error.user.not_found": "Felhasználó nem található.",
+  "success.user.deleted": "Felhasználói fiók sikeresen törölve.",
+  "error.user.email.exists": "Hiba: Ezzel az e-mail címmel már létezik egy felhasználó!"
 }

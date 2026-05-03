@@ -18,4 +18,6 @@ public interface EmailService {
     void sendDeletionConfirmationEmail(String to, String userName);
 
     void sendDoctorInviteEmail(String to, String frontEnd);
+
+    void sendAdminInviteEmail(String to, String frontEnd);
 }

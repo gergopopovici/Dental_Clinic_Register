@@ -1,13 +1,14 @@
 package edu.ubb.licenta.pgim2289.spring.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
+import lombok.Data;
 
 import java.time.Instant;
 
+@Entity
+@Data
+@Table(name = "admin_invite")
 public class AdminInvite {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -107,4 +107,17 @@ public class EmailServiceImpl implements EmailService {
                 + "Note: This invitation link is valid for 24 hours.");
         mailSender.send(message);
     }
+
+    @Override
+    public void sendAdminInviteEmail(String to, String frontEnd) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(fromEmail);
+        message.setTo(to);
+        message.setSubject("Admin Registration Invitation");
+        message.setText(("Hello!\n\nYou have been invited to register as an Admin in our clinic system.\n\n"
+                + "Please click the link below to set up your account:\n\n"
+                + frontEnd + "\n\n"
+                + "Note: This invitation link is valid for 24 hours."));
+        mailSender.send(message);
+    }
 }

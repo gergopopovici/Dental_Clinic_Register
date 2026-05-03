@@ -18,17 +18,18 @@ import { useNavigate } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
 import { useTranslation } from 'react-i18next';
 import { useEffect, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { getAdminStats } from '../services/UserService';
 import { sendDoctorInvite } from '../services/DoctorInviteService';
+import { sendAdminInvite } from '../services/AdminInviteService';
 
 function AdminDashboard() {
   const navigate = useNavigate();
   const { user, isLoading } = useUser();
   const { t } = useTranslation();
 
-  const [inviteEmail, setInviteEmail] = useState('');
-  const [isInviting, setIsInviting] = useState(false);
+  const [doctorInviteEmail, setDoctorInviteEmail] = useState('');
+  const [adminInviteEmail, setAdminInviteEmail] = useState('');
 
   const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({
     open: false,
@@ -46,6 +47,30 @@ function AdminDashboard() {
     enabled: !!user && user.roles.includes('ROLE_ADMIN'),
   });
 
+  const doctorInviteMutation = useMutation({
+    mutationFn: sendDoctorInvite,
+    onSuccess: () => {
+      setSnackbar({ open: true, message: t('success.invite.sent'), severity: 'success' });
+      setDoctorInviteEmail('');
+    },
+    onError: (error: any) => {
+      const backendErrorKey = error.response?.data?.message || error.response?.data?.error || 'error.unknown';
+      setSnackbar({ open: true, message: t(backendErrorKey), severity: 'error' });
+    },
+  });
+
+  const adminInviteMutation = useMutation({
+    mutationFn: sendAdminInvite,
+    onSuccess: () => {
+      setSnackbar({ open: true, message: t('success.admin_invite.sent'), severity: 'success' });
+      setAdminInviteEmail('');
+    },
+    onError: (error: any) => {
+      const backendErrorKey = error.response?.data?.message || error.response?.data?.error || 'error.unknown';
+      setSnackbar({ open: true, message: t(backendErrorKey), severity: 'error' });
+    },
+  });
+
   useEffect(() => {
     if (!isLoading && !user) {
       navigate('/login');
@@ -57,29 +82,6 @@ function AdminDashboard() {
       navigate('/dashboard');
     }
   }, [user, navigate]);
-
-  const handleSendInvite = async () => {
-    if (!inviteEmail) return;
-    setIsInviting(true);
-    try {
-      await sendDoctorInvite({ email: inviteEmail });
-      setSnackbar({
-        open: true,
-        message: t('success.invite.sent'),
-        severity: 'success',
-      });
-      setInviteEmail('');
-    } catch (error: any) {
-      const backendErrorKey = error.response?.data?.message || error.response?.data?.error || 'error.unknown';
-      setSnackbar({
-        open: true,
-        message: t(backendErrorKey),
-        severity: 'error',
-      });
-    } finally {
-      setIsInviting(false);
-    }
-  };
 
   const handleCloseSnackbar = () => setSnackbar({ ...snackbar, open: false });
 
@@ -158,9 +160,9 @@ function AdminDashboard() {
               fullWidth
               variant="outlined"
               placeholder={t('doctorEmailAddress')}
-              value={inviteEmail}
-              onChange={(e) => setInviteEmail(e.target.value)}
-              disabled={isInviting}
+              value={doctorInviteEmail}
+              onChange={(e) => setDoctorInviteEmail(e.target.value)}
+              disabled={doctorInviteMutation.isPending}
               sx={{
                 input: { color: 'white' },
                 bgcolor: '#2c2c2c',
@@ -171,11 +173,42 @@ function AdminDashboard() {
             <Button
               variant="contained"
               color="primary"
-              onClick={handleSendInvite}
-              disabled={!inviteEmail || isInviting}
+              onClick={() => doctorInviteMutation.mutate({ email: doctorInviteEmail })}
+              disabled={!doctorInviteEmail || doctorInviteMutation.isPending}
               sx={{ px: 4, whiteSpace: 'nowrap' }}
             >
-              {isInviting ? <CircularProgress size={24} color="inherit" /> : t('sendInviteLink')}
+              {doctorInviteMutation.isPending ? <CircularProgress size={24} color="inherit" /> : t('sendInviteLink')}
+            </Button>
+          </Box>
+        </Paper>
+
+        <Paper sx={{ mt: 4, p: 3, bgcolor: '#1e1e1e', color: 'white' }}>
+          <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
+            {t('inviteNewAdmin')}
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <TextField
+              fullWidth
+              variant="outlined"
+              placeholder={t('adminEmailAddress')}
+              value={adminInviteEmail}
+              onChange={(e) => setAdminInviteEmail(e.target.value)}
+              disabled={adminInviteMutation.isPending}
+              sx={{
+                input: { color: 'white' },
+                bgcolor: '#2c2c2c',
+                borderRadius: 1,
+                '& .MuiOutlinedInput-notchedOutline': { borderColor: '#444' },
+              }}
+            />
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => adminInviteMutation.mutate({ email: adminInviteEmail })}
+              disabled={!adminInviteEmail || adminInviteMutation.isPending}
+              sx={{ px: 4, whiteSpace: 'nowrap' }}
+            >
+              {adminInviteMutation.isPending ? <CircularProgress size={24} color="inherit" /> : t('sendInviteLink')}
             </Button>
           </Box>
         </Paper>

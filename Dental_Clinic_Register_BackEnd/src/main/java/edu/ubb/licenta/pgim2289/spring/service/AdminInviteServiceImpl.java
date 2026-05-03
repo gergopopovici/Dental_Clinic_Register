@@ -1,55 +1,48 @@
 package edu.ubb.licenta.pgim2289.spring.service;
 
 import edu.ubb.licenta.pgim2289.spring.exception.InvalidInviteTokenException;
-import edu.ubb.licenta.pgim2289.spring.model.DoctorInvite;
-import edu.ubb.licenta.pgim2289.spring.repository.DoctorInviteRepository;
+import edu.ubb.licenta.pgim2289.spring.model.AdminInvite;
+import edu.ubb.licenta.pgim2289.spring.repository.AdminInviteRepository;
 import edu.ubb.licenta.pgim2289.spring.repository.UserRepository;
-import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
 @Service
-public class DoctorInviteServiceImpl implements DoctorInviteService {
-    private final DoctorInviteRepository doctorInviteRepository;
+public class AdminInviteServiceImpl implements AdminInviteService {
+    private final AdminInviteRepository adminInviteRepository;
     private final UserRepository userRepository;
 
-    public DoctorInviteServiceImpl(DoctorInviteRepository doctorInviteRepository, UserRepository userRepository) {
-        this.doctorInviteRepository = doctorInviteRepository;
+    public AdminInviteServiceImpl(AdminInviteRepository adminInviteRepository, UserRepository userRepository) {
+        this.adminInviteRepository = adminInviteRepository;
         this.userRepository = userRepository;
     }
 
     @Override
-    @Transactional
     public void saveInvite(String email, String token) {
-        if (userRepository.existsByEmail(email)) {
+        if (userRepository.existsByEmail(email)){
             throw new IllegalStateException("error.user.email.exists");
         }
-        DoctorInvite invite = doctorInviteRepository.findByEmail(email)
-                .orElse(new DoctorInvite());
+        AdminInvite invite = adminInviteRepository.findByEmail(email).orElse(new AdminInvite());
         invite.setEmail(email);
         invite.setToken(token);
         invite.setExpiryDate(Instant.now().plus(24, ChronoUnit.HOURS));
-        doctorInviteRepository.save(invite);
-
+        adminInviteRepository.save(invite);
     }
 
     @Override
-    public DoctorInvite validateToken(String token) {
-        DoctorInvite invite = doctorInviteRepository.findByToken(token)
-                .orElseThrow(() -> new InvalidInviteTokenException(
-                        "error.invite.invalid",
-                        "Invite token is invalid or does not exist."
-                ));
-
+    public AdminInvite validateToken(String token) {
+        AdminInvite invite = adminInviteRepository.findByToken(token).orElseThrow(() -> new InvalidInviteTokenException(
+                "error.invite.invalid",
+                "Invite token is invalid or does not exist."
+        ));
         if (invite.getUsed()) {
             throw new InvalidInviteTokenException(
                     "error.invite.used",
                     "This invite token has already been used."
             );
         }
-
         if (invite.getExpiryDate().isBefore(Instant.now())) {
             throw new InvalidInviteTokenException(
                     "error.invite.expired",
@@ -60,8 +53,8 @@ public class DoctorInviteServiceImpl implements DoctorInviteService {
     }
 
     @Override
-    public void markAsUsed(DoctorInvite invite) {
-        invite.setUsed(true);
-        doctorInviteRepository.save(invite);
+    public void markedAsUsed(AdminInvite adminInvite) {
+        adminInvite.setUsed(true);
+        adminInviteRepository.save(adminInvite);
     }
 }

@@ -20,6 +20,7 @@ const getAvatarApiUrl = `${api}/api/users/avatar/`;
 const getAdminStatsApiUrl = `${api}/api/users/admin/stats`;
 const sendDoctorInviteApiUrl = `${api}/api/admin/invites/send`;
 const registerDoctorApiUrl = `${api}/api/auth/register-doctor`;
+const adminInviteApiUrl = `${api}/api/admin/admin_invite/send`;
 const apiURL = api;
 
 export {
@@ -43,5 +44,6 @@ export {
   getAvatarApiUrl,
   getAdminStatsApiUrl,
   sendDoctorInviteApiUrl,
-  registerDoctorApiUrl
+  registerDoctorApiUrl,
+  adminInviteApiUrl,
 };

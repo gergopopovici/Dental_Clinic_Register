@@ -10,4 +10,5 @@ export const sendDoctorInvite = async (request: RequestNewEmailDTO) => {
     console.error('Error in sendDoctorInvite:', error);
     throw error;
   }
+  
 };

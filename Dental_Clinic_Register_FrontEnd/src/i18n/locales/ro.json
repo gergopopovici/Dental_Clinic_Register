@@ -143,5 +143,17 @@
   "error.signup.invalid_phone": "Eroare: Număr de telefon românesc invalid!",
   "licenseNumber": "Număr de Licență",
   "specialisation": "Specializare",
-  "contactAdminToUpdateCredentials": "Vă rugăm să contactați administratorul pentru a actualiza aceste credențiale."
+  "contactAdminToUpdateCredentials": "Vă rugăm să contactați administratorul pentru a actualiza aceste credențiale.",
+  "inviteNewAdmin": "Invită un nou administrator",
+  "adminEmailAddress": "Adresa de email a administratorului",
+  "sendAdminInviteLink": "Trimite link de invitație pentru administrator",
+  "error.invite.admin_invalid": "Acest link de invitație pentru administrator este invalid sau nu există.",
+  "error.invite.admin_used": "Acest link de invitație pentru administrator a fost deja folosit.",
+  "error.invite.admin_expired": "Acest link de invitație pentru administrator a expirat. Vă rugăm să solicitați altul.",
+  "error.invite.admin_user_exists": "Un utilizator cu acest email deja există. Vă rugăm să cereți administratorului să folosească o altă adresă de email.",
+  "success.admin_invite.sent": "Link de invitație pentru administrator trimis cu succes la adresa de email a administratorului.",
+  "error.invite.admin_email_mismatch": "Adresa de email furnizată nu se potrivește cu cea asociată cu linkul de invitație pentru administrator.",
+  "error.user.not_found": "Utilizatorul nu a fost găsit.",
+  "success.user.deleted": "Contul utilizatorului a fost șters cu succes.",
+  "error.user.email.exists": "Eroare: Un utilizator cu această adresă de email deja există!"
 }

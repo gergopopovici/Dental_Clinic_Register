@@ -143,5 +143,17 @@
   "error.signup.invalid_phone": "Error: Invalid Romanian phone number!",
   "licenseNumber": "License Number",
   "specialisation": "Specialisation",
-  "contactAdminToUpdateCredentials": "Please contact the administrator to update these credentials."
+  "contactAdminToUpdateCredentials": "Please contact the administrator to update these credentials.",
+  "inviteNewAdmin": "Invite New Admin",
+  "adminEmailAddress": "Admin's Email Address",
+  "sendAdminInviteLink": "Send Admin Invite Link",
+  "error.invite.admin_invalid": "This admin invite link is invalid or does not exist.",
+  "error.invite.admin_used": "This admin invite link has already been used.",
+  "error.invite.admin_expired": "This admin invite link has expired. Please request a new one.",
+  "error.invite.admin_user_exists": "A user with this email already exists. Please ask the admin to use a different email address.",
+  "success.admin_invite.sent": "Admin invite link sent successfully to the admin's email address.",
+  "error.invite.admin_email_mismatch": "The email address provided does not match the one associated with the admin invite link.",
+  "error.user.not_found": "User not found.",
+  "success.user.deleted": "User account deleted successfully.",
+  "error.user.email.exists": "Error: A user with this email already exists!"
 }
