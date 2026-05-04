@@ -3,8 +3,10 @@ import {
   deleteUserAccountApiUrl,
   emailChangeRequestApiUrl,
   getAdminStatsApiUrl,
+  getAllUsersForAdminApiUrl,
   getAvatarApiUrl,
   passwordRequestApiUrl,
+  toggleUserStatusBaseApiUrl,
   updateEmailApiUrl,
   updatePasswordApiUrl,
   updateUserApiUrl,
@@ -137,6 +139,29 @@ export const getAdminStats = async()=>{
     return response.data;
   } catch (error) {
     console.error('Error in getAdminStats:', error);
+    throw error;
+  }
+}
+
+export const getAllUsersForAdminList = async(search?:string) =>{
+  try {
+    const response = await apiClient.get(getAllUsersForAdminApiUrl,{
+      params: search ? { search} :{},
+    });
+    console.log('getAllUsersForAdminList response:', response.data);
+    return response.data;
+  }catch (error){
+    console.error('Error in getAllUsersForAdminList:', error);
+    throw error;
+  }
+}
+
+export const toggleUserStatus = async(targetUserId: number) =>{
+  try {
+    const response = await apiClient.post(`${toggleUserStatusBaseApiUrl}/${targetUserId}/toggle-status`);
+    return response.data;
+  }catch (error){
+    console.error('Error in toggleUserStatus:', error);
     throw error;
   }
 }

@@ -22,6 +22,8 @@ const sendDoctorInviteApiUrl = `${api}/api/admin/invites/send`;
 const registerDoctorApiUrl = `${api}/api/auth/register-doctor`;
 const adminInviteApiUrl = `${api}/api/admin/admin_invite/send`;
 const registerAdminApiUrl = `${api}/api/auth/register-admin`;
+const getAllUsersForAdminApiUrl = `${api}/api/users/users`;
+const toggleUserStatusBaseApiUrl = `${api}/api/users`;
 const apiURL = api;
 
 export {
@@ -48,4 +50,6 @@ export {
   registerDoctorApiUrl,
   adminInviteApiUrl,
   registerAdminApiUrl,
+  getAllUsersForAdminApiUrl,
+  toggleUserStatusBaseApiUrl,
 };

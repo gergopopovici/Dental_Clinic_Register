@@ -16,6 +16,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.Instant;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @Slf4j
@@ -253,10 +255,20 @@ public class UserServiceImpl implements UserService {
         return userRepository.countByEnabledFalse();
     }
 
+
     @Override
-    public List<UserManagmentDTO> getAllUsersForAdmin() {
-        return userRepository.findAll().stream().map(user -> {
-            String fullName = user.getFirstName() + " " + user.getLastName();
+    public List<UserManagmentDTO> getAllUsersForAdmin(String keyword) {
+        List<User> users;
+        if (keyword == null || keyword.trim().isEmpty()) {
+            users = userRepository.findAll();
+        } else {
+            users = userRepository.searchUsers(keyword.trim());
+        }
+
+        return users.stream().map(user -> {
+            String fullName = Stream.of(user.getFirstName(), user.getMiddleName(), user.getLastName())
+                    .filter(name -> name != null && !name.trim().isEmpty())
+                    .collect(Collectors.joining(" "));
             String role = user.getRoles().isEmpty() ? "NONE" :
                     user.getRoles().iterator().next().getRoleName().name();
 
@@ -269,6 +281,28 @@ public class UserServiceImpl implements UserService {
                     user.getEnabled()
             );
         }).toList();
+    }
+
+    @Override
+    public ResponseEntity<MessageResponse> toggleUserStatus(Long targetUserId, Long currentAdminId) {
+        if (targetUserId.equals(currentAdminId)) {
+            return ResponseEntity.badRequest().body(new MessageResponse("error.admin.cannot_ban_self"));
+        }
+        User targetUser = userRepository.findById(targetUserId)
+                .orElseThrow(() -> new RuntimeException("error.user.not_found"));
+
+        if (targetUser.getRoles().stream().anyMatch(role -> role.getRoleName().name().equals("ROLE_ADMIN"))
+                && targetUser.getEnabled()) {
+
+            long activeAdminCount = userRepository.countActiveAdmins(Role.RoleName.ROLE_ADMIN);
+            if (activeAdminCount <= 1) {
+                return ResponseEntity.badRequest().body(new MessageResponse("error.admin.cannot_ban_last_admin"));
+            }
+        }
+        targetUser.setEnabled(!targetUser.getEnabled());
+        userRepository.save(targetUser);
+
+        return ResponseEntity.ok(new MessageResponse("success.user.status_toggled"));
     }
 
     public User registerUser(User user, Set<String> roleNames) {

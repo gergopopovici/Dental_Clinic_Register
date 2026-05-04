@@ -22,6 +22,7 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { getAdminStats } from '../services/UserService';
 import { sendDoctorInvite } from '../services/DoctorInviteService';
 import { sendAdminInvite } from '../services/AdminInviteService';
+import UserTable from '../components/UserTable';
 
 function AdminDashboard() {
   const navigate = useNavigate();
@@ -212,6 +213,9 @@ function AdminDashboard() {
             </Button>
           </Box>
         </Paper>
+        <Box sx={{ mt: 4 }}>
+          <UserTable currentUserId={user?.id} />
+        </Box>
       </Box>
 
       <Snackbar

@@ -2,7 +2,6 @@ package edu.ubb.licenta.pgim2289.spring.presentation;
 
 import edu.ubb.licenta.pgim2289.spring.dto.*;
 import edu.ubb.licenta.pgim2289.spring.exception.FileStorageException;
-import edu.ubb.licenta.pgim2289.spring.model.Patient;
 import edu.ubb.licenta.pgim2289.spring.model.User;
 import edu.ubb.licenta.pgim2289.spring.service.*;
 import edu.ubb.licenta.pgim2289.spring.utils.SecurityUtil;
@@ -18,6 +17,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -241,9 +241,22 @@ public class UserController {
         ));
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN')")
-    @GetMapping("/admin/users")
-    public ResponseEntity<List<UserManagmentDTO>> getAllUsersForAdmin() {
-        return ResponseEntity.ok(userService.getAllUsersForAdmin());
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/users")
+    public ResponseEntity<List<UserManagmentDTO>> getUsers(
+            @RequestParam(value = "search", required = false) String search) {
+
+        return ResponseEntity.ok(userService.getAllUsersForAdmin(search));
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/{targetUserId}/toggle-status")
+    public ResponseEntity<MessageResponse> toggleUserStatus(
+            @PathVariable Long targetUserId, Principal principal) {
+
+        User currentAdmin = userService.findByUsername(principal.getName())
+                .orElseThrow(() -> new RuntimeException("error.admin.not.found"));
+
+        return userService.toggleUserStatus(targetUserId, currentAdmin.getId());
     }
 }

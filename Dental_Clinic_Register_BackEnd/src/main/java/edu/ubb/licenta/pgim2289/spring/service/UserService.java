@@ -45,5 +45,7 @@ public interface UserService {
 
     long countBanned();
 
-    List<UserManagmentDTO> getAllUsersForAdmin();
+    List<UserManagmentDTO> getAllUsersForAdmin(String keyword);
+
+    ResponseEntity<MessageResponse> toggleUserStatus(Long targetUserId, Long currentAdminId);
 }
