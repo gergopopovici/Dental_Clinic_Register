@@ -4,10 +4,10 @@ import edu.ubb.licenta.pgim2289.spring.dto.MessageResponse;
 import edu.ubb.licenta.pgim2289.spring.dto.RequestUserDTO;
 import edu.ubb.licenta.pgim2289.spring.dto.ValidationResult;
 import edu.ubb.licenta.pgim2289.spring.model.User;
+import jakarta.transaction.Transactional;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.beans.Transient;
 import java.util.Set;
 
 @Service
@@ -45,7 +45,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
         return ResponseEntity.ok(new MessageResponse("accountRegisteredSuccessfully"));
     }
 
-    @Transient
+    @Transactional
     @Override
     public ResponseEntity<MessageResponse> registerDoctor(RequestUserDTO dto) {
         ValidationResult validation = validationService.validateUserRegistration(dto);
@@ -57,6 +57,17 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
         User savedUser = userService.createUser(dto);
         doctorService.createDoctor(savedUser, dto);
         return ResponseEntity.ok(new MessageResponse("success.doctor.registered"));
+    }
+
+    @Override
+    public ResponseEntity<MessageResponse> registerAdmin(RequestUserDTO dto) {
+        ValidationResult validation = validationService.validateUserRegistration(dto);
+        if (!validation.isValid()) {
+            return ResponseEntity.badRequest().body(new MessageResponse(validation.getErrorMessage()));
+        }
+        dto.setRoles(Set.of("ROLE_ADMIN"));
+        userService.createAdminUser(dto);
+        return ResponseEntity.ok(new MessageResponse("success.admin.registered"));
     }
 
     @Override

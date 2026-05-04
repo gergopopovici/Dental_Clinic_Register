@@ -15,6 +15,8 @@ import java.util.Optional;
 public interface UserService {
     User createUser(RequestUserDTO dto);
 
+    User createAdminUser(RequestUserDTO dto);
+
     ResponseEntity<MessageResponse> verifyUserAccount(String token);
 
     Optional<User> findById(Long id);

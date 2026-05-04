@@ -2,6 +2,8 @@ package edu.ubb.licenta.pgim2289.spring.service;
 
 import edu.ubb.licenta.pgim2289.spring.dto.MessageResponse;
 import edu.ubb.licenta.pgim2289.spring.dto.RequestUserDTO;
+import jakarta.mail.Message;
+import org.apache.coyote.Response;
 import org.springframework.http.ResponseEntity;
 
 public interface UserRegistrationService {
@@ -10,4 +12,6 @@ public interface UserRegistrationService {
     ResponseEntity<MessageResponse> verifyAccount(String token);
 
     ResponseEntity<MessageResponse> registerDoctor(RequestUserDTO dto);
+
+    ResponseEntity<MessageResponse>registerAdmin(RequestUserDTO dto);
 }

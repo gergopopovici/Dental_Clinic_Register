@@ -155,5 +155,6 @@
   "error.invite.admin_email_mismatch": "The email address provided does not match the one associated with the admin invite link.",
   "error.user.not_found": "User not found.",
   "success.user.deleted": "User account deleted successfully.",
-  "error.user.email.exists": "Error: A user with this email already exists!"
+  "error.user.email.exists": "Error: A user with this email already exists!",
+  "success.admin.registered": "Admin registered successfully!"
 }

@@ -26,7 +26,6 @@ public class UserServiceImpl implements UserService {
     private final VerificationTokenJpa verificationTokenRepository;
     private final RoleRepository roleRepository;
     private final PhoneNumberUtilService phoneNumberUtilService;
-    private final PatientService patientService;
     private final RefreshTokenService refreshTokenService;
     private final FileStorageService fileStorageService;
 
@@ -35,20 +34,34 @@ public class UserServiceImpl implements UserService {
                            VerificationTokenJpa verificationTokenRepository,
                            RoleRepository roleRepository,
                            PhoneNumberUtilService phoneNumberUtilService,
-                           PatientService patientService,
                            RefreshTokenService refreshTokenService, FileStorageService fileStorageService) {
         this.userRepository = userRepository;
         this.encoder = encoder;
         this.verificationTokenRepository = verificationTokenRepository;
         this.roleRepository = roleRepository;
         this.phoneNumberUtilService = phoneNumberUtilService;
-        this.patientService = patientService;
         this.refreshTokenService = refreshTokenService;
         this.fileStorageService = fileStorageService;
     }
 
     @Override
     public User createUser(RequestUserDTO dto) {
+        User user = setUpUser(dto);
+        Set<String> roleNamesForNewUser = dto.getRoles();
+        log.info("roleNamesForNewUser: {}", roleNamesForNewUser);
+        log.info("All roles from the Role entity: {}", roleRepository.findAll());
+        User savedUser = registerUser(user, roleNamesForNewUser);
+        return userRepository.save(savedUser);
+    }
+
+    @Override
+    public User createAdminUser(RequestUserDTO dto) {
+        User user = setUpUser(dto);
+        user.setEnabled(true);
+        return registerUser(user, dto.getRoles());
+    }
+
+    private User setUpUser(RequestUserDTO dto) {
         User user = new User();
         user.setUserName(dto.getUsername());
         user.setEmail(dto.getEmail());
@@ -59,11 +72,7 @@ public class UserServiceImpl implements UserService {
         user.setPhoneNumber(dto.getPhoneNumber());
         user.setGender(dto.getGender());
         user.setDateOfBirth(dto.getDateOfBirth());
-        Set<String> roleNamesForNewUser = dto.getRoles();
-        log.info("roleNamesForNewUser: {}", roleNamesForNewUser);
-        log.info("All roles from the Role entity: {}", roleRepository.findAll());
-        User savedUser = registerUser(user, roleNamesForNewUser);
-        return userRepository.save(savedUser);
+        return user;
     }
 
     @Override
@@ -107,7 +116,7 @@ public class UserServiceImpl implements UserService {
             user.setEmail(scrambledEmail);
             user.setFirstName("Deleted");
             user.setLastName("Patient");
-            user.setPhoneNumber(UUID.randomUUID().toString().substring(0,10));
+            user.setPhoneNumber(UUID.randomUUID().toString().substring(0, 10));
             user.setEnabled(false);
             return ResponseEntity.ok(new MessageResponse("success.user.deleted"));
         } else {

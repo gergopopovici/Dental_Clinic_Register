@@ -38,7 +38,7 @@ public class DoctorInviteController {
         }
         String inviteToken = UUID.randomUUID().toString();
         doctorInviteService.saveInvite(email, inviteToken);
-        String frontendLink = "http://localhost:5175/register?inviteToken=" + inviteToken;
+        String frontendLink = "http://localhost:5175/register?inviteToken=" + inviteToken + "&role=doctor";
         emailService.sendDoctorInviteEmail(email, frontendLink);
         return ResponseEntity.ok(new MessageResponse("success.invite.sent"));
     }

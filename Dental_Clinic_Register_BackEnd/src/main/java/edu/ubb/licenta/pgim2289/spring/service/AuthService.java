@@ -18,5 +18,9 @@ public interface AuthService {
 
     ResponseEntity<LoginResponse> refreshToken(RequestRefreshTokenDTO refreshTokenRequest);
 
-    ResponseEntity<?> registerDoctor(String inviteToken, RequestUserDTO requestUserDTO);
+    ResponseEntity<MessageResponse> registerDoctor(String inviteToken, RequestUserDTO requestUserDTO);
+
+    ResponseEntity<MessageResponse> registerAdmin(String inviteToken, RequestUserDTO requestUserDTO);
+
+
 }

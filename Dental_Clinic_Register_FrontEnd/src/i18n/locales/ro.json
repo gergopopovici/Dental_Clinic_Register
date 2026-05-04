@@ -155,5 +155,6 @@
   "error.invite.admin_email_mismatch": "Adresa de email furnizată nu se potrivește cu cea asociată cu linkul de invitație pentru administrator.",
   "error.user.not_found": "Utilizatorul nu a fost găsit.",
   "success.user.deleted": "Contul utilizatorului a fost șters cu succes.",
-  "error.user.email.exists": "Eroare: Un utilizator cu această adresă de email deja există!"
+  "error.user.email.exists": "Eroare: Un utilizator cu această adresă de email deja există!",
+  "success.admin.registered": "Administrator înregistrat cu succes!"
 }

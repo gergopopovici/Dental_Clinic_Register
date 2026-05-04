@@ -36,7 +36,7 @@ public class AdminInviteController {
         }
         String inviteToken = UUID.randomUUID().toString();
         adminInviteService.saveInvite(email, inviteToken);
-        String frontendLink = "http://localhost:5175/register?inviteToken=" + inviteToken;
+        String frontendLink = "http://localhost:5175/register?inviteToken=" + inviteToken + "&role=admin";
         emailService.sendAdminInviteEmail(email, frontendLink);
         return ResponseEntity.ok(new MessageResponse("success.admin_invite.sent"));
     }

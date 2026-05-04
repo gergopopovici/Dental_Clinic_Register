@@ -2,6 +2,7 @@ package edu.ubb.licenta.pgim2289.spring.service;
 
 import edu.ubb.licenta.pgim2289.spring.dto.*;
 import edu.ubb.licenta.pgim2289.spring.exception.TokenRefreshException;
+import edu.ubb.licenta.pgim2289.spring.model.AdminInvite;
 import edu.ubb.licenta.pgim2289.spring.model.AuthTokenPair;
 import edu.ubb.licenta.pgim2289.spring.model.DoctorInvite;
 import edu.ubb.licenta.pgim2289.spring.model.User;
@@ -29,6 +30,7 @@ public class AuthServiceImpl implements AuthService {
     private final TokenManagementService tokenManagementService;
     private final CookieManagementService cookieManagementService;
     private final DoctorInviteService doctorInviteService;
+    private final AdminInviteService adminInviteService;
 
     @Override
     @Transactional
@@ -120,7 +122,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public ResponseEntity<?> registerDoctor(String inviteToken, RequestUserDTO requestUserDTO) {
+    public ResponseEntity<MessageResponse> registerDoctor(String inviteToken, RequestUserDTO requestUserDTO) {
         DoctorInvite invite = doctorInviteService.validateToken(inviteToken);
         if (!invite.getEmail().equalsIgnoreCase(requestUserDTO.getEmail())) {
             return ResponseEntity.badRequest().body(new MessageResponse("error.invite.email_mismatch"));
@@ -128,6 +130,19 @@ public class AuthServiceImpl implements AuthService {
         ResponseEntity<MessageResponse> response = userRegistrationService.registerDoctor(requestUserDTO);
         if (response.getStatusCode().is2xxSuccessful()) {
             doctorInviteService.markAsUsed(invite);
+        }
+        return response;
+    }
+
+    @Override
+    public ResponseEntity<MessageResponse> registerAdmin(String inviteToken, RequestUserDTO requestUserDTO) {
+        AdminInvite invite  = adminInviteService.validateToken(inviteToken);
+        if(!invite.getEmail().equalsIgnoreCase(requestUserDTO.getEmail())){
+            return ResponseEntity.badRequest().body(new MessageResponse("error.invite.email_mismatch"));
+        }
+        ResponseEntity<MessageResponse> response = userRegistrationService.registerAdmin(requestUserDTO);
+        if(response.getStatusCode().is2xxSuccessful()){
+            adminInviteService.markedAsUsed(invite);
         }
         return response;
     }

@@ -155,5 +155,6 @@
   "error.invite.admin_email_mismatch": "A megadott e-mail cím nem egyezik a meghívó linkhez társított adminisztrátor e-mail címmel.",
   "error.user.not_found": "Felhasználó nem található.",
   "success.user.deleted": "Felhasználói fiók sikeresen törölve.",
-  "error.user.email.exists": "Hiba: Ezzel az e-mail címmel már létezik egy felhasználó!"
+  "error.user.email.exists": "Hiba: Ezzel az e-mail címmel már létezik egy felhasználó!",
+  "success.admin.registered": "Adminisztrátor sikeresen regisztrálva!"
 }

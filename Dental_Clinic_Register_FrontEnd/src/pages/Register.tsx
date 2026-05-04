@@ -20,7 +20,7 @@ import { FormEvent, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
 import { Gender, RequestUserDTO } from '../models/User';
-import { signup, registerDoctor } from '../services/AuthorisationService';
+import { signup, registerDoctor, registerAdmin } from '../services/AuthorisationService';
 import { AxiosError } from 'axios';
 import { registerPageBackground } from '../assets';
 import { useTranslation } from 'react-i18next';
@@ -29,6 +29,7 @@ import LanguageSelector from '../components/LanguageSelector';
 function Register() {
   const [searchParams] = useSearchParams();
   const inviteToken = searchParams.get('inviteToken');
+  const roleParam = searchParams.get('role');
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -66,6 +67,19 @@ function Register() {
     mutationFn: (data: RequestUserDTO) => registerDoctor(data, inviteToken as string),
     onSuccess: () => {
       setSuccessMessage(t('success.doctor.registered'));
+      setErrorMessage('');
+    },
+    onError: (error: AxiosError<{ message: string }>) => {
+      const message = error.response?.data?.message || 'error.unknown';
+      setErrorMessage(t(message));
+      setSuccessMessage('');
+    },
+  });
+
+  const adminRegisterMutation = useMutation({
+    mutationFn: (data: RequestUserDTO) => registerAdmin(data, inviteToken as string),
+    onSuccess: () => {
+      setSuccessMessage(t('success.admin.registered'));
       setErrorMessage('');
     },
     onError: (error: AxiosError<{ message: string }>) => {
@@ -121,6 +135,9 @@ function Register() {
       return;
     }
 
+    const isDoctorInvite = inviteToken && roleParam !== 'admin';
+    const isAdminInvite = inviteToken && roleParam === 'admin';
+
     const data: RequestUserDTO = {
       username,
       password,
@@ -131,12 +148,14 @@ function Register() {
       lastName,
       dateOfBirth,
       gender,
-      licenseNumber: inviteToken ? licenseNumber : undefined,
-      specialisation: inviteToken ? specialisation : undefined,
-      roles: inviteToken ? ['ROLE_DOCTOR'] : ['ROLE_PATIENT'],
+      licenseNumber: isDoctorInvite ? licenseNumber : undefined,
+      specialisation: isDoctorInvite ? specialisation : undefined,
+      roles: isAdminInvite ? ['ROLE_ADMIN'] : isDoctorInvite ? ['ROLE_DOCTOR'] : ['ROLE_PATIENT'],
     };
 
-    if (inviteToken) {
+    if (isAdminInvite) {
+      adminRegisterMutation.mutate(data);
+    } else if (isDoctorInvite) {
       doctorRegisterMutation.mutate(data);
     } else {
       registerMutation.mutate(data);
@@ -147,7 +166,8 @@ function Register() {
     setGender(event.target.value as Gender);
   };
 
-  const isPending = registerMutation.isPending || doctorRegisterMutation.isPending;
+  const isPending = registerMutation.isPending || doctorRegisterMutation.isPending || adminRegisterMutation.isPending;
+  const isDoctorInvite = inviteToken && roleParam !== 'admin';
 
   return (
     <Box
@@ -392,8 +412,7 @@ function Register() {
                 </Select>
               </FormControl>
 
-              {/* DOCTOR SPECIFIC FIELDS */}
-              {inviteToken && (
+              {isDoctorInvite && (
                 <>
                   <Typography variant="body2" sx={{ mt: 1, mb: 1, fontWeight: 'bold' }}>
                     {t('licenseNumber')}:
