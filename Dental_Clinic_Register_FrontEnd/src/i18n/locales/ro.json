@@ -174,5 +174,13 @@
   "noUsersFound": "Nu s-au găsit utilizatori.",
   "fullName": "Nume complet",
   "admin.user_management": "Administrare Utilizatori Admin",
-  "searchUsers": "Căutați utilizatori după nume, email sau nume de utilizator"
+  "searchUsers": "Căutați utilizatori după nume, email sau nume de utilizator",
+  "error.email.not_found": "Eroare: Nu s-a găsit niciun utilizator cu această adresă de email.",
+  "error.account.not.activated": "Eroare: Acest cont nu a fost activat.",
+  "error.user.not.found.after.authentication": "Datele utilizatorului nu sunt disponibile după autentificare. Vă rugăm să încercați din nou.",
+  "service.name.not.blank":"Numele serviciului nu poate fi gol",
+  "service.price.is.required":"Prețul serviciului este obligatoriu",
+  "service.price.must.be.greater.than.zero":"Prețul serviciului trebuie să fie mai mare decât zero",
+  "service.duration.is.required":"Durata serviciului este obligatorie",
+  "service.duration.must.be.greater.than.zero":"Durata serviciului trebuie să fie mai mare decât zero"
 }

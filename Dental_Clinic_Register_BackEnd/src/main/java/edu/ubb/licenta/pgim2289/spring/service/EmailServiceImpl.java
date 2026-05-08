@@ -120,4 +120,29 @@ public class EmailServiceImpl implements EmailService {
                 + "Note: This invitation link is valid for 24 hours."));
         mailSender.send(message);
     }
+
+    @Override
+    public void sendBanningNotificationEmail(String to, String userName) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(fromEmail);
+        message.setTo(to);
+        message.setSubject("Account Suspension Notice");
+        message.setText("Hello " + userName + ",\n\n"
+                + "We are writing to inform you that your account in our clinic system has been suspended.\n\n"
+                + "If you believe this was a mistake, please contact support.");
+        mailSender.send(message);
+    }
+
+    @Override
+    public void sendReactivatingNotificationEmail(String to, String userName) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(fromEmail);
+        message.setTo(to);
+        message.setSubject("Account Reactivation Notice");
+        message.setText("Hello " + userName + ",\n\n"
+                + "Good news! Your account in our clinic system has been reactivated.\n\n"
+                + "You can now log in and continue using our services."
+                + "\n\nIf you have any questions, feel free to contact support.");
+        mailSender.send(message);
+    }
 }

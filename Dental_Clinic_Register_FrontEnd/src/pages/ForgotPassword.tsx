@@ -33,7 +33,7 @@ function ForgotPassword() {
     },
     onError: (error: AxiosError<{ message: string }>) => {
       const message = error.response?.data?.message || t('passwordResetFailed');
-      setErrorMessage(message);
+      setErrorMessage(t(message));
       setSuccessMessage('');
     },
   });

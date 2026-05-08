@@ -46,7 +46,7 @@ public class AuthServiceImpl implements AuthService {
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 
         User user = userAuthService.findByUsername(userDetails.getUsername())
-                .orElseThrow(() -> new RuntimeException("User not found after authentication."));
+                .orElseThrow(() -> new RuntimeException("error.user.not.found.after.authentication"));
 
         AuthTokenPair tokenPair = tokenManagementService.generateTokenPair(user);
         cookieManagementService.setAccessTokenCookie(tokenPair.getAccessToken());

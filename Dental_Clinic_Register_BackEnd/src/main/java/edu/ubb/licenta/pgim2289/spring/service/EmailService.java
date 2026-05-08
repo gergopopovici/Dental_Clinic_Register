@@ -20,4 +20,8 @@ public interface EmailService {
     void sendDoctorInviteEmail(String to, String frontEnd);
 
     void sendAdminInviteEmail(String to, String frontEnd);
+
+    void sendBanningNotificationEmail(String to, String userName);
+
+    void sendReactivatingNotificationEmail(String to, String userName);
 }

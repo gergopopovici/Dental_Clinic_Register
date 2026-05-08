@@ -174,5 +174,13 @@
   "noUsersFound": "No users found.",
   "fullName": "Full Name",
   "admin.user_management": "Admin User Management",
-  "searchUsers": "Search users by name,email or username"
+  "searchUsers": "Search users by name,email or username",
+  "error.email.not_found": "Error: No user found with this email address.",
+  "error.account.not.activated": "Error: This account has not been activated",
+  "error.user.not.found.after.authentication": "User data not available after authentication. Please try again.",
+  "service.name.not.blank":"Service name cannot be blank",
+  "service.price.is.required":"Service price is required",
+  "service.price.must.be.greater.than.zero":"Service price must be greater than zero",
+  "service.duration.is.required":"Service duration is required",
+  "service.duration.must.be.greater.than.zero":"Service duration must be greater than zero"
 }

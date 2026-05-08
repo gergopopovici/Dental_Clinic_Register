@@ -40,9 +40,11 @@ public class PasswordResetServiceImpl implements PasswordResetService {
     public ResponseEntity<MessageResponse> initiateForgotPassword(RequestPasswordResetTokenDTO dto) {
         User user = userRepository.findByEmail(dto.getEmail());
         if (user == null) {
-            return ResponseEntity.badRequest().body(new MessageResponse("Error: Email not found!"));
+            return ResponseEntity.badRequest().body(new MessageResponse("error.email.not_found"));
         }
-
+        if (!user.getEnabled()){
+            return ResponseEntity.badRequest().body(new MessageResponse("error.account.not.activated"));
+        }
         String rawToken = UUID.randomUUID().toString();
         String hashedToken = encoder.encode(rawToken);
         PasswordResetToken resetToken = new PasswordResetToken();

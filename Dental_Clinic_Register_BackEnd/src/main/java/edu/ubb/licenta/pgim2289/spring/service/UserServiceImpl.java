@@ -30,13 +30,14 @@ public class UserServiceImpl implements UserService {
     private final PhoneNumberUtilService phoneNumberUtilService;
     private final RefreshTokenService refreshTokenService;
     private final FileStorageService fileStorageService;
+    private final EmailService emailService;
 
 
     public UserServiceImpl(UserRepository userRepository, PasswordEncoder encoder,
                            VerificationTokenJpa verificationTokenRepository,
                            RoleRepository roleRepository,
                            PhoneNumberUtilService phoneNumberUtilService,
-                           RefreshTokenService refreshTokenService, FileStorageService fileStorageService) {
+                           RefreshTokenService refreshTokenService, FileStorageService fileStorageService, EmailService emailService) {
         this.userRepository = userRepository;
         this.encoder = encoder;
         this.verificationTokenRepository = verificationTokenRepository;
@@ -44,6 +45,7 @@ public class UserServiceImpl implements UserService {
         this.phoneNumberUtilService = phoneNumberUtilService;
         this.refreshTokenService = refreshTokenService;
         this.fileStorageService = fileStorageService;
+        this.emailService = emailService;
     }
 
     @Override
@@ -300,8 +302,12 @@ public class UserServiceImpl implements UserService {
             }
         }
         targetUser.setEnabled(!targetUser.getEnabled());
+        if (!targetUser.getEnabled()) {
+            emailService.sendBanningNotificationEmail(targetUser.getEmail(), targetUser.getUserName());
+        } else {
+            emailService.sendReactivatingNotificationEmail(targetUser.getEmail(),targetUser.getUserName());
+        }
         userRepository.save(targetUser);
-
         return ResponseEntity.ok(new MessageResponse("success.user.status_toggled"));
     }
 
