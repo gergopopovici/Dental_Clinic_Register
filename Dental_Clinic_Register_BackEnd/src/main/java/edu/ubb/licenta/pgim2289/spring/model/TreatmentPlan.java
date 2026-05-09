@@ -42,7 +42,7 @@ public class TreatmentPlan extends BaseEntity {
             joinColumns = @JoinColumn(name = "treatment_plan_id"),
             inverseJoinColumns = @JoinColumn(name = "service_id")
     )
-    private Set<Service> services = new HashSet<>();
+    private Set<ServiceProvided> services = new HashSet<>();
 
     @OneToMany(mappedBy = "treatmentPlan", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<BraceComponents> braceComponents = new HashSet<>();

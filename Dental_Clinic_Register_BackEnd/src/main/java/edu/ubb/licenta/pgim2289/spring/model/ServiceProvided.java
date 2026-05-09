@@ -12,7 +12,7 @@ import java.math.BigDecimal;
 @Table(name = "service_provided")
 @Data
 @NoArgsConstructor
-public class Service extends BaseEntity {
+public class ServiceProvided extends BaseEntity {
 
     @Column(name = "name", unique = true, nullable = false)
     private String name;

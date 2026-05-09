@@ -105,4 +105,13 @@ public class GlobalExceptionHandler {
         errorMap.put("error", ex.getMessageKey());
         return errorMap;
     }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Map<String, String> handleIllegalArgumentException(IllegalArgumentException ex) {
+
+        Map<String, String> errorMap = new ConcurrentHashMap<>();
+        errorMap.put("message", ex.getMessage());
+        return errorMap;
+    }
 }

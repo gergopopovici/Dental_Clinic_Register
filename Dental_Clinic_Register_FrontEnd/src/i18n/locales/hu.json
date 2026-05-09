@@ -182,5 +182,10 @@
   "service.price.is.required":"A szolgáltatás ára kötelező",
   "service.price.must.be.greater.than.zero":"A szolgáltatás ára nagyobb kell legyen, mint nulla",
   "service.duration.is.required":"A szolgáltatás időtartama kötelező",
-  "service.duration.must.be.greater.than.zero":"A szolgáltatás időtartama nagyobb kell legyen, mint nulla"
+  "service.duration.must.be.greater.than.zero":"A szolgáltatás időtartama nagyobb kell legyen, mint nulla",
+  "error.service_not_found": "Hiba: Szolgáltatás nem található.",
+  "success.service.deleted": "Szolgáltatás sikeresen törölve.",
+  "error.delete_service": "Nem sikerült törölni a szolgáltatást. Kérem, próbálja újra.",
+  "error.create.service": "Nem sikerült létrehozni a szolgáltatást. Kérem, próbálja újra.",
+  "error.update.service": "Nem sikerült frissíteni a szolgáltatást. Kérem, próbálja újra."
 }

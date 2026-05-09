@@ -182,5 +182,10 @@
   "service.price.is.required":"Prețul serviciului este obligatoriu",
   "service.price.must.be.greater.than.zero":"Prețul serviciului trebuie să fie mai mare decât zero",
   "service.duration.is.required":"Durata serviciului este obligatorie",
-  "service.duration.must.be.greater.than.zero":"Durata serviciului trebuie să fie mai mare decât zero"
+  "service.duration.must.be.greater.than.zero":"Durata serviciului trebuie să fie mai mare decât zero",
+  "error.service_not_found": "Eroare: Serviciu nu găsit.",
+  "success.service.deleted": "Serviciu șters cu succes.",
+  "error.create.service": "Nu s-a reușit crearea serviciului. Vă rugăm să încercați din nou.",
+  "error.update.service": "Nu s-a reușit actualizarea serviciului. Vă rugăm să încercați din nou."
+  
 }

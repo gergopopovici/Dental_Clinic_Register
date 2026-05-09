@@ -24,7 +24,7 @@ public class Appointment extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "service_id", nullable = false)
-    private Service service;
+    private ServiceProvided service;
 
     @Column(name = "start_Time", nullable = false)
     private LocalDateTime startTime;
@@ -37,6 +37,8 @@ public class Appointment extends BaseEntity {
     private AppointmentStatus status;
     @Column(name = "notes", columnDefinition = "TEXT")
     private String notes;
+    @Column(name = "resource_link", length = 500)
+    private String resourceLink;
 
     public enum AppointmentStatus {
         PENDING, CONFIRMED, COMPLETED, CANCELLED

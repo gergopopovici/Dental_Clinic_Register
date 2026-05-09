@@ -6,8 +6,9 @@ import edu.ubb.licenta.pgim2289.spring.service.RoleService;
 import org.mapstruct.Mapper;
 
 import edu.ubb.licenta.pgim2289.spring.model.User;
+import org.mapstruct.ReportingPolicy;
 
-@Mapper(componentModel = "spring", uses = {RoleService.class})
+@Mapper(componentModel = "spring", uses = {RoleService.class}, unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface UserMapper {
     User toEntity(RequestUserDTO requestUserDTO);
 

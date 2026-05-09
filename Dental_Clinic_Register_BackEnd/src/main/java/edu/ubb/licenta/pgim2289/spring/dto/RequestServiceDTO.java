@@ -13,16 +13,16 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RequestServiceDTO {
-    @NotBlank()
+    @NotBlank(message = "service.name.not.blank")
     private String name;
 
     private String description;
 
-    @NotNull()
-    @Positive()
+    @NotNull(message = "service.price.is.required")
+    @Positive(message = "service.price.must.be.greater.than.zero")
     private BigDecimal price;
 
-    @NotNull()
-    @Positive()
+    @NotNull(message = "service.duration.is.required")
+    @Positive(message = "service.duration.must.be.greater.than.zero")
     private Integer durationMinutes;
 }

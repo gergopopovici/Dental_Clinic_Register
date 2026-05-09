@@ -1,6 +1,5 @@
 package edu.ubb.licenta.pgim2289.spring.dto;
 
-import edu.ubb.licenta.pgim2289.spring.model.Appointment;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -12,19 +11,20 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RequestAppointmentDTO {
-    @NotNull()
+    @NotNull(message = "Patient ID is required")
     private Long patientId;
 
-    @NotNull()
+    @NotNull(message = "Doctor ID is required")
     private Long doctorId;
 
-    @NotNull()
+    @NotNull(message = "Service ID is required")
     private Long serviceId;
 
-    @NotNull()
+    @NotNull(message = "Start time is required")
     private LocalDateTime startTime;
 
-    private String notes;
+    @NotNull(message = "End time is required")
+    private LocalDateTime endTime;
 
-    private Appointment.AppointmentStatus status;
+    private String notes;
 }
