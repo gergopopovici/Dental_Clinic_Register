@@ -26,7 +26,7 @@ public class ServiceProvidedController {
         return ResponseEntity.ok(serviceProvidedService.getAllServices());
     }
 
-    @GetMapping("{/id}")
+    @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN','DOCTOR','PATIENT')")
     public ResponseEntity<ResponseServiceDTO> getServiceById(@PathVariable Long id) {
         return ResponseEntity.ok(serviceProvidedService.findServiceById(id));
@@ -41,14 +41,14 @@ public class ServiceProvidedController {
                 .body(serviceProvidedService.createService(requestServiceDTO));
     }
 
-    @PutMapping("{/id}")
+    @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<ResponseServiceDTO> updateService(@PathVariable Long id,
                                                             @Valid @RequestBody RequestServiceDTO requestServiceDTO) {
         return ResponseEntity.ok(serviceProvidedService.updateService(id, requestServiceDTO));
     }
 
-    @DeleteMapping("{/id}")
+    @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<Void> deleteService(@PathVariable Long id){
         serviceProvidedService.deleteService(id);

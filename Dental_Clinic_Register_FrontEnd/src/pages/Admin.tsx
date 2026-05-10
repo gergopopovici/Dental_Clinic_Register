@@ -23,6 +23,7 @@ import { getAdminStats } from '../services/UserService';
 import { sendDoctorInvite } from '../services/DoctorInviteService';
 import { sendAdminInvite } from '../services/AdminInviteService';
 import UserTable from '../components/UserTable';
+import ServiceTable from '../components/ServiceTable';
 
 function AdminDashboard() {
   const navigate = useNavigate();
@@ -215,6 +216,9 @@ function AdminDashboard() {
         </Paper>
         <Box sx={{ mt: 4 }}>
           <UserTable currentUserId={user?.id} />
+        </Box>
+        <Box sx={{ mt: 4 }}>
+          <ServiceTable />
         </Box>
       </Box>
 

@@ -187,5 +187,14 @@
   "success.service.deleted": "Szolgáltatás sikeresen törölve.",
   "error.delete_service": "Nem sikerült törölni a szolgáltatást. Kérem, próbálja újra.",
   "error.create.service": "Nem sikerült létrehozni a szolgáltatást. Kérem, próbálja újra.",
-  "error.update.service": "Nem sikerült frissíteni a szolgáltatást. Kérem, próbálja újra."
+  "error.update.service": "Nem sikerült frissíteni a szolgáltatást. Kérem, próbálja újra.",
+  "error.delete.service": "Nem sikerült törölni a szolgáltatást. Kérem, próbálja újra.",
+  "manageServices": "Szolgáltatások kezelése",
+  "addService": "Szolgáltatás hozzáadása",
+  "noServicesFound": "Nem található szolgáltatás.",
+  "description": "Leírás",
+  "price": "Ár",
+  "duration": "Időtartam (perc)",
+  "save": "Mentés",
+  "error.fetch_services": "Nem sikerült a szolgáltatások betöltése"
 }

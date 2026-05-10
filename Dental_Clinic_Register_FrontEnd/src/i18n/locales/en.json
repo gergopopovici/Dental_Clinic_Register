@@ -186,5 +186,15 @@
   "error.service_not_found": "Error: Service not found.",
   "success.service.deleted": "Service deleted successfully.",
   "error.create.service": "Failed to create service. Please try again.",
-  "error.update.service": "Failed to update service. Please try again."
+  "error.update.service": "Failed to update service. Please try again.",
+  "error.delete.service": "Failed to delete service. Please try again.",
+  "manageServices": "Manage Services",
+  "addService": "Add Service",
+  "noServicesFound": "No services found.",
+  "description": "Description",
+  "price": "Price",
+  "duration": "Duration (mins)",
+  "save": "Save",
+  "error.fetch_services": "Failed to load services",
+  "serviceName": "Service Name"
 }
