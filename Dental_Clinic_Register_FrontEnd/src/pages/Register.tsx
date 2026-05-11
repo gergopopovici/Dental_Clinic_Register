@@ -5,11 +5,14 @@ import {
   Button,
   Card,
   CardContent,
+  Checkbox,
   CircularProgress,
   FormControl,
   InputLabel,
   Link,
+  ListItemText,
   MenuItem,
+  OutlinedInput,
   Select,
   SelectChangeEvent,
   TextField,
@@ -17,10 +20,11 @@ import {
 } from '@mui/material';
 import AppRegistrationIcon from '@mui/icons-material/AppRegistration';
 import { FormEvent, useState } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
 import { Gender, RequestUserDTO } from '../models/User';
 import { signup, registerDoctor, registerAdmin } from '../services/AuthorisationService';
+import { getAllServices } from '../services/ProvidedServiceService';
 import { AxiosError } from 'axios';
 import { registerPageBackground } from '../assets';
 import { useTranslation } from 'react-i18next';
@@ -48,6 +52,7 @@ function Register() {
 
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [serviceIds, setServiceIds] = useState<number[]>([]);
   const { t } = useTranslation();
 
   const registerMutation = useMutation({
@@ -64,7 +69,7 @@ function Register() {
   });
 
   const doctorRegisterMutation = useMutation({
-    mutationFn: (data: RequestUserDTO) => registerDoctor(data, inviteToken as string),
+    mutationFn: (data: any) => registerDoctor(data, inviteToken as string),
     onSuccess: () => {
       setSuccessMessage(t('success.doctor.registered'));
       setErrorMessage('');
@@ -138,7 +143,7 @@ function Register() {
     const isDoctorInvite = inviteToken && roleParam !== 'admin';
     const isAdminInvite = inviteToken && roleParam === 'admin';
 
-    const data: RequestUserDTO = {
+    const baseUserDetails = {
       username,
       password,
       email,
@@ -148,17 +153,21 @@ function Register() {
       lastName,
       dateOfBirth,
       gender,
-      licenseNumber: isDoctorInvite ? licenseNumber : undefined,
-      specialisation: isDoctorInvite ? specialisation : undefined,
       roles: isAdminInvite ? ['ROLE_ADMIN'] : isDoctorInvite ? ['ROLE_DOCTOR'] : ['ROLE_PATIENT'],
     };
 
     if (isAdminInvite) {
-      adminRegisterMutation.mutate(data);
+      adminRegisterMutation.mutate(baseUserDetails as any);
     } else if (isDoctorInvite) {
-      doctorRegisterMutation.mutate(data);
+      const doctorPayload = {
+        userDetails: baseUserDetails,
+        licenseNumber: licenseNumber,
+        specialisation: specialisation,
+        serviceIds: serviceIds,
+      };
+      doctorRegisterMutation.mutate(doctorPayload as any);
     } else {
-      registerMutation.mutate(data);
+      registerMutation.mutate(baseUserDetails as any);
     }
   };
 
@@ -168,6 +177,19 @@ function Register() {
 
   const isPending = registerMutation.isPending || doctorRegisterMutation.isPending || adminRegisterMutation.isPending;
   const isDoctorInvite = inviteToken && roleParam !== 'admin';
+
+  const { data: services = [], isLoading: isLoadingServices } = useQuery({
+    queryKey: ['services'],
+    queryFn: getAllServices,
+    enabled: !!isDoctorInvite,
+  });
+
+  const handleServiceChange = (event: SelectChangeEvent<number[]>) => {
+    const {
+      target: { value },
+    } = event;
+    setServiceIds(typeof value === 'string' ? value.split(',').map(Number) : (value as number[]));
+  };
 
   return (
     <Box
@@ -438,6 +460,34 @@ function Register() {
                     onChange={(e) => setSpecialisation(e.target.value)}
                     sx={{ mb: 2 }}
                   />
+                  <Typography variant="body2" sx={{ mt: 1, mb: 1, fontWeight: 'bold' }}>
+                    {t('servicesProvided') || 'Services Provided'}:
+                  </Typography>
+                  <FormControl fullWidth sx={{ mb: 2 }} required>
+                    <InputLabel id="services-label">{t('servicesProvided') || 'Services'}</InputLabel>
+                    <Select
+                      labelId="services-label"
+                      id="services-select"
+                      multiple
+                      value={serviceIds}
+                      onChange={handleServiceChange}
+                      input={<OutlinedInput label={t('servicesProvided') || 'Services'} />}
+                      renderValue={(selected) =>
+                        services
+                          .filter((service) => selected.includes(service.id))
+                          .map((service) => service.name)
+                          .join(', ')
+                      }
+                      disabled={isLoadingServices}
+                    >
+                      {services.map((service) => (
+                        <MenuItem key={service.id} value={service.id}>
+                          <Checkbox checked={serviceIds.includes(service.id)} />
+                          <ListItemText primary={service.name} secondary={`${service.price} RON`} />
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
                 </>
               )}
 

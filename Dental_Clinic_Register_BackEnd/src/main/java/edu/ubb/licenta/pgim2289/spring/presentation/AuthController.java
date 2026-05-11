@@ -59,8 +59,8 @@ public class AuthController {
     @PostMapping("/register-doctor")
     public ResponseEntity<MessageResponse> registerDoctor(
             @RequestParam("inviteToken") String inviteToken,
-            @Valid @RequestBody RequestUserDTO requestUserDTO) {
-        return authService.registerDoctor(inviteToken, requestUserDTO);
+            @Valid @RequestBody RequestDoctorDTO requestDoctorDTO) {
+        return authService.registerDoctor(inviteToken, requestDoctorDTO);
     }
 
     @PostMapping("/register-admin")

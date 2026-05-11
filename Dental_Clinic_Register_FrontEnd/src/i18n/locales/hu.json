@@ -196,5 +196,7 @@
   "price": "Ár",
   "duration": "Időtartam (perc)",
   "save": "Mentés",
-  "error.fetch_services": "Nem sikerült a szolgáltatások betöltése"
+  "error.fetch_services": "Nem sikerült a szolgáltatások betöltése",
+  "doctor.must.select.atleast.one.service": "Hiba: Egy doktor legalább egy szolgáltatást ki kell jelöljön.",
+  "servicesProvided": "Nyújtott szolgáltatások"
 }

@@ -18,6 +18,7 @@ export interface RequestUserDTO {
   roles: string[];
   licenseNumber?: string;
   specialisation?: string;
+  serviceIds?: number[];
 }
 
 export interface ResponseUserDTO {

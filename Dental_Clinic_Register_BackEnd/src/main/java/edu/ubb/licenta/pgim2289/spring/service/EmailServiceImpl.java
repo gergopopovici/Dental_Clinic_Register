@@ -9,6 +9,8 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
@@ -143,6 +145,87 @@ public class EmailServiceImpl implements EmailService {
                 + "Good news! Your account in our clinic system has been reactivated.\n\n"
                 + "You can now log in and continue using our services."
                 + "\n\nIf you have any questions, feel free to contact support.");
+        mailSender.send(message);
+    }
+
+    @Override
+    public void sendNewRequestEmailToDoctor(String doctorEmail, String doctorName, String patientName, LocalDate requestedDate) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(fromEmail);
+        message.setTo(doctorEmail);
+        message.setSubject("New Appointment Request");
+        message.setText("Hello Dr. " + doctorName + ",\n\n"
+                + "You have a new appointment request from patient " + patientName
+                + " for the date: " + requestedDate + ".\n\n"
+                + "Please log in to the system to review and confirm the exact time.");
+        mailSender.send(message);
+    }
+
+    @Override
+    public void sendConfirmationEmailToPatient(String patientEmail, String patientName, LocalDateTime exactStartTime, String doctorName) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(fromEmail);
+        message.setTo(patientEmail);
+        message.setSubject("Appointment Confirmed!");
+        message.setText("Hello " + patientName + ",\n\n"
+                + "Great news! Your appointment has been officially confirmed.\n\n"
+                + "Doctor: Dr. " + doctorName + "\n"
+                + "Date & Time: " + exactStartTime + "\n\n"
+                + "We look forward to seeing you!");
+        mailSender.send(message);
+    }
+
+    @Override
+    public void sendNewAppointmentCreatedEmailToPatient(String patientEmail, String patientName, LocalDateTime exactStartTime, String doctorName) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(fromEmail);
+        message.setTo(patientEmail);
+        message.setSubject("New Appointment Scheduled");
+        message.setText("Hello " + patientName + ",\n\n"
+                + "A new appointment has been scheduled for you by the clinic.\n\n"
+                + "Doctor: Dr. " + doctorName + "\n"
+                + "Date & Time: " + exactStartTime + "\n\n"
+                + "If you need to reschedule, please contact the clinic or log into your portal.");
+        mailSender.send(message);
+    }
+
+    @Override
+    public void sendAppointmentUpdatedEmailToPatient(String patientEmail, String patientName, LocalDateTime newStartTime, String doctorName) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(fromEmail);
+        message.setTo(patientEmail);
+        message.setSubject("Appointment Rescheduled");
+        message.setText("Hello " + patientName + ",\n\nYour appointment with Dr. " + doctorName + " has been rescheduled.\n\nNew Time: " + newStartTime);
+        mailSender.send(message);
+    }
+
+    @Override
+    public void sendAppointmentCancelledByPatientEmailToDoctor(String doctorEmail, String doctorName, String patientName, LocalDateTime startTime) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(fromEmail);
+        message.setTo(doctorEmail);
+        message.setSubject("Appointment Cancelled by Patient");
+        message.setText("Hello Dr. " + doctorName + ",\n\nPatient " + patientName + " has cancelled their appointment scheduled for " + startTime + ".");
+        mailSender.send(message);
+    }
+
+    @Override
+    public void sendAppointmentCancelledByDoctorEmailToPatient(String patientEmail, String patientName, String doctorName, LocalDateTime startTime, String reason) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(fromEmail);
+        message.setTo(patientEmail);
+        message.setSubject("Appointment Cancelled");
+        message.setText("Hello " + patientName + ",\n\nUnfortunately, Dr. " + doctorName + " had to cancel your appointment on " + startTime + ".\nReason: " + reason + "\n\nPlease log in to book a new time.");
+        mailSender.send(message);
+    }
+
+    @Override
+    public void sendPostVisitThankYouEmail(String patientEmail, String patientName, String doctorName) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(fromEmail);
+        message.setTo(patientEmail);
+        message.setSubject("Thank you for your visit!");
+        message.setText("Hello " + patientName + ",\n\nThank you for visiting Dr. " + doctorName + " today. We hope you had a great experience!");
         mailSender.send(message);
     }
 }

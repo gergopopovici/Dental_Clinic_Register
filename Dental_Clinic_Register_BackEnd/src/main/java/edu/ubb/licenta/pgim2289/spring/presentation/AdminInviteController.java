@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("api/admin/admin_invite")
+@RequestMapping("/api/admin/admin_invite")
 public class AdminInviteController {
     private final EmailService emailService;
     private final AdminInviteService adminInviteService;

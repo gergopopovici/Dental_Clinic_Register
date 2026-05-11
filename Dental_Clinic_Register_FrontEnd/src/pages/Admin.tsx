@@ -215,10 +215,10 @@ function AdminDashboard() {
           </Box>
         </Paper>
         <Box sx={{ mt: 4 }}>
-          <UserTable currentUserId={user?.id} />
+          <ServiceTable />
         </Box>
         <Box sx={{ mt: 4 }}>
-          <ServiceTable />
+          <UserTable currentUserId={user?.id} />
         </Box>
       </Box>
 

@@ -10,7 +10,10 @@ import lombok.ToString;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @EqualsAndHashCode(callSuper = true)
 @Entity
@@ -85,4 +88,11 @@ public class User extends BaseEntity implements Serializable {
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private VerificationToken verificationToken;
+    @Transient
+    public String getFullName() {
+        return Stream.of(firstName, middleName, lastName)
+                .filter(Objects::nonNull)
+                .filter(name -> !name.trim().isEmpty())
+                .collect(Collectors.joining(" "));
+    }
 }

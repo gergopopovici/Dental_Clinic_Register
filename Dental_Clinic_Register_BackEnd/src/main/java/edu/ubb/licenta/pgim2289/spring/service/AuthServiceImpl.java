@@ -122,12 +122,12 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public ResponseEntity<MessageResponse> registerDoctor(String inviteToken, RequestUserDTO requestUserDTO) {
+    public ResponseEntity<MessageResponse> registerDoctor(String inviteToken, RequestDoctorDTO requestDoctorDTO) {
         DoctorInvite invite = doctorInviteService.validateToken(inviteToken);
-        if (!invite.getEmail().equalsIgnoreCase(requestUserDTO.getEmail())) {
+        if (!invite.getEmail().equalsIgnoreCase(requestDoctorDTO.getUserDetails().getEmail())) {
             return ResponseEntity.badRequest().body(new MessageResponse("error.invite.email_mismatch"));
         }
-        ResponseEntity<MessageResponse> response = userRegistrationService.registerDoctor(requestUserDTO);
+        ResponseEntity<MessageResponse> response = userRegistrationService.registerDoctor(requestDoctorDTO);
         if (response.getStatusCode().is2xxSuccessful()) {
             doctorInviteService.markAsUsed(invite);
         }

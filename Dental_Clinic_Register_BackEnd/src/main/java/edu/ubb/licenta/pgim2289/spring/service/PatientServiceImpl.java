@@ -36,4 +36,9 @@ public class PatientServiceImpl implements PatientService {
     public Patient getPatient(User user) {
         return patientRepository.findByUser(user);
     }
+
+    @Override
+    public Optional<Patient> findById(Long id) {
+        return patientRepository.findById(id);
+    }
 }

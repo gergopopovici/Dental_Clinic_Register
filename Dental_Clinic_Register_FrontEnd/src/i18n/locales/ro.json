@@ -202,5 +202,8 @@
   "price": "Preț",
   "duration": "Durată (minute)",
   "save": "Salvează",
-  "error.fetch_services": "Eroare la încărcarea serviciilor"
+  "error.fetch_services": "Eroare la încărcarea serviciilor",
+  "doctor.must.select.atleast.one.service": "Doctorul trebuie să selecteze cel puțin un serviciu oferit",
+  "error.invalid_service_ids": "Eroare: ID-uri de servicii invalide furnizate.",
+  "servicesProvided": "Servicii Oferite"
 }

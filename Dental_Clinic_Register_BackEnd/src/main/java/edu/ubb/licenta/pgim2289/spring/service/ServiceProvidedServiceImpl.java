@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -58,5 +59,10 @@ public class ServiceProvidedServiceImpl implements ServiceProvidedService {
         ServiceProvided serviceProvided = serviceRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("error.service_not_found"));
         return mapper.toDTO(serviceProvided);
+    }
+
+    @Override
+    public Optional<ServiceProvided> findById(Long id) {
+        return serviceRepository.findById(id);
     }
 }

@@ -1,6 +1,7 @@
 package edu.ubb.licenta.pgim2289.spring.service;
 
 import edu.ubb.licenta.pgim2289.spring.dto.MessageResponse;
+import edu.ubb.licenta.pgim2289.spring.dto.RequestDoctorDTO;
 import edu.ubb.licenta.pgim2289.spring.dto.RequestUserDTO;
 import edu.ubb.licenta.pgim2289.spring.dto.ValidationResult;
 import edu.ubb.licenta.pgim2289.spring.model.User;
@@ -47,15 +48,15 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 
     @Transactional
     @Override
-    public ResponseEntity<MessageResponse> registerDoctor(RequestUserDTO dto) {
-        ValidationResult validation = validationService.validateUserRegistration(dto);
+    public ResponseEntity<MessageResponse> registerDoctor(RequestDoctorDTO requestDoctorDTO) {
+        ValidationResult validation = validationService.validateUserRegistration(requestDoctorDTO.getUserDetails());
         if (!validation.isValid()) {
             return ResponseEntity.badRequest().body(new MessageResponse(validation
                     .getErrorMessage()));
         }
-        dto.setRoles(Set.of("ROLE_DOCTOR"));
-        User savedUser = userService.createUser(dto);
-        doctorService.createDoctor(savedUser, dto);
+        requestDoctorDTO.getUserDetails().setRoles(Set.of("ROLE_DOCTOR"));
+        User savedUser = userService.createUser(requestDoctorDTO.getUserDetails());
+        doctorService.createDoctor(savedUser, requestDoctorDTO);
         return ResponseEntity.ok(new MessageResponse("success.doctor.registered"));
     }
 

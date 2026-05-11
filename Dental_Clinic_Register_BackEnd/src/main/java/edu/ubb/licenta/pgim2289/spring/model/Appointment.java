@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @EqualsAndHashCode(callSuper = true)
@@ -26,21 +27,35 @@ public class Appointment extends BaseEntity {
     @JoinColumn(name = "service_id", nullable = false)
     private ServiceProvided service;
 
-    @Column(name = "start_Time", nullable = false)
+    @Column(name = "requested_date")
+    private LocalDate requestedDate;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "time_preference", nullable = true)
+    private TimePreference timePreference;
+
+
+    @Column(name = "start_time")
     private LocalDateTime startTime;
 
-    @Column(name = "end_Time", nullable = false)
+    @Column(name = "end_time")
     private LocalDateTime endTime;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    private AppointmentStatus status;
+    private AppointmentStatus status = AppointmentStatus.PENDING;
+
     @Column(name = "notes", columnDefinition = "TEXT")
     private String notes;
+
     @Column(name = "resource_link", length = 500)
     private String resourceLink;
 
     public enum AppointmentStatus {
-        PENDING, CONFIRMED, COMPLETED, CANCELLED
+        PENDING, CONFIRMED, COMPLETED, CANCELLED, NO_SHOW
+    }
+
+    public enum TimePreference {
+        MORNING, AFTERNOON, EVENING
     }
 }

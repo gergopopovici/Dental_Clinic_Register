@@ -31,6 +31,7 @@ public class DoctorInviteServiceImpl implements DoctorInviteService {
         invite.setEmail(email);
         invite.setToken(token);
         invite.setExpiryDate(Instant.now().plus(24, ChronoUnit.HOURS));
+        invite.setUsed(false);
         doctorInviteRepository.save(invite);
 
     }

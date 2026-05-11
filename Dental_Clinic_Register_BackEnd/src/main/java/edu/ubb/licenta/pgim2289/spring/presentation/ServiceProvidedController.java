@@ -21,7 +21,6 @@ public class ServiceProvidedController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN','DOCTOR','PATIENT')")
     public ResponseEntity<List<ResponseServiceDTO>> getAllServices() {
         return ResponseEntity.ok(serviceProvidedService.getAllServices());
     }
