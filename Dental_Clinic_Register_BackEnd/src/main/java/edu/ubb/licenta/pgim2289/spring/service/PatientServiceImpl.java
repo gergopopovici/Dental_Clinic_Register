@@ -1,12 +1,15 @@
 package edu.ubb.licenta.pgim2289.spring.service;
 
+import edu.ubb.licenta.pgim2289.spring.dto.PatientDropDownDTO;
 import edu.ubb.licenta.pgim2289.spring.dto.RequestUserDTO;
 import edu.ubb.licenta.pgim2289.spring.model.Patient;
 import edu.ubb.licenta.pgim2289.spring.model.User;
 import edu.ubb.licenta.pgim2289.spring.repository.PatientRepository;
 import edu.ubb.licenta.pgim2289.spring.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -40,5 +43,19 @@ public class PatientServiceImpl implements PatientService {
     @Override
     public Optional<Patient> findById(Long id) {
         return patientRepository.findById(id);
+    }
+
+    @Override
+    @Transactional
+    public List<PatientDropDownDTO> getAllPatientsForDropdown() {
+        return patientRepository.findAll().stream()
+                .map(patient -> {
+                    PatientDropDownDTO dto = new PatientDropDownDTO();
+                    dto.setUserId(patient.getUser().getId());
+                    dto.setFullName(patient.getUser().getFullName());
+                    dto.setEmail(patient.getUser().getEmail());
+                    return dto;
+                })
+                .toList();
     }
 }

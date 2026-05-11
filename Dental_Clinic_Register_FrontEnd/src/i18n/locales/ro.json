@@ -205,5 +205,12 @@
   "error.fetch_services": "Eroare la încărcarea serviciilor",
   "doctor.must.select.atleast.one.service": "Doctorul trebuie să selecteze cel puțin un serviciu oferit",
   "error.invalid_service_ids": "Eroare: ID-uri de servicii invalide furnizate.",
-  "servicesProvided": "Servicii Oferite"
+  "servicesProvided": "Servicii Oferite",
+  "error.user.not.found": "Utilizatorul nu a fost găsit.",
+  "error.patient.not.found": "Pacientul nu a fost găsit.",
+  "error.doctor.not.found": "Medicul nu a fost găsit.",
+  "error.service.not.found": "Serviciul nu a fost găsit.",
+  "error.appointment.not.found": "Programarea nu a fost găsită.",
+  "error.unauthorised.action": "Acțiune neautorizată.",
+  "error.doctor.already.booked": "Medicul este deja programat în acest interval orar."
 }

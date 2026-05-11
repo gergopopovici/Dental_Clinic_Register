@@ -25,6 +25,9 @@ const registerAdminApiUrl = `${api}/api/auth/register-admin`;
 const getAllUsersForAdminApiUrl = `${api}/api/users/users`;
 const toggleUserStatusBaseApiUrl = `${api}/api/users`;
 const getAllServicesApiUrl = `${api}/api/services`;
+const getPatientsDropdownApiUrl = `${api}/api/patients/dropdown`;
+const getDoctorsByServiceBaseApiUrl = `${api}/api/doctor/by-service`;
+const appointmentsApiUrl = `${api}/api/appointments`;
 const apiURL = api;
 
 export {
@@ -54,4 +57,7 @@ export {
   getAllUsersForAdminApiUrl,
   toggleUserStatusBaseApiUrl,
   getAllServicesApiUrl,
+  getPatientsDropdownApiUrl,
+  getDoctorsByServiceBaseApiUrl,
+  appointmentsApiUrl
 };

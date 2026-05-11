@@ -41,14 +41,14 @@ function LanguageSelector() {
           <Flag code="GB" style={{ width: 20 }} /> English
         </Box>
       </MenuItem>
-      <MenuItem value="ro">
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Flag code="RO" style={{ width: 20 }} /> Română
-        </Box>
-      </MenuItem>
       <MenuItem value="hu">
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Flag code="HU" style={{ width: 20 }} /> Magyar
+        </Box>
+      </MenuItem>
+      <MenuItem value="ro">
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Flag code="RO" style={{ width: 20 }} /> Română
         </Box>
       </MenuItem>
     </Select>

@@ -199,5 +199,12 @@
   "serviceName": "Service Name",
   "doctor.must.select.atleast.one.service": "Doctor must select at least one service they provide",
   "error.invalid_service_ids": "Error: Invalid service IDs provided.",
-  "servicesProvided": "Services Provided"
+  "servicesProvided": "Services Provided",
+  "error.user.not.found": "User not found.",
+  "error.patient.not.found": "Patient not found.",
+  "error.doctor.not.found": "Doctor not found.",
+  "error.service.not.found": "Service not found.",
+  "error.appointment.not.found": "Appointment not found.",
+  "error.unauthorised.action": "Unauthorized action.",
+  "error.doctor.already.booked": "The doctor is already booked for this time slot."
 }

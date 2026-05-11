@@ -198,5 +198,12 @@
   "save": "Mentés",
   "error.fetch_services": "Nem sikerült a szolgáltatások betöltése",
   "doctor.must.select.atleast.one.service": "Hiba: Egy doktor legalább egy szolgáltatást ki kell jelöljön.",
-  "servicesProvided": "Nyújtott szolgáltatások"
+  "servicesProvided": "Nyújtott szolgáltatások",
+  "error.user.not.found": "Felhasználó nem található.",
+  "error.patient.not.found": "Páciens nem található.",
+  "error.doctor.not.found": "Orvos nem található.",
+  "error.service.not.found": "Szolgáltatás nem található.",
+  "error.appointment.not.found": "Időpont nem található.",
+  "error.unauthorised.action": "Jogosulatlan művelet.",
+  "error.doctor.already.booked": "Az orvos már foglalt ebben az időpontban."
 }
