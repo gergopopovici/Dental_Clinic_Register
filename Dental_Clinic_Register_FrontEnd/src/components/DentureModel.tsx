@@ -1,7 +1,5 @@
-/* eslint-disable no-unused-vars */
 import React, { useRef } from 'react';
-import { useGLTF } from '@react-three/drei';
-import { useThree } from '@react-three/fiber';
+import { useGLTF, Center } from '@react-three/drei';
 import * as THREE from 'three';
 
 type DentureModelProps = {
@@ -11,9 +9,6 @@ type DentureModelProps = {
 
 export default function DentureModel({ modelPath, onModelClick }: DentureModelProps) {
   const meshRef = useRef(null);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { viewport } = useThree();
-
   const gltf = useGLTF(modelPath);
 
   const handleClick = (event: { intersections: Array<{ point: THREE.Vector3 }> }) => {
@@ -24,8 +19,10 @@ export default function DentureModel({ modelPath, onModelClick }: DentureModelPr
   };
 
   return (
-    <group ref={meshRef} position={[0, 0, 0]} onPointerDown={handleClick}>
-      <primitive object={gltf.scene} scale={1.0} />
+    <group ref={meshRef} onPointerDown={handleClick}>
+      <Center>
+        <primitive object={gltf.scene} scale={2.5} />
+      </Center>
     </group>
   );
 }

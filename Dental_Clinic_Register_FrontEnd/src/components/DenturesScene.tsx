@@ -1,266 +1,204 @@
-import React, { Suspense, useState, useCallback } from 'react';
-import { Canvas, useThree, useFrame } from '@react-three/fiber';
+import React, { Suspense, useState, useCallback, useEffect } from 'react';
+import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
-import { Box, Button, Typography } from '@mui/material';
+import { Box, Button, Typography, CircularProgress } from '@mui/material';
 import * as THREE from 'three';
 
 import DentureModel from './DentureModel';
 import Brace from './Brace';
 import RubberBand from './RubberBand';
-
-type BraceData = THREE.Vector3;
-
-type RubberBandData = {
-  startPosition: THREE.Vector3;
-  endPosition: THREE.Vector3;
-  color: string;
-};
+import { BraceComponentDTO } from '../models/BraceComponentDTO';
+import { getBraceComponents, syncBraceComponents } from '../services/BraceComponentService';
 
 type PlacementMode = 'none' | 'brace' | 'rubberBand' | 'delete';
 
-function DenturesScene() {
-  const [braces, setBraces] = useState<BraceData[]>([]);
-  const [rubberBands, setRubberBands] = useState<RubberBandData[]>([]);
+const DUMMY_TOOTH_CENTERS = [
+  { x: -1.5, y: 1.0, z: 2.0 },
+  { x: 1.5, y: 1.0, z: 2.0 },
+  { x: -2.5, y: 1.2, z: 1.5 },
+  { x: 2.5, y: 1.2, z: 1.5 },
+];
+
+function DenturesScene({ treatmentPlanId = 1 }: { treatmentPlanId?: number }) {
+  const [components, setComponents] = useState<BraceComponentDTO[]>([]);
   const [placementMode, setPlacementMode] = useState<PlacementMode>('none');
   const [rubberBandStartPoint, setRubberBandStartPoint] = useState<THREE.Vector3 | null>(null);
   const [rubberBandColor, setRubberBandColor] = useState<string>('#FF0000');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleRemoveBrace = useCallback((indexToRemove: number) => {
-    setBraces((prevBraces) => prevBraces.filter((_, index) => index !== indexToRemove));
-  }, []);
+  useEffect(() => {
+    const fetchComponents = async () => {
+      setIsLoading(true);
+      try {
+        const data = await getBraceComponents(treatmentPlanId);
+        setComponents(data);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchComponents();
+  }, [treatmentPlanId]);
 
-  const handleRemoveRubberBand = useCallback((indexToRemove: number) => {
-    setRubberBands((prevBands) => prevBands.filter((_, index) => index !== indexToRemove));
+  const handleSave = async () => {
+    setIsLoading(true);
+    try {
+      const savedData = await syncBraceComponents(treatmentPlanId, components);
+      setComponents(savedData);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleAutoPlace = () => {
+    const autoBraces: BraceComponentDTO[] = DUMMY_TOOTH_CENTERS.map((point) => ({
+      treatmentPlanId,
+      type: 'BRACE',
+      positionX: point.x,
+      positionY: point.y,
+      positionZ: point.z,
+      colour: '#C0C0C0',
+    }));
+    setComponents((prev) => [...prev, ...autoBraces]);
+  };
+
+  const handleRemoveComponent = useCallback((indexToRemove: number) => {
+    setComponents((prev) => prev.filter((_, index) => index !== indexToRemove));
   }, []);
 
   const handleModelClick = (point: THREE.Vector3) => {
     if (placementMode === 'brace') {
-      setBraces((prevBraces) => [...prevBraces, point]);
+      const newBrace: BraceComponentDTO = {
+        treatmentPlanId,
+        type: 'BRACE',
+        positionX: point.x,
+        positionY: point.y,
+        positionZ: point.z,
+        colour: '#C0C0C0',
+      };
+      setComponents((prev) => [...prev, newBrace]);
     } else if (placementMode === 'rubberBand') {
       if (!rubberBandStartPoint) {
         setRubberBandStartPoint(point);
       } else {
-        setRubberBands((prevBands) => [
-          ...prevBands,
-          { startPosition: rubberBandStartPoint, endPosition: point, color: rubberBandColor },
-        ]);
+        const newBand: BraceComponentDTO = {
+          treatmentPlanId,
+          type: 'RUBBER_BAND',
+          startPositionX: rubberBandStartPoint.x,
+          startPositionY: rubberBandStartPoint.y,
+          startPositionZ: rubberBandStartPoint.z,
+          endPositionX: point.x,
+          endPositionY: point.y,
+          endPositionZ: point.z,
+          colour: rubberBandColor,
+        };
+        setComponents((prev) => [...prev, newBand]);
         setRubberBandStartPoint(null);
       }
     }
   };
 
   const handleClearAll = () => {
-    setBraces([]);
-    setRubberBands([]);
+    setComponents([]);
     setRubberBandStartPoint(null);
   };
 
-  const handleSetBraceMode = () => {
-    if (placementMode === 'brace') {
-      setPlacementMode('none');
-    } else {
-      setPlacementMode('brace');
-    }
+  const toggleMode = (mode: PlacementMode) => {
+    setPlacementMode((prev) => (prev === mode ? 'none' : mode));
     setRubberBandStartPoint(null);
   };
-
-  const handleSetRubberBandMode = () => {
-    if (placementMode === 'rubberBand') {
-      setPlacementMode('none');
-    } else {
-      setPlacementMode('rubberBand');
-    }
-    setRubberBandStartPoint(null);
-  };
-
-  const handleSetDeleteMode = () => {
-    if (placementMode === 'delete') {
-      setPlacementMode('none');
-    } else {
-      setPlacementMode('delete');
-    }
-    setRubberBandStartPoint(null);
-  };
-
-  const handleColorChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setRubberBandColor(event.target.value);
-  };
-
-  const MODEL_PATH = '/denture_model.glb';
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        width: '100%',
-        minHeight: '100vh',
-        mx: 'auto',
-        p: 2,
-        position: 'relative',
-        overflow: 'hidden',
-      }}
-    >
-      <Box
-        sx={{
-          display: 'flex',
-          gap: 2,
-          mb: 2,
-          flexWrap: 'wrap',
-          justifyContent: 'center',
-          zIndex: 10,
-        }}
-      >
-        <Button variant={placementMode === 'brace' ? 'contained' : 'outlined'} onClick={handleSetBraceMode}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
+      <Box sx={{ display: 'flex', gap: 2, mb: 2, flexWrap: 'wrap', justifyContent: 'center' }}>
+        <Button variant={placementMode === 'brace' ? 'contained' : 'outlined'} onClick={() => toggleMode('brace')}>
           Place Brace
         </Button>
-        <Button variant={placementMode === 'rubberBand' ? 'contained' : 'outlined'} onClick={handleSetRubberBandMode}>
+        <Button
+          variant={placementMode === 'rubberBand' ? 'contained' : 'outlined'}
+          onClick={() => toggleMode('rubberBand')}
+        >
           Place Rubber Band
         </Button>
-        {/* New Delete button */}
-        <Button variant={placementMode === 'delete' ? 'contained' : 'outlined'} onClick={handleSetDeleteMode}>
+        <Button variant={placementMode === 'delete' ? 'contained' : 'outlined'} onClick={() => toggleMode('delete')}>
           Delete
+        </Button>
+        <Button variant="outlined" color="primary" onClick={handleAutoPlace}>
+          Auto-Place
         </Button>
         <Button variant="outlined" color="error" onClick={handleClearAll}>
           Clear All
         </Button>
+        <Button variant="contained" color="success" onClick={handleSave} disabled={isLoading}>
+          {isLoading ? <CircularProgress size={24} /> : 'Save Plan'}
+        </Button>
       </Box>
 
       {placementMode === 'rubberBand' && (
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 2,
-            mb: 2,
-            zIndex: 10,
-          }}
-        >
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
           <Typography>Rubber Band Color:</Typography>
-          <input type="color" value={rubberBandColor} onChange={handleColorChange} />
-          {rubberBandStartPoint && (
-            <Typography variant="body2" color="primary">
-              Click again for end point...
-            </Typography>
-          )}
+          <input type="color" value={rubberBandColor} onChange={(e) => setRubberBandColor(e.target.value)} />
+          {rubberBandStartPoint && <Typography color="primary">Click again for end point...</Typography>}
         </Box>
       )}
 
       <Canvas
-        camera={{
-          position: [0.00003453758318994637, 1.6543756293575801e-15, 27.018004383109798],
-          fov: 75,
-        }}
-        style={{
-          width: '400px',
-          height: '300px',
-          border: '1px solid #ccc',
-          borderRadius: '8px',
-          background: '#f0f0f0',
-          zIndex: 1,
-        }}
+        camera={{ position: [0, 0, 40], fov: 45 }}
+        style={{ width: '800px', height: '600px', borderRadius: '8px', background: '#2c2c2c' }}
       >
-        <CameraLogger />
         <Suspense fallback={null}>
           <ambientLight intensity={1.0} />
-          <directionalLight position={[10, 10, 5]} intensity={2.0} castShadow />
+          <directionalLight position={[10, 10, 5]} intensity={2.0} />
           <pointLight position={[5, 5, 5]} intensity={1.5} />
-          <pointLight position={[-5, -5, 5]} intensity={1.5} />
 
-          <group position={[0, 0, 0]}>
-            <DentureModel modelPath={MODEL_PATH} onModelClick={handleModelClick} />
-          </group>
+          <DentureModel modelPath="/denture_model.glb" onModelClick={handleModelClick} />
 
-          {braces.map((position, index) => (
-            <Brace
-              key={`brace-${index}`}
-              position={position}
-              onClick={() => {
-                if (placementMode === 'delete') {
-                  handleRemoveBrace(index);
-                }
-              }}
-            />
-          ))}
-
-          {rubberBands.map((band, index) => (
-            <RubberBand
-              key={`band-${index}`}
-              startPosition={band.startPosition}
-              endPosition={band.endPosition}
-              color={band.color}
-              onClick={() => {
-                if (placementMode === 'delete') {
-                  handleRemoveRubberBand(index);
-                }
-              }}
-            />
-          ))}
+          {components.map((comp, index) => {
+            if (comp.type === 'BRACE' && comp.positionX != null) {
+              const pos = new THREE.Vector3(comp.positionX ?? 0, comp.positionY ?? 0, comp.positionZ ?? 0);
+              return (
+                <Brace
+                  key={`comp-${index}`}
+                  position={pos}
+                  onClick={() => placementMode === 'delete' && handleRemoveComponent(index)}
+                />
+              );
+            }
+            if (comp.type === 'RUBBER_BAND' && comp.startPositionX != null && comp.endPositionX != null) {
+              const start = new THREE.Vector3(
+                comp.startPositionX ?? 0,
+                comp.startPositionY ?? 0,
+                comp.startPositionZ ?? 0,
+              );
+              const end = new THREE.Vector3(comp.endPositionX ?? 0, comp.endPositionY ?? 0, comp.endPositionZ ?? 0);
+              return (
+                <RubberBand
+                  key={`comp-${index}`}
+                  startPosition={start}
+                  endPosition={end}
+                  color={comp.colour || '#FF0000'}
+                  onClick={() => placementMode === 'delete' && handleRemoveComponent(index)}
+                />
+              );
+            }
+            return null;
+          })}
 
           <OrbitControls
-            enablePan={false}
+            enablePan={true}
             enableZoom={true}
             enableRotate={true}
             minDistance={10}
-            maxDistance={50}
-            minPolarAngle={Math.PI / 2}
-            maxPolarAngle={Math.PI / 2}
+            maxDistance={80}
             target={[0, 0, 0]}
-            minAzimuthAngle={-Infinity}
-            maxAzimuthAngle={Infinity}
           />
         </Suspense>
       </Canvas>
-
-      <Box
-        sx={{
-          mt: 4,
-          maxHeight: 200,
-          overflowY: 'auto',
-          p: 2,
-          border: '1px solid #ccc',
-          borderRadius: '4px',
-          width: '100%',
-          maxWidth: '600px',
-          bgcolor: '#f9f9f9',
-          zIndex: 10,
-        }}
-      >
-        <Typography variant="h6" gutterBottom>
-          Placed Components
-        </Typography>
-        {braces.length === 0 && rubberBands.length === 0 && (
-          <Typography variant="body2" color="text.secondary">
-            No components placed yet.
-          </Typography>
-        )}
-        {braces.map((pos, index) => (
-          <Typography key={`display-brace-${index}`} variant="body2">
-            Brace {index + 1}: ({pos.x.toFixed(3)}, {pos.y.toFixed(3)}, {pos.z.toFixed(3)})
-          </Typography>
-        ))}
-        {rubberBands.map((band, index) => (
-          <Typography key={`display-band-${index}`} variant="body2">
-            Rubber Band {index + 1} ({band.color}): Start({band.startPosition.x.toFixed(3)},{' '}
-            {band.startPosition.y.toFixed(3)}, {band.startPosition.z.toFixed(3)}) - End({band.endPosition.x.toFixed(3)},{' '}
-            {band.endPosition.y.toFixed(3)}, {band.endPosition.z.toFixed(3)})
-          </Typography>
-        ))}
-      </Box>
     </Box>
   );
 }
 
 export default DenturesScene;
-
-function CameraLogger() {
-  const { camera } = useThree();
-
-  useFrame(() => {
-    console.log('Camera position:', camera.position);
-    console.log('Camera rotation:', camera.rotation);
-  });
-
-  return null;
-}
