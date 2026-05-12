@@ -20,6 +20,7 @@ import { UserProvider } from './context/UserContext';
 import { Box, Typography } from '@mui/material';
 import BracesPage from './pages/Braces';
 import AdminDashboard from './pages/Admin';
+import Appointments from './pages/Appointments/Appointments';
 
 const DashboardPage = () => (
   <Box>
@@ -30,15 +31,6 @@ const DashboardPage = () => (
       Welcome to your patient dashboard! This is where you can see an overview of your health, upcoming appointments,
       and more.
     </Typography>
-  </Box>
-);
-
-const AppointmentsPage = () => (
-  <Box>
-    <Typography variant="h4" gutterBottom>
-      Appointments
-    </Typography>
-    <Typography>Manage your appointments here. View past, current, and schedule new ones.</Typography>
   </Box>
 );
 
@@ -69,7 +61,7 @@ function App() {
                 }
               >
                 <Route path="/dashboard" element={<DashboardPage />} />
-                <Route path="/appointments" element={<AppointmentsPage />} />
+                <Route path="/appointments" element={<Appointments />} />
                 <Route path="/profile" element={<ProfileSettings />} />
                 <Route path="/braces" element={<BracesPage />} />
                 <Route path="/admin" element={<AdminDashboard />} />
