@@ -36,9 +36,8 @@ public interface EmailService {
 
     void sendAppointmentUpdatedEmailToPatient(String patientEmail, String patientName, LocalDateTime newStartTime, String doctorName);
 
-    void sendAppointmentCancelledByPatientEmailToDoctor(String doctorEmail, String doctorName, String patientName, LocalDateTime startTime);
-
-    void sendAppointmentCancelledByDoctorEmailToPatient(String patientEmail, String patientName, String doctorName, LocalDateTime startTime, String reason);
-
     void sendPostVisitThankYouEmail(String patientEmail, String patientName, String doctorName);
+    void sendAppointmentCancelledByPatientEmailToDoctor(String doctorEmail, String doctorName, String patientName, String dateInfo);
+
+    void sendAppointmentCancelledByDoctorEmailToPatient(String patientEmail, String patientName, String doctorName, String dateInfo, String reason);
 }

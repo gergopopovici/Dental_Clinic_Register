@@ -1,24 +1,27 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { RequestPatientAppointmentDTO, TimePreference } from '../models/Appointment';
-import { getDoctorsByService } from '../services/DoctorService';
-import { requestAppointment } from '../services/AppointmentService';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Dialog,
-  DialogContent,
   DialogTitle,
-  FormControl,
-  InputLabel,
-  Typography,
-  Select,
-  MenuItem,
-  CircularProgress,
-  TextField,
+  DialogContent,
   DialogActions,
   Button,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  TextField,
+  CircularProgress,
+  Typography,
+  Autocomplete,
+  Box,
 } from '@mui/material';
+import { useTranslation } from 'react-i18next';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getAllServices } from '../services/ProvidedServiceService';
+import { getDoctorsByService } from '../services/DoctorService';
+import { requestAppointment } from '../services/AppointmentService';
+import { RequestPatientAppointmentDTO, TimePreference } from '../models/Appointment';
+
 interface PatientBookModalProps {
   open: boolean;
   onClose: () => void;
@@ -44,17 +47,28 @@ function PatientBookModal({ open, onClose, userId }: PatientBookModalProps) {
       setErrorMessage('');
     }
   }, [open]);
-  const { data: doctors, isLoading: isLoadingDoctors } = useQuery({
-    queryKey: ['doctorsByService', serviceId],
-    queryFn: () => getDoctorsByService(serviceId as number),
-    enabled: !!serviceId && open,
-  });
 
   const { data: services, isLoading: isLoadingServices } = useQuery({
     queryKey: ['services'],
     queryFn: getAllServices,
     enabled: open,
   });
+
+  const { data: doctors, isLoading: isLoadingDoctors } = useQuery({
+    queryKey: ['doctorsByService', serviceId],
+    queryFn: () => getDoctorsByService(serviceId as number),
+    enabled: !!serviceId && open,
+  });
+
+  const sortedServices = useMemo(
+    () => (services ? [...services].sort((a, b) => a.name.localeCompare(b.name)) : []),
+    [services],
+  );
+
+  const sortedDoctors = useMemo(
+    () => (doctors ? [...doctors].sort((a, b) => a.fullName.localeCompare(b.fullName)) : []),
+    [doctors],
+  );
 
   const bookMutation = useMutation({
     mutationFn: (request: RequestPatientAppointmentDTO) => requestAppointment(userId, request),
@@ -73,13 +87,12 @@ function PatientBookModal({ open, onClose, userId }: PatientBookModalProps) {
       setErrorMessage(t('pleaseFillAllFields'));
       return;
     }
-    const payload: RequestPatientAppointmentDTO = {
+    bookMutation.mutate({
       serviceId: serviceId as number,
       doctorId: doctorId as number,
       requestedDate: date,
       timePreference: timePreference as TimePreference,
-    };
-    bookMutation.mutate(payload);
+    });
   };
 
   const darkFieldStyles = {
@@ -87,8 +100,10 @@ function PatientBookModal({ open, onClose, userId }: PatientBookModalProps) {
     borderRadius: 1,
     '& .MuiOutlinedInput-notchedOutline': { borderColor: '#444' },
     '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#888' },
-    '& .MuiSvgIcon-root': { color: 'white' },
+    '& .MuiInputLabel-root': { color: '#aaa' },
+    '& .MuiInputLabel-root.Mui-focused': { color: '#1976d2' },
     color: 'white',
+    input: { color: 'white' },
   };
 
   return (
@@ -97,19 +112,22 @@ function PatientBookModal({ open, onClose, userId }: PatientBookModalProps) {
       onClose={onClose}
       maxWidth="sm"
       fullWidth
+      disableRestoreFocus
       slotProps={{ paper: { sx: { bgcolor: '#1e1e1e', color: 'white' } } }}
     >
       <DialogTitle sx={{ fontWeight: 'bold', borderBottom: '1px solid #333' }}>
         {t('requestNewAppointment')}
       </DialogTitle>
-      <DialogContent sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 3 }}>
+
+      <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 3, pt: '24px !important' }}>
         {errorMessage && (
-          <Typography color="error" variant="body2" sx={{ textAlign: 'center' }}>
+          <Typography color="error" variant="body2" sx={{ textAlign: 'center', mb: 1 }}>
             {errorMessage}
           </Typography>
         )}
-        <FormControl fullWidth variant="outlined">
-          <InputLabel sx={{ color: '#aaa' }}>{t('selectService')}</InputLabel>
+
+        <FormControl fullWidth variant="outlined" sx={darkFieldStyles}>
+          <InputLabel shrink>{t('selectService')}</InputLabel>
           <Select
             value={serviceId}
             onChange={(e) => {
@@ -117,63 +135,70 @@ function PatientBookModal({ open, onClose, userId }: PatientBookModalProps) {
               setDoctorId('');
             }}
             label={t('selectService')}
-            sx={darkFieldStyles}
+            notched
+            autoFocus
           >
             {isLoadingServices ? (
               <MenuItem disabled>
                 <CircularProgress size={20} sx={{ mr: 2 }} /> {t('loading')}
               </MenuItem>
             ) : (
-              services?.map((s) => (
+              sortedServices.map((s) => (
                 <MenuItem key={s.id} value={s.id}>
-                  {s.name} ({s.durationMinutes} min)
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
+                    <Typography variant="body2">
+                      {s.name} ({s.durationMinutes} min)
+                    </Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#81c784', ml: 2 }}>
+                      {s.price} {t('currency')}
+                    </Typography>
+                  </Box>
                 </MenuItem>
               ))
             )}
           </Select>
         </FormControl>
-        <FormControl fullWidth variant="outlined" disabled={!serviceId}>
-          <InputLabel sx={{ color: '#aaa' }}>{t('selectDoctors')}</InputLabel>
-          <Select
-            value={doctorId}
-            onChange={(e) => setDoctorId(e.target.value as number)}
-            label={t('selectDoctor')}
-            sx={darkFieldStyles}
-          >
-            {isLoadingDoctors ? (
-              <MenuItem disabled>
-                <CircularProgress size={20} sx={{ mr: 2 }} /> {t('loading')}
-              </MenuItem>
-            ) : !doctors || doctors.length === 0 ? (
-              <MenuItem disabled>{serviceId ? t('noDoctorsFoundForService') : t('selectServiceFirst')}</MenuItem>
-            ) : (
-              doctors.map((d) => (
-                <MenuItem key={d.id} value={d.id}>
-                  {d.fullName}
-                </MenuItem>
-              ))
-            )}
-          </Select>
-        </FormControl>
+
+        <Autocomplete
+          disabled={!serviceId}
+          options={sortedDoctors}
+          loading={isLoadingDoctors}
+          getOptionLabel={(option) => option.fullName || ''}
+          value={sortedDoctors.find((d) => d.id === doctorId) || null}
+          onChange={(_, newValue) => setDoctorId(newValue ? newValue.id : '')}
+          noOptionsText={serviceId ? t('noDoctorsFoundForService') : t('selectServiceFirst')}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label={t('selectDoctor')}
+              placeholder={t('searchDoctorByName')}
+              slotProps={{ inputLabel: { shrink: true } }}
+              sx={darkFieldStyles}
+            />
+          )}
+          slotProps={{ paper: { sx: { bgcolor: '#2c2c2c', color: 'white' } } }}
+        />
+
         <TextField
           type="date"
           label={t('date')}
           fullWidth
           slotProps={{
-            inputLabel: { shrink: true, sx: { color: '#aaa' } },
+            inputLabel: { shrink: true },
             htmlInput: { min: new Date().toISOString().split('T')[0] },
           }}
           value={date}
           onChange={(e) => setDate(e.target.value)}
-          sx={{ input: { color: 'white' }, ...darkFieldStyles }}
+          sx={darkFieldStyles}
         />
-        <FormControl fullWidth variant="outlined">
-          <InputLabel sx={{ color: '#aaa' }}>{t('timePreference')}</InputLabel>
+
+        <FormControl fullWidth variant="outlined" sx={darkFieldStyles}>
+          <InputLabel shrink>{t('timePreference')}</InputLabel>
           <Select
             value={timePreference}
             onChange={(e) => setTimePreference(e.target.value as TimePreference)}
             label={t('timePreference')}
-            sx={darkFieldStyles}
+            notched
           >
             <MenuItem value="MORNING">{t('morning')}</MenuItem>
             <MenuItem value="AFTERNOON">{t('afternoon')}</MenuItem>
@@ -181,8 +206,9 @@ function PatientBookModal({ open, onClose, userId }: PatientBookModalProps) {
           </Select>
         </FormControl>
       </DialogContent>
+
       <DialogActions sx={{ p: 3, borderTop: '1px solid #333' }}>
-        <Button onClick={onClose} sx={{ color: '#aaa' }} disabled={bookMutation.isPending}>
+        <Button onClick={onClose} sx={{ color: '#aaa' }}>
           {t('cancel')}
         </Button>
         <Button variant="contained" color="primary" onClick={handleSubmit} disabled={bookMutation.isPending}>
@@ -192,4 +218,5 @@ function PatientBookModal({ open, onClose, userId }: PatientBookModalProps) {
     </Dialog>
   );
 }
+
 export default PatientBookModal;

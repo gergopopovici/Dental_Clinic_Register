@@ -1,8 +1,22 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { cancelAppointmentByPatient, getPatientAppointments } from '../../services/AppointmentService';
-import { Alert, Box, Button, CircularProgress, Grid, Snackbar, Typography } from '@mui/material';
+import {
+  Alert,
+  Box,
+  Button,
+  CircularProgress,
+  Snackbar,
+  Typography,
+  Tabs,
+  Tab,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Grid,
+} from '@mui/material';
 import PatientBookModal from '../../components/PatientBookModal';
 import AppointmentCard from '../../components/AppointmentCard';
 
@@ -10,11 +24,25 @@ interface PatientDashboardProps {
   userId: number;
 }
 
+const getSortString = (apt: any) => {
+  if (apt.startTime) return apt.startTime;
+  if (apt.requestedDate) {
+    const hour =
+      apt.timePreference === 'MORNING' ? '09:00:00' : apt.timePreference === 'EVENING' ? '18:00:00' : '14:00:00';
+    return `${apt.requestedDate}T${hour}`;
+  }
+  return '0000-00-00T00:00:00';
+};
+
 function PatientDashboard({ userId }: PatientDashboardProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const [tabValue, setTabValue] = useState(0);
   const [isBookModalOpen, setIsBookModalOpen] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
+
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [appointmentToCancel, setAppointmentToCancel] = useState<number | null>(null);
 
   const {
     data: appointments,
@@ -25,22 +53,49 @@ function PatientDashboard({ userId }: PatientDashboardProps) {
     queryFn: () => getPatientAppointments(userId),
   });
 
+  const processedLists = useMemo(() => {
+    if (!appointments) return { upcoming: [], history: [] };
+
+    const now = new Date().getTime();
+
+    const upcoming = appointments
+      .filter((a) => {
+        const isFutureStatus = a.status === 'CONFIRMED' || a.status === 'PENDING';
+        const isFutureDate = new Date(getSortString(a)).getTime() > now;
+        return isFutureStatus && isFutureDate;
+      })
+      .sort((a, b) => getSortString(a).localeCompare(getSortString(b)));
+
+    const history = appointments
+      .filter((a) => {
+        const isPastStatus = ['COMPLETED', 'CANCELLED', 'NO_SHOW'].includes(a.status);
+        const isPastDate = new Date(getSortString(a)).getTime() <= now;
+        return isPastStatus || isPastDate;
+      })
+      .sort((a, b) => getSortString(a).localeCompare(getSortString(b)));
+
+    return { upcoming, history };
+  }, [appointments]);
+
   const cancelMutation = useMutation({
     mutationFn: (appointmentId: number) => cancelAppointmentByPatient(userId, appointmentId),
-    onSuccess: () => {
+    onSuccess: async () => {
       setSnackbar({ open: true, message: t('appointmentCancelled'), severity: 'success' });
-      queryClient.invalidateQueries({ queryKey: ['patientAppointments', userId] });
+      await queryClient.invalidateQueries({ queryKey: ['patientAppointments', userId] });
     },
     onError: (error: any) => {
       const backendErrorKey = error.response?.data?.message || 'error.unknown';
       setSnackbar({ open: true, message: t(backendErrorKey), severity: 'error' });
     },
   });
-  const handleCloseSnackbar = () => setSnackbar({ ...snackbar, open: false });
+
+  const currentDisplayList = tabValue === 0 ? processedLists.upcoming : processedLists.history;
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+      <Box
+        sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4, flexWrap: 'wrap', gap: 2 }}
+      >
         <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
           {t('myAppointments')}
         </Typography>
@@ -48,33 +103,82 @@ function PatientDashboard({ userId }: PatientDashboardProps) {
           + {t('bookNewAppointment')}
         </Button>
       </Box>
+
+      <Box sx={{ borderBottom: 1, borderColor: '#333', mb: 4 }}>
+        <Tabs
+          value={tabValue}
+          onChange={(_, newValue) => setTabValue(newValue)}
+          textColor="primary"
+          indicatorColor="primary"
+        >
+          <Tab label={t('upcoming')} sx={{ color: 'white' }} />
+          <Tab label={t('history')} sx={{ color: 'white' }} />
+        </Tabs>
+      </Box>
+
       {isLoading && <CircularProgress sx={{ color: 'white', display: 'block', mx: 'auto', mt: 4 }} />}
       {isError && <Typography color="error">{t('failedToFetchAppointments')}</Typography>}
 
-      {appointments && appointments.length === 0 && !isLoading && (
-        <Typography sx={{ color: '#aaa' }}>{t('noAppointmentsFound')}</Typography>
+      {!isLoading && !isError && currentDisplayList.length === 0 && (
+        <Typography sx={{ color: '#aaa', fontStyle: 'italic', mt: 2 }}>
+          {tabValue === 0 ? t('noUpcomingAppointments') : t('noPastAppointments')}
+        </Typography>
       )}
+
       <Grid container spacing={3}>
-        {appointments?.map((apt) => (
+        {currentDisplayList.map((apt) => (
           <Grid size={{ xs: 12, sm: 6, md: 4 }} key={apt.id}>
             <AppointmentCard
               appointment={apt}
               userRole="PATIENT"
               onCancel={
-                apt.status === 'PENDING' || apt.status === 'CONFIRMED' ? (id) => cancelMutation.mutate(id) : undefined
+                (apt.status === 'PENDING' || apt.status === 'CONFIRMED') && tabValue === 0
+                  ? (id) => {
+                      setAppointmentToCancel(id);
+                      setCancelDialogOpen(true);
+                    }
+                  : undefined
               }
             />
           </Grid>
         ))}
       </Grid>
+
       <PatientBookModal open={isBookModalOpen} onClose={() => setIsBookModalOpen(false)} userId={userId} />
 
-      <Snackbar open={snackbar.open} autoHideDuration={6000} onClose={handleCloseSnackbar}>
-        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity}>
+      <Dialog
+        open={cancelDialogOpen}
+        onClose={() => setCancelDialogOpen(false)}
+        slotProps={{ paper: { sx: { bgcolor: '#1e1e1e', color: 'white', minWidth: '400px' } } }}
+      >
+        <DialogTitle sx={{ borderBottom: '1px solid #333' }}>{t('cancelAppointment')}</DialogTitle>
+        <DialogContent sx={{ pt: '24px !important' }}>
+          <Typography variant="body1">{t('confirmCancelPatientMessage')}</Typography>
+        </DialogContent>
+        <DialogActions sx={{ borderTop: '1px solid #333', p: 2 }}>
+          <Button onClick={() => setCancelDialogOpen(false)} sx={{ color: '#aaa' }}>
+            {t('back')}
+          </Button>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={async () => {
+              if (appointmentToCancel) await cancelMutation.mutateAsync(appointmentToCancel);
+              setCancelDialogOpen(false);
+            }}
+          >
+            {t('confirmCancel')}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Snackbar open={snackbar.open} autoHideDuration={6000} onClose={() => setSnackbar({ ...snackbar, open: false })}>
+        <Alert onClose={() => setSnackbar({ ...snackbar, open: false })} severity={snackbar.severity} variant="filled">
           {snackbar.message}
         </Alert>
       </Snackbar>
     </Box>
   );
 }
+
 export default PatientDashboard;

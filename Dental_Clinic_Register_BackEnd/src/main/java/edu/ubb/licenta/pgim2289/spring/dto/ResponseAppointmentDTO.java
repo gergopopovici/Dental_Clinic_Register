@@ -19,6 +19,7 @@ public class ResponseAppointmentDTO {
     private Long serviceId;
     private String serviceName;
     private Integer serviceDurationMinutes;
+    private Integer price;
 
     private LocalDate requestedDate;
     private Appointment.TimePreference timePreference;

@@ -21,7 +21,7 @@ public class AppointmentController {
     }
 
     @GetMapping("/patient/{userId}")
-    @PreAuthorize("hasRole('Patient')")
+    @PreAuthorize("hasRole('PATIENT')")
     public ResponseEntity<List<ResponseAppointmentDTO>> getPatientAppointments(
             @PathVariable Long userId) {
         return ResponseEntity.ok(appointmentService.getAppointmentsByPatient(userId));

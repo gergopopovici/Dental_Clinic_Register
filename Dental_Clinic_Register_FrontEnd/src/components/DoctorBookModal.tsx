@@ -12,12 +12,14 @@ import {
   TextField,
   CircularProgress,
   Typography,
+  Autocomplete,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getAllServices } from '../services/ProvidedServiceService';
 import { createAppointmentByDoctor } from '../services/AppointmentService';
 import { getAllPatientsForDropdown } from '../services/PatientService';
+import { PatientDropDownDTO } from '../models/Appointment';
 
 interface DoctorBookModalProps {
   open: boolean;
@@ -58,6 +60,15 @@ function DoctorBookModal({ open, onClose, doctorId }: DoctorBookModalProps) {
     queryFn: getAllServices,
     enabled: open,
   });
+
+  const sortedPatients = React.useMemo(() => {
+    if (!patients) return [];
+    return [...patients].sort((a: PatientDropDownDTO, b: PatientDropDownDTO) => {
+      const nameA = (a.fullName || '').toLowerCase();
+      const nameB = (b.fullName || '').toLowerCase();
+      return nameA.localeCompare(nameB);
+    });
+  }, [patients]);
 
   const bookMutation = useMutation({
     mutationFn: (payload: any) => createAppointmentByDoctor(doctorId, payload),
@@ -117,30 +128,43 @@ function DoctorBookModal({ open, onClose, doctorId }: DoctorBookModalProps) {
           </Typography>
         )}
 
-        <FormControl fullWidth variant="outlined" sx={darkFieldStyles}>
-          <InputLabel shrink>{t('selectPatient')}</InputLabel>
-          <Select
-            value={patientId}
-            onChange={(e) => setPatientId(e.target.value as number)}
-            label={t('selectPatient')}
-            notched
-          >
-            {isLoadingPatients ? (
-              <MenuItem disabled>
-                <CircularProgress size={20} sx={{ mr: 2 }} /> {t('loading')}
-              </MenuItem>
-            ) : (
-              patients?.map((p: any) => {
-                const uniqueId = p.id || p.userId || p.email;
-                return (
-                  <MenuItem key={uniqueId} value={uniqueId}>
-                    {p.fullName || `${p.firstName} ${p.lastName}`}
-                  </MenuItem>
-                );
-              })
-            )}
-          </Select>
-        </FormControl>
+        <Autocomplete
+          options={sortedPatients}
+          loading={isLoadingPatients}
+          getOptionLabel={(option: PatientDropDownDTO) => option.fullName || ''}
+          value={sortedPatients.find((p) => p.userId === patientId) || null}
+          onChange={(_, newValue) => setPatientId(newValue ? newValue.userId : '')}
+          noOptionsText={t('noPatientsFound')}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label={t('selectPatient')}
+              placeholder={t('searchPatientByName')}
+              slotProps={{
+                inputLabel: { shrink: true },
+                input: {
+                  ...params.InputProps,
+                  endAdornment: (
+                    <>
+                      {isLoadingPatients ? <CircularProgress color="inherit" size={20} /> : null}
+                      {params.InputProps.endAdornment}
+                    </>
+                  ),
+                },
+              }}
+              sx={darkFieldStyles}
+            />
+          )}
+          slotProps={{
+            paper: {
+              sx: {
+                bgcolor: '#2c2c2c',
+                color: 'white',
+                '& .MuiAutocomplete-option[aria-selected="true"]': { bgcolor: '#444 !important' },
+              },
+            },
+          }}
+        />
 
         <FormControl fullWidth variant="outlined" sx={darkFieldStyles}>
           <InputLabel shrink>{t('selectService')}</InputLabel>

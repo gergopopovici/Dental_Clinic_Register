@@ -15,6 +15,7 @@ public interface AppointmentMapper {
     @Mapping(source = "service.id", target = "serviceId")
     @Mapping(source = "service.name", target = "serviceName")
     @Mapping(source = "service.durationMinutes", target = "serviceDurationMinutes")
+    @Mapping(source = "service.price", target = "price")
     ResponseAppointmentDTO toDto(Appointment appointment);
 
 }

@@ -86,4 +86,5 @@ export interface ResponseAppointmentDTO {
   endTime?: string;
   notes?: string;
   resourceLink?: string;
+  price:number;
 }

@@ -200,32 +200,32 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void sendAppointmentCancelledByPatientEmailToDoctor(String doctorEmail, String doctorName, String patientName, LocalDateTime startTime) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom(fromEmail);
-        message.setTo(doctorEmail);
-        message.setSubject("Appointment Cancelled by Patient");
-        message.setText("Hello Dr. " + doctorName + ",\n\nPatient " + patientName + " has cancelled their appointment scheduled for " + startTime + ".");
-        mailSender.send(message);
-    }
-
-    @Override
-    public void sendAppointmentCancelledByDoctorEmailToPatient(String patientEmail, String patientName, String doctorName, LocalDateTime startTime, String reason) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom(fromEmail);
-        message.setTo(patientEmail);
-        message.setSubject("Appointment Cancelled");
-        message.setText("Hello " + patientName + ",\n\nUnfortunately, Dr. " + doctorName + " had to cancel your appointment on " + startTime + ".\nReason: " + reason + "\n\nPlease log in to book a new time.");
-        mailSender.send(message);
-    }
-
-    @Override
     public void sendPostVisitThankYouEmail(String patientEmail, String patientName, String doctorName) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(fromEmail);
         message.setTo(patientEmail);
         message.setSubject("Thank you for your visit!");
         message.setText("Hello " + patientName + ",\n\nThank you for visiting Dr. " + doctorName + " today. We hope you had a great experience!");
+        mailSender.send(message);
+    }
+
+    @Override
+    public void sendAppointmentCancelledByPatientEmailToDoctor(String doctorEmail, String doctorName, String patientName, String dateInfo) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(fromEmail);
+        message.setTo(doctorEmail);
+        message.setSubject("Appointment Cancelled by Patient");
+        message.setText("Hello Dr. " + doctorName + ",\n\nPatient " + patientName + " has cancelled their appointment for " + dateInfo + ".");
+        mailSender.send(message);
+    }
+
+    @Override
+    public void sendAppointmentCancelledByDoctorEmailToPatient(String patientEmail, String patientName, String doctorName, String dateInfo, String reason) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(fromEmail);
+        message.setTo(patientEmail);
+        message.setSubject("Appointment Cancelled");
+        message.setText("Hello " + patientName + ",\n\nUnfortunately, Dr. " + doctorName + " had to cancel your appointment on " + dateInfo + ".\nReason: " + reason + "\n\nPlease log in to book a new time.");
         mailSender.send(message);
     }
 }

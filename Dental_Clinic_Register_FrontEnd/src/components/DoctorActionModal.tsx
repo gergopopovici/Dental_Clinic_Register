@@ -20,9 +20,21 @@ interface DoctorActionModalProps {
   userId: number;
   appointmentId: number | null;
   actionType: 'CONFIRM' | 'RESCHEDULE';
+  initialDateTime?: string;
+  initialNotes?: string;
+  initialResourceLink?: string;
 }
 
-function DoctorActionModal({ open, onClose, userId, appointmentId, actionType }: DoctorActionModalProps) {
+function DoctorActionModal({
+  open,
+  onClose,
+  userId,
+  appointmentId,
+  actionType,
+  initialDateTime,
+  initialNotes,
+  initialResourceLink,
+}: DoctorActionModalProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
@@ -32,13 +44,17 @@ function DoctorActionModal({ open, onClose, userId, appointmentId, actionType }:
   const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
-    if (!open) {
+    if (open) {
+      setDateTime(initialDateTime || '');
+      setNotes(initialNotes || '');
+      setResourceLink(initialResourceLink || '');
+    } else {
       setDateTime('');
       setNotes('');
       setResourceLink('');
       setErrorMessage('');
     }
-  }, [open]);
+  }, [open, initialDateTime, initialNotes, initialResourceLink]);
 
   const actionMutation = useMutation({
     mutationFn: (payload: DoctorConfirmDTO | DoctorUpdateAppointmentDTO) => {
@@ -50,8 +66,8 @@ function DoctorActionModal({ open, onClose, userId, appointmentId, actionType }:
         return updateAppointment(userId, appointmentId, payload as DoctorUpdateAppointmentDTO);
       }
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['doctorAppointments'] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['doctorAppointments', userId] });
       onClose();
     },
     onError: (error: any) => {

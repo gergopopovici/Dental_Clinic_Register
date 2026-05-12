@@ -44,11 +44,24 @@ function AppointmentCard({
   const displayDate = appointment.requestedDate || appointment.startTime?.split('T')[0];
   const displayTime = appointment.startTime
     ? appointment.startTime.split('T')[1].substring(0, 5)
-    : appointment.timePreference;
+    : t(appointment.timePreference?.toLowerCase() || '');
+
+  const isInactive = ['CANCELLED', 'NO_SHOW'].includes(appointment.status);
 
   return (
-    <Card sx={{ bgcolor: '#1e1e1e', color: 'white', height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+    <Card
+      sx={{
+        bgcolor: '#1e1e1e',
+        color: 'white',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        opacity: isInactive ? 0.7 : 1,
+        transition: 'opacity 0.3s ease',
+        border: isInactive ? '1px solid #333' : '1px solid transparent',
+      }}
+    >
+      <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', p: 2 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
           <Chip
             label={t(appointment.status.toLowerCase()) || appointment.status}
@@ -69,19 +82,39 @@ function AppointmentCard({
         <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 1 }}>
           {appointment.serviceName}
         </Typography>
+
         <Typography variant="body1" sx={{ color: '#aaaaaa', mb: 0.5 }}>
           {userRole === 'PATIENT'
             ? `${t('doctor')}: Dr. ${appointment.doctorName}`
             : `${t('patient')}: ${appointment.patientName}`}
         </Typography>
-        <Typography variant="body2" sx={{ color: '#777777', mb: 2 }}>
+
+        <Typography variant="body2" sx={{ color: '#777777', mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
           {appointment.serviceDurationMinutes} {t('minutes')}
+          <Box component="span" sx={{ color: '#444' }}>
+            •
+          </Box>
+          <Box
+            component="span"
+            sx={{
+              color: isInactive ? '#555' : '#81c784',
+              fontWeight: 'bold',
+              textDecoration: isInactive ? 'line-through' : 'none',
+            }}
+          >
+            {appointment.price} {t('currency')}
+          </Box>
         </Typography>
 
         {appointment.notes && (
-          <Typography variant="body2" sx={{ bgcolor: '#2c2c2c', p: 1, borderRadius: 1, mb: 2, fontStyle: 'italic' }}>
-            {appointment.notes}
-          </Typography>
+          <Box sx={{ bgcolor: '#2c2c2c', p: 1.5, borderRadius: 1, mb: 2 }}>
+            <Typography variant="caption" sx={{ color: '#aaa', display: 'block', mb: 0.5, fontWeight: 'bold' }}>
+              {appointment.status === 'CANCELLED' ? t('cancelReason') : t('notes')}:
+            </Typography>
+            <Typography variant="body2" sx={{ fontStyle: 'italic' }}>
+              {appointment.notes}
+            </Typography>
+          </Box>
         )}
 
         {appointment.resourceLink && (
@@ -97,22 +130,30 @@ function AppointmentCard({
               rel="noopener noreferrer"
               variant="text"
               color="primary"
-              sx={{ textTransform: 'none', p: 0, '&:hover': { background: 'none', textDecoration: 'underline' } }}
+              sx={{
+                textTransform: 'none',
+                p: 0,
+                minWidth: 0,
+                '&:hover': { background: 'none', textDecoration: 'underline' },
+              }}
             >
               🔗 {t('resourceLink')}
             </Button>
           </Box>
         )}
 
-        <Box sx={{ display: 'flex', gap: 1, mt: 'auto', flexWrap: 'wrap' }}>
+        <Box
+          sx={{
+            display: 'flex',
+            gap: 1.5,
+            mt: 'auto',
+            flexWrap: 'wrap',
+            pt: 2,
+            borderTop: '1px solid #333',
+          }}
+        >
           {(appointment.status === 'PENDING' || appointment.status === 'CONFIRMED') && onCancel && (
-            <Button
-              variant="outlined"
-              color="error"
-              size="small"
-              onClick={() => onCancel(appointment.id)}
-              sx={{ flex: 1 }}
-            >
+            <Button variant="outlined" color="error" size="small" onClick={() => onCancel(appointment.id)}>
               {t('cancel')}
             </Button>
           )}
@@ -120,46 +161,22 @@ function AppointmentCard({
           {userRole === 'DOCTOR' && (
             <>
               {appointment.status === 'PENDING' && onConfirm && (
-                <Button
-                  variant="contained"
-                  color="success"
-                  size="small"
-                  onClick={() => onConfirm(appointment.id)}
-                  sx={{ flex: 1 }}
-                >
+                <Button variant="contained" color="success" size="small" onClick={() => onConfirm(appointment.id)}>
                   {t('confirm')}
                 </Button>
               )}
               {appointment.status === 'CONFIRMED' && onUpdate && (
-                <Button
-                  variant="outlined"
-                  color="primary"
-                  size="small"
-                  onClick={() => onUpdate(appointment.id)}
-                  sx={{ flex: 1 }}
-                >
+                <Button variant="outlined" color="primary" size="small" onClick={() => onUpdate(appointment.id)}>
                   {t('reschedule')}
                 </Button>
               )}
               {appointment.status === 'CONFIRMED' && onComplete && (
-                <Button
-                  variant="contained"
-                  color="info"
-                  size="small"
-                  onClick={() => onComplete(appointment.id)}
-                  sx={{ flex: 1 }}
-                >
+                <Button variant="contained" color="info" size="small" onClick={() => onComplete(appointment.id)}>
                   {t('complete')}
                 </Button>
               )}
               {appointment.status === 'CONFIRMED' && onNoShow && (
-                <Button
-                  variant="outlined"
-                  color="warning"
-                  size="small"
-                  onClick={() => onNoShow(appointment.id)}
-                  sx={{ flex: 1 }}
-                >
+                <Button variant="outlined" color="warning" size="small" onClick={() => onNoShow(appointment.id)}>
                   {t('noShow')}
                 </Button>
               )}

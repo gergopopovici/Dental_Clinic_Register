@@ -129,7 +129,12 @@ public class AppointmentServiceImpl implements AppointmentService {
         LocalDateTime newStartTime = request.getNewStartTime();
         LocalDateTime newEndTime = newStartTime.plusMinutes(appointment.getService().getDurationMinutes());
 
-        long overlapping = appointmentRepository.countOverlappingAppointments(appointment.getDoctor().getId(), newStartTime, newEndTime);
+        long overlapping = appointmentRepository.countOverlappingAppointmentsExcluding(
+                appointment.getDoctor().getId(),
+                appointmentId,
+                newStartTime,
+                newEndTime
+        );
         if (overlapping > 0) {
             throw new IllegalArgumentException("error.doctor.already.booked");
         }
@@ -146,30 +151,56 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Override
     @Transactional
     public ResponseAppointmentDTO cancelAppointmentByPatient(Long appointmentId, Long userId) {
-        Appointment appointment = appointmentRepository.findById(appointmentId).orElseThrow(() -> new IllegalArgumentException("error.appointment.not.found"));
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new IllegalArgumentException("error.appointment.not.found"));
 
         if (!appointment.getPatient().getUser().getId().equals(userId)) {
             throw new SecurityException("error.unauthorised.action");
         }
 
         appointment.setStatus(Appointment.AppointmentStatus.CANCELLED);
-        emailService.sendAppointmentCancelledByPatientEmailToDoctor(appointment.getDoctor().getUser().getEmail(), appointment.getDoctor().getUser().getFullName(), appointment.getPatient().getUser().getFullName(), appointment.getStartTime());
+
+        String dateInfo = appointment.getStartTime() != null
+                ? appointment.getStartTime().toString().replace("T", " ")
+                : appointment.getRequestedDate().toString();
+
+        emailService.sendAppointmentCancelledByPatientEmailToDoctor(
+                appointment.getDoctor().getUser().getEmail(),
+                appointment.getDoctor().getUser().getFullName(),
+                appointment.getPatient().getUser().getFullName(),
+                dateInfo
+        );
+
         return appointmentMapper.toDto(appointmentRepository.save(appointment));
     }
 
     @Override
     @Transactional
     public ResponseAppointmentDTO cancelAppointmentByDoctor(Long appointmentId, Long userId, String reason) {
-        Appointment appointment = appointmentRepository.findById(appointmentId).orElseThrow(() -> new IllegalArgumentException("error.appointment.not.found"));
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new IllegalArgumentException("error.appointment.not.found"));
 
         if (!appointment.getDoctor().getUser().getId().equals(userId)) {
             throw new SecurityException("error.unauthorised.action");
         }
 
         appointment.setStatus(Appointment.AppointmentStatus.CANCELLED);
-        appointment.setNotes(appointment.getNotes() != null ? appointment.getNotes() + " | Cancel reason: " + reason : "Cancel reason: " + reason);
+        appointment.setNotes(appointment.getNotes() != null
+                ? appointment.getNotes() + " | Cancel reason: " + reason
+                : "Cancel reason: " + reason);
 
-        emailService.sendAppointmentCancelledByDoctorEmailToPatient(appointment.getPatient().getUser().getEmail(), appointment.getPatient().getUser().getFullName(), appointment.getDoctor().getUser().getFullName(), appointment.getStartTime(), reason);
+        String dateInfo = appointment.getStartTime() != null
+                ? appointment.getStartTime().toString().replace("T", " ")
+                : appointment.getRequestedDate().toString();
+
+        emailService.sendAppointmentCancelledByDoctorEmailToPatient(
+                appointment.getPatient().getUser().getEmail(),
+                appointment.getPatient().getUser().getFullName(),
+                appointment.getDoctor().getUser().getFullName(),
+                dateInfo,
+                reason
+        );
+
         return appointmentMapper.toDto(appointmentRepository.save(appointment));
     }
 
@@ -213,7 +244,8 @@ public class AppointmentServiceImpl implements AppointmentService {
     public List<ResponseAppointmentDTO> getDailyAppointmentsForDoctor(Long userId, LocalDate date) {
         LocalDateTime startOfDay = date.atStartOfDay();
         LocalDateTime endOfDay = date.atTime(LocalTime.MAX);
-        return appointmentRepository.findByDoctor_User_IdAndStartTimeBetweenOrderByStartTimeAsc(userId, startOfDay, endOfDay)
+
+        return appointmentRepository.findDoctorDailyAppointments(userId, startOfDay, endOfDay)
                 .stream().map(appointmentMapper::toDto)
                 .toList();
     }
