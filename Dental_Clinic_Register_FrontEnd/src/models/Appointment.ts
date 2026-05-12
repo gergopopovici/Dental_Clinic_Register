@@ -69,7 +69,6 @@ export interface RequestDoctorDTO {
   serviceIds: number[];
 }
 
-// --- RESPONSES ---
 export interface ResponseAppointmentDTO {
   id: number;
   patientId: number;

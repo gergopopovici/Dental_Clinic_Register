@@ -1,6 +1,5 @@
 package edu.ubb.licenta.pgim2289.spring.model;
 
-
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -15,26 +14,37 @@ public class BraceComponents extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "treatment_plan_id", nullable = false)
     private TreatmentPlan treatmentPlan;
+
     @Column(name = "type", nullable = false)
     private String type;
+
     @Column(name = "positionX")
-    private double positionX;
+    private Double positionX;
+
     @Column(name = "positionY")
-    private double positionY;
+    private Double positionY;
+
     @Column(name = "positionZ")
-    private double positionZ;
+    private Double positionZ;
+
     @Column(name = "startPositionX")
-    private double startPositionX;
+    private Double startPositionX;
+
     @Column(name = "startPositionY")
-    private double startPositionY;
+    private Double startPositionY;
+
     @Column(name = "startPositionZ")
-    private double startPositionZ;
+    private Double startPositionZ;
+
     @Column(name = "endPositionX")
-    private double endPositionX;
+    private Double endPositionX;
+
     @Column(name = "endPositionY")
-    private double endPositionY;
+    private Double endPositionY;
+
     @Column(name = "endPositionZ")
-    private double endPositionZ;
+    private Double endPositionZ;
+
     @Column(name = "colour")
     private String colour;
 }

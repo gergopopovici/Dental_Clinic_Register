@@ -8,11 +8,5 @@ import java.util.List;
 public interface BraceComponentsRepository extends JpaRepository<BraceComponents, Integer> {
     List<BraceComponents> findByTreatmentPlanId(Integer treatmentPlanId);
 
-    boolean findByPositionXAndPositionYAndPositionY(double positionX, double positionY, double positionY1);
-
-    void deleteByPositionXAndPositionYAndPositionZ(double positionX, double positionY, double positionZ);
-
-    boolean findByStartPositionXAndStartPositionYAndStartPositionZAndEndPositionXAndEndPositionYAndEndPositionZ(double startPositionX, double startPositionY, double startPositionZ, double endPositionX, double endPositionY, double endPositionZ);
-
-    void deleteByStartPositionXAndStartPositionYAndStartPositionZAndEndPositionXAndEndPositionYAndEndPositionZ(double startPositionX, double startPositionY, double startPositionZ, double endPositionX, double endPositionY, double endPositionZ);
+    void deleteAllByTreatmentPlanId(Integer treatmentPlanId);
 }

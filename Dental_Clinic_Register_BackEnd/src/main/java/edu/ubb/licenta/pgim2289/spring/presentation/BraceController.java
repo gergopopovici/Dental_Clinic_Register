@@ -1,7 +1,6 @@
 package edu.ubb.licenta.pgim2289.spring.presentation;
 
 import edu.ubb.licenta.pgim2289.spring.dto.BraceComponentDTO;
-import edu.ubb.licenta.pgim2289.spring.exception.BraceComponentException;
 import edu.ubb.licenta.pgim2289.spring.exception.TreatmentPlanException;
 import edu.ubb.licenta.pgim2289.spring.service.BraceComponentService;
 import org.springframework.http.HttpStatus;
@@ -29,56 +28,13 @@ public class BraceController {
         }
     }
 
-    @PostMapping("/plan/{treatmentPlanId}")
-    public ResponseEntity<?> addComponent(@PathVariable Integer treatmentPlanId, @RequestBody BraceComponentDTO request) {
+    @PostMapping("/plan/{treatmentPlanId}/sync")
+    public ResponseEntity<?> syncComponents(@PathVariable Integer treatmentPlanId, @RequestBody List<BraceComponentDTO> requestList) {
         try {
-            BraceComponentDTO component = braceComponentService.addBraceComponent(treatmentPlanId, request);
-            return ResponseEntity.ok(component);
+            List<BraceComponentDTO> components = braceComponentService.syncBraceComponents(treatmentPlanId, requestList);
+            return ResponseEntity.ok(components);
         } catch (TreatmentPlanException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
-
-    @DeleteMapping("/{componentId}")
-    public ResponseEntity<?> deleteComponent(@PathVariable Integer componentId) {
-        try {
-            braceComponentService.deleteBraceComponent(componentId);
-            return ResponseEntity.noContent().build();
-        } catch (BraceComponentException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
-    }
-
-    @DeleteMapping("/delete-by-coordinates")
-    public ResponseEntity<Void> deleteComponentByCoordinates(
-            @RequestParam Double positionX,
-            @RequestParam Double positionY,
-            @RequestParam Double positionZ) {
-        try {
-            braceComponentService.deleteBraceComponentByCoordinates(positionX, positionY, positionZ);
-            return ResponseEntity.noContent().build();
-        } catch (BraceComponentException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-    }
-
-    @DeleteMapping("/delete-rubberband-by-coordinates")
-    public ResponseEntity<Void> deleteRubberBandByCoordinates(
-            @RequestParam Double startPositionX,
-            @RequestParam Double startPositionY,
-            @RequestParam Double startPositionZ,
-            @RequestParam Double endPositionX,
-            @RequestParam Double endPositionY,
-            @RequestParam Double endPositionZ) {
-        try {
-            braceComponentService.deleteRubberBandByCoordinates(
-                    startPositionX, startPositionY, startPositionZ,
-                    endPositionX, endPositionY, endPositionZ);
-            return ResponseEntity.noContent().build();
-        } catch (BraceComponentException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-    }
-
-
 }

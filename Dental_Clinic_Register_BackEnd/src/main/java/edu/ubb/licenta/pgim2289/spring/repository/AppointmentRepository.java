@@ -42,4 +42,10 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
             @Param("excludeAppointmentId") Long excludeAppointmentId,
             @Param("startTime") LocalDateTime startTime,
             @Param("endTime") LocalDateTime endTime);
+
+    List<Appointment> findByStatusAndStartTimeBetweenAndReminderDaySentFalse(
+            Appointment.AppointmentStatus status, LocalDateTime start, LocalDateTime end);
+
+    List<Appointment> findByStatusAndStartTimeBetweenAndReminderHourSentFalse(
+            Appointment.AppointmentStatus status, LocalDateTime start, LocalDateTime end);
 }

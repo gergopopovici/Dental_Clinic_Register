@@ -51,6 +51,12 @@ public class Appointment extends BaseEntity {
     @Column(name = "resource_link", length = 500)
     private String resourceLink;
 
+    @Column(name = "reminder_day_sent")
+    private Boolean reminderDaySent = false;
+
+    @Column(name = "reminder_hour_sent")
+    private Boolean reminderHourSent = false;
+
     public enum AppointmentStatus {
         PENDING, CONFIRMED, COMPLETED, CANCELLED, NO_SHOW
     }

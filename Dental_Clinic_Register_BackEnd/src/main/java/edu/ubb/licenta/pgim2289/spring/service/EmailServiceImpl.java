@@ -228,4 +228,16 @@ public class EmailServiceImpl implements EmailService {
         message.setText("Hello " + patientName + ",\n\nUnfortunately, Dr. " + doctorName + " had to cancel your appointment on " + dateInfo + ".\nReason: " + reason + "\n\nPlease log in to book a new time.");
         mailSender.send(message);
     }
+
+    @Override
+    public void sendAppointmentReminder(String to, String userName, LocalDateTime startTime, String doctorName, String type) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(fromEmail);
+        message.setTo(to);
+        message.setSubject("Appointment Reminder: " + type);
+        message.setText("Hello " + userName + ",\n\nThis is a reminder that you have an appointment with Dr. "
+                + doctorName + ".\nTime: " + startTime.toString().replace("T", " ")
+                + "\n\nWe look forward to seeing you!");
+        mailSender.send(message);
+    }
 }
