@@ -26,7 +26,7 @@ public class BraceComponentServiceImpl implements BraceComponentService {
 
     @Override
     @Transactional
-    public List<BraceComponentDTO> syncBraceComponents(Integer treatmentPlanId, List<BraceComponentDTO> requestList) {
+    public List<BraceComponentDTO> syncBraceComponents(Long treatmentPlanId, List<BraceComponentDTO> requestList) {
         TreatmentPlan treatmentPlan = treatmentPlanRepository.findById(treatmentPlanId)
                 .orElseThrow(() -> new TreatmentPlanException("Treatment Plan not found with id " + treatmentPlanId));
 
@@ -54,7 +54,7 @@ public class BraceComponentServiceImpl implements BraceComponentService {
     }
 
     @Override
-    public List<BraceComponentDTO> getBraceComponentsByTreatmentPlanId(Integer treatmentPlanId) {
+    public List<BraceComponentDTO> getBraceComponentsByTreatmentPlanId(Long treatmentPlanId) {
         return braceComponentsRepository.findByTreatmentPlanId(treatmentPlanId)
                 .stream()
                 .map(this::convertToDto)

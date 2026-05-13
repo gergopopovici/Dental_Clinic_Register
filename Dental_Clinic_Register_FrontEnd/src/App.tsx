@@ -21,6 +21,7 @@ import { Box, Typography } from '@mui/material';
 import BracesPage from './pages/Braces';
 import AdminDashboard from './pages/Admin';
 import Appointments from './pages/Appointments/Appointments';
+import TreatmentPlansPage from './pages/TreatmentPlansPage';
 
 const DashboardPage = () => (
   <Box>
@@ -65,6 +66,7 @@ function App() {
                 <Route path="/profile" element={<ProfileSettings />} />
                 <Route path="/braces" element={<BracesPage />} />
                 <Route path="/admin" element={<AdminDashboard />} />
+                <Route path="/treatment-plans" element={<TreatmentPlansPage />} />
               </Route>
             </Route>
 

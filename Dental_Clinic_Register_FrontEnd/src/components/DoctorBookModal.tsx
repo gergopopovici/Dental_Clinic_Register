@@ -61,13 +61,15 @@ function DoctorBookModal({ open, onClose, doctorId }: DoctorBookModalProps) {
     enabled: open,
   });
 
-  const sortedPatients = React.useMemo(() => {
+  const activeAndSortedPatients = React.useMemo(() => {
     if (!patients) return [];
-    return [...patients].sort((a: PatientDropDownDTO, b: PatientDropDownDTO) => {
-      const nameA = (a.fullName || '').toLowerCase();
-      const nameB = (b.fullName || '').toLowerCase();
-      return nameA.localeCompare(nameB);
-    });
+    return patients
+      .filter((p: PatientDropDownDTO) => !p.email.includes('@anonymised.com'))
+      .sort((a: PatientDropDownDTO, b: PatientDropDownDTO) => {
+        const nameA = (a.fullName || '').toLowerCase();
+        const nameB = (b.fullName || '').toLowerCase();
+        return nameA.localeCompare(nameB);
+      });
   }, [patients]);
 
   const bookMutation = useMutation({
@@ -129,12 +131,12 @@ function DoctorBookModal({ open, onClose, doctorId }: DoctorBookModalProps) {
         )}
 
         <Autocomplete
-          options={sortedPatients}
+          options={activeAndSortedPatients}
           loading={isLoadingPatients}
-          getOptionLabel={(option: PatientDropDownDTO) => option.fullName || ''}
-          value={sortedPatients.find((p) => p.userId === patientId) || null}
+          getOptionLabel={(option: PatientDropDownDTO) => `${option.fullName} (${option.email})`}
+          value={activeAndSortedPatients.find((p) => p.userId === patientId) || null}
           onChange={(_, newValue) => setPatientId(newValue ? newValue.userId : '')}
-          noOptionsText={t('noPatientsFound')}
+          noOptionsText={t('noPatientsFound', 'No patients found')}
           renderInput={(params) => (
             <TextField
               {...params}

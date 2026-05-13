@@ -116,12 +116,15 @@ public class UserServiceImpl implements UserService {
         if (userRepository.existsById(id)) {
             Optional<User> userOptional = userRepository.findById(id);
             User user = userOptional.get();
-            String scrambledEmail = "deleted_" + UUID.randomUUID().toString() + "@anonymised.com";
-            user.setEmail(scrambledEmail);
+            String randomStr = UUID.randomUUID().toString();
+            user.setEmail("deleted_" + randomStr + "@anonymised.com");
+            user.setUserName("anon_" + randomStr.substring(0, 8));
             user.setFirstName("Deleted");
+            user.setMiddleName(null);
             user.setLastName("Patient");
-            user.setPhoneNumber(UUID.randomUUID().toString().substring(0, 10));
+            user.setPhoneNumber(randomStr.substring(0, 10));
             user.setEnabled(false);
+            userRepository.save(user);
             return ResponseEntity.ok(new MessageResponse("success.user.deleted"));
         } else {
             return ResponseEntity.badRequest().body(new MessageResponse("error.user.not_found"));
@@ -267,22 +270,24 @@ public class UserServiceImpl implements UserService {
             users = userRepository.searchUsers(keyword.trim());
         }
 
-        return users.stream().map(user -> {
-            String fullName = Stream.of(user.getFirstName(), user.getMiddleName(), user.getLastName())
-                    .filter(name -> name != null && !name.trim().isEmpty())
-                    .collect(Collectors.joining(" "));
-            String role = user.getRoles().isEmpty() ? "NONE" :
-                    user.getRoles().iterator().next().getRoleName().name();
+        return users.stream()
+                .filter(user -> !user.getEmail().endsWith("@anonymised.com"))
+                .map(user -> {
+                    String fullName = Stream.of(user.getFirstName(), user.getMiddleName(), user.getLastName())
+                            .filter(name -> name != null && !name.trim().isEmpty())
+                            .collect(Collectors.joining(" "));
+                    String role = user.getRoles().isEmpty() ? "NONE" :
+                            user.getRoles().iterator().next().getRoleName().name();
 
-            return new UserManagmentDTO(
-                    user.getId(),
-                    user.getUserName(),
-                    fullName,
-                    user.getEmail(),
-                    role,
-                    user.getEnabled()
-            );
-        }).toList();
+                    return new UserManagmentDTO(
+                            user.getId(),
+                            user.getUserName(),
+                            fullName,
+                            user.getEmail(),
+                            role,
+                            user.getEnabled()
+                    );
+                }).toList();
     }
 
     @Override
@@ -305,7 +310,7 @@ public class UserServiceImpl implements UserService {
         if (!targetUser.getEnabled()) {
             emailService.sendBanningNotificationEmail(targetUser.getEmail(), targetUser.getUserName());
         } else {
-            emailService.sendReactivatingNotificationEmail(targetUser.getEmail(),targetUser.getUserName());
+            emailService.sendReactivatingNotificationEmail(targetUser.getEmail(), targetUser.getUserName());
         }
         userRepository.save(targetUser);
         return ResponseEntity.ok(new MessageResponse("success.user.status_toggled"));

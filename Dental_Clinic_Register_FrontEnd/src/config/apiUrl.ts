@@ -29,6 +29,7 @@ const getPatientsDropdownApiUrl = `${api}/api/patients/dropdown`;
 const getDoctorsByServiceBaseApiUrl = `${api}/api/doctor/by-service`;
 const appointmentsApiUrl = `${api}/api/appointments`;
 const braceComponenetsApiUrl = `${api}/api/components`;
+const treatmentPlanApiUrl = `${api}/api/treatment-plans`;
 const apiURL = api;
 
 export {
@@ -61,5 +62,6 @@ export {
   getPatientsDropdownApiUrl,
   getDoctorsByServiceBaseApiUrl,
   appointmentsApiUrl,
-  braceComponenetsApiUrl
+  braceComponenetsApiUrl,
+  treatmentPlanApiUrl,
 };

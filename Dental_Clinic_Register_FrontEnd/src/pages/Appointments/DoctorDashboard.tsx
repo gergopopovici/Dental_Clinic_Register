@@ -172,19 +172,28 @@ function DoctorDashboard({ userId }: DoctorDashboardProps) {
           <Typography sx={{ color: '#aaa', fontStyle: 'italic' }}>{t('noPendingRequestsForThisDate')}</Typography>
         )}
         <Grid container spacing={3}>
-          {pendingAppointments.map((apt) => (
-            <Grid size={{ xs: 12, sm: 6, md: 4 }} key={apt.id}>
-              <AppointmentCard
-                appointment={apt}
-                userRole="DOCTOR"
-                onCancel={(id) => {
-                  setAppointmentToCancel(id);
-                  setCancelDialogOpen(true);
-                }}
-                onConfirm={() => openModal(apt, 'CONFIRM')}
-              />
-            </Grid>
-          ))}
+          {pendingAppointments.map((apt) => {
+            const isDeleted = apt.patientName?.toLowerCase().includes('deleted');
+            return (
+              <Grid size={{ xs: 12, sm: 6, md: 4 }} key={apt.id}>
+                <Box sx={{ opacity: isDeleted ? 0.5 : 1, transition: 'opacity 0.3s' }}>
+                  <AppointmentCard
+                    appointment={apt}
+                    userRole="DOCTOR"
+                    onCancel={
+                      !isDeleted
+                        ? (id) => {
+                            setAppointmentToCancel(id);
+                            setCancelDialogOpen(true);
+                          }
+                        : undefined
+                    }
+                    onConfirm={!isDeleted ? () => openModal(apt, 'CONFIRM') : undefined}
+                  />
+                </Box>
+              </Grid>
+            );
+          })}
         </Grid>
       </Box>
 
@@ -198,25 +207,38 @@ function DoctorDashboard({ userId }: DoctorDashboardProps) {
           <Typography sx={{ color: '#aaa', fontStyle: 'italic' }}>{t('noScheduledAppointments')}</Typography>
         )}
         <Grid container spacing={3}>
-          {confirmedAppointments.map((apt) => (
-            <Grid size={{ xs: 12, sm: 6, md: 4 }} key={apt.id}>
-              <AppointmentCard
-                appointment={apt}
-                userRole="DOCTOR"
-                onCancel={
-                  apt.status === 'CONFIRMED'
-                    ? (id) => {
-                        setAppointmentToCancel(id);
-                        setCancelDialogOpen(true);
-                      }
-                    : undefined
-                }
-                onUpdate={apt.status === 'CONFIRMED' ? () => openModal(apt, 'RESCHEDULE') : undefined}
-                onComplete={apt.status === 'CONFIRMED' ? (id) => completeMutation.mutate(id) : undefined}
-                onNoShow={apt.status === 'CONFIRMED' ? (id) => noShowMutation.mutate(id) : undefined}
-              />
-            </Grid>
-          ))}
+          {confirmedAppointments.map((apt) => {
+            const isDeleted = apt.patientName?.toLowerCase().includes('deleted');
+            return (
+              <Grid size={{ xs: 12, sm: 6, md: 4 }} key={apt.id}>
+                <Box
+                  sx={{
+                    opacity: isDeleted ? 0.5 : 1,
+                    pointerEvents: isDeleted ? 'none' : 'auto',
+                    transition: 'opacity 0.3s',
+                  }}
+                >
+                  <AppointmentCard
+                    appointment={apt}
+                    userRole="DOCTOR"
+                    onCancel={
+                      !isDeleted && apt.status === 'CONFIRMED'
+                        ? (id) => {
+                            setAppointmentToCancel(id);
+                            setCancelDialogOpen(true);
+                          }
+                        : undefined
+                    }
+                    onUpdate={!isDeleted && apt.status === 'CONFIRMED' ? () => openModal(apt, 'RESCHEDULE') : undefined}
+                    onComplete={
+                      !isDeleted && apt.status === 'CONFIRMED' ? (id) => completeMutation.mutate(id) : undefined
+                    }
+                    onNoShow={!isDeleted && apt.status === 'CONFIRMED' ? (id) => noShowMutation.mutate(id) : undefined}
+                  />
+                </Box>
+              </Grid>
+            );
+          })}
         </Grid>
       </Box>
 

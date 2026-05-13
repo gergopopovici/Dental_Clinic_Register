@@ -19,7 +19,7 @@ public class BraceController {
     }
 
     @GetMapping("/plan/{treatmentPlanId}")
-    public ResponseEntity<?> getComponentsByTreatmentPlanId(@PathVariable Integer treatmentPlanId) {
+    public ResponseEntity<?> getComponentsByTreatmentPlanId(@PathVariable Long treatmentPlanId) {
         try {
             List<BraceComponentDTO> components = braceComponentService.getBraceComponentsByTreatmentPlanId(treatmentPlanId);
             return ResponseEntity.ok(components);
@@ -29,7 +29,7 @@ public class BraceController {
     }
 
     @PostMapping("/plan/{treatmentPlanId}/sync")
-    public ResponseEntity<?> syncComponents(@PathVariable Integer treatmentPlanId, @RequestBody List<BraceComponentDTO> requestList) {
+    public ResponseEntity<?> syncComponents(@PathVariable Long treatmentPlanId, @RequestBody List<BraceComponentDTO> requestList) {
         try {
             List<BraceComponentDTO> components = braceComponentService.syncBraceComponents(treatmentPlanId, requestList);
             return ResponseEntity.ok(components);

@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface BraceComponentsRepository extends JpaRepository<BraceComponents, Integer> {
-    List<BraceComponents> findByTreatmentPlanId(Integer treatmentPlanId);
+    List<BraceComponents> findByTreatmentPlanId(Long treatmentPlanId);
 
-    void deleteAllByTreatmentPlanId(Integer treatmentPlanId);
+    void deleteAllByTreatmentPlanId(Long treatmentPlanId);
 }

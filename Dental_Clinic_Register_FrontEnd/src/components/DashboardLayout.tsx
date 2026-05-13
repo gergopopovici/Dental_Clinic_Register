@@ -15,6 +15,7 @@ import {
 } from '@mui/material';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import EventNoteIcon from '@mui/icons-material/EventNote';
+import AssignmentIcon from '@mui/icons-material/Assignment';
 import PersonIcon from '@mui/icons-material/Person';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -53,6 +54,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       label: t('appointments'),
       path: '/appointments',
       icon: <EventNoteIcon />,
+      showForAdmin: false,
+      showForPatient: true,
+      showForDoctor: true,
+    },
+    {
+      label: t('treatmentPlans'),
+      path: '/treatment-plans',
+      icon: <AssignmentIcon />,
       showForAdmin: false,
       showForPatient: true,
       showForDoctor: true,
