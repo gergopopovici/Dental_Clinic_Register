@@ -298,5 +298,11 @@
   "activePlans": "Aktív tervek",
   "noActivePlans": "Nincsenek aktív tervek.",
   "pastPlans": "Korábbi tervek",
-  "noPastPlans": "Nincsenek korábbi tervek."
+  "noPastPlans": "Nincsenek korábbi tervek.",
+  "open3DModel": "3D Modell",
+  "view3DModel": "3D Modell megtekintése",
+  "bracesConfigurator": "3D Fogszabályzó Tervező",
+  "managingPlanId": "Terv #",
+  "backToPlans": "Vissza a tervekhez",
+  "error.unauthorized_plan_access": "Nincs jogosultsága a kezelési terv megtekintéséhez."
 }

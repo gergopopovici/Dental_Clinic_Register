@@ -90,7 +90,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         User user = userService.findById(userId).orElseThrow(() -> new IllegalArgumentException("error.user.not.found"));
         Doctor doctor = user.getDoctorDetails();
 
-        Patient patient = patientService.findById(request.getPatientId()).orElseThrow(() -> new IllegalArgumentException("error.patient.not.found"));
+        Patient patient = patientService.findByUserId(request.getPatientId()).orElseThrow(() -> new IllegalArgumentException("error.patient.not.found"));
         ServiceProvided service = serviceProvidedService.findById(request.getServiceId()).orElseThrow(() -> new IllegalArgumentException("error.service.not.found"));
 
         LocalDateTime exactStartTime = request.getStartTime();

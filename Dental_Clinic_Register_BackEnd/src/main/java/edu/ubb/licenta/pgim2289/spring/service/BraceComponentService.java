@@ -7,5 +7,5 @@ import java.util.List;
 public interface BraceComponentService {
     List<BraceComponentDTO> syncBraceComponents(Long treatmentPlanId, List<BraceComponentDTO> requestList);
 
-    List<BraceComponentDTO> getBraceComponentsByTreatmentPlanId(Long treatmentPlanId);
+    public List<BraceComponentDTO> getBraceComponentsByTreatmentPlanId(Long treatmentPlanId, Long currentUserId);
 }

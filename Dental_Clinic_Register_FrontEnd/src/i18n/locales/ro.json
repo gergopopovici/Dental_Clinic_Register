@@ -298,5 +298,11 @@
   "activePlans": "Planuri active",
   "noActivePlans": "Nu există planuri active.",
   "pastPlans": "Planuri anterioare",
-  "noPastPlans": "Nu există planuri anterioare."
+  "noPastPlans": "Nu există planuri anterioare.",
+  "open3DModel": "Model 3D",
+  "view3DModel": "Vezi model 3D",
+  "bracesConfigurator": "Configurator aparat dentar 3D",
+  "managingPlanId": "Planul #",
+  "backToPlans": "Înapoi la planuri",
+  "error.unauthorized_plan_access": "Nu aveți permisiunea de a vizualiza acest plan de tratament."
 }

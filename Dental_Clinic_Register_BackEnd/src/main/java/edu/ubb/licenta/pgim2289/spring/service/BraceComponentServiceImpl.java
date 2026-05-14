@@ -4,9 +4,12 @@ import edu.ubb.licenta.pgim2289.spring.dto.BraceComponentDTO;
 import edu.ubb.licenta.pgim2289.spring.exception.TreatmentPlanException;
 import edu.ubb.licenta.pgim2289.spring.model.BraceComponents;
 import edu.ubb.licenta.pgim2289.spring.model.TreatmentPlan;
+import edu.ubb.licenta.pgim2289.spring.model.User;
 import edu.ubb.licenta.pgim2289.spring.repository.BraceComponentsRepository;
 import edu.ubb.licenta.pgim2289.spring.repository.TreatmentPlanRepository;
+import edu.ubb.licenta.pgim2289.spring.repository.UserRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,18 +20,21 @@ public class BraceComponentServiceImpl implements BraceComponentService {
 
     private final BraceComponentsRepository braceComponentsRepository;
     private final TreatmentPlanRepository treatmentPlanRepository;
+    private final UserRepository userRepository;
 
     public BraceComponentServiceImpl(BraceComponentsRepository braceComponentsRepository,
-                                     TreatmentPlanRepository treatmentPlanRepository) {
+                                     TreatmentPlanRepository treatmentPlanRepository,
+                                     UserRepository userRepository) {
         this.braceComponentsRepository = braceComponentsRepository;
         this.treatmentPlanRepository = treatmentPlanRepository;
+        this.userRepository = userRepository;
     }
 
     @Override
     @Transactional
     public List<BraceComponentDTO> syncBraceComponents(Long treatmentPlanId, List<BraceComponentDTO> requestList) {
         TreatmentPlan treatmentPlan = treatmentPlanRepository.findById(treatmentPlanId)
-                .orElseThrow(() -> new TreatmentPlanException("Treatment Plan not found with id " + treatmentPlanId));
+                .orElseThrow(() -> new TreatmentPlanException("error.treatment_plan.not_found"));
 
         braceComponentsRepository.deleteAllByTreatmentPlanId(treatmentPlanId);
 
@@ -54,7 +60,22 @@ public class BraceComponentServiceImpl implements BraceComponentService {
     }
 
     @Override
-    public List<BraceComponentDTO> getBraceComponentsByTreatmentPlanId(Long treatmentPlanId) {
+    public List<BraceComponentDTO> getBraceComponentsByTreatmentPlanId(Long treatmentPlanId, Long currentUserId) {
+        TreatmentPlan plan = treatmentPlanRepository.findById(treatmentPlanId)
+                .orElseThrow(() -> new TreatmentPlanException("error.treatment_plan.not_found"));
+
+        User currentUser = userRepository.findById(currentUserId)
+                .orElseThrow(() -> new RuntimeException("error.user.not_found"));
+
+        boolean isPatient = currentUser.getRoles().stream()
+                .anyMatch(r -> r.getRoleName().name().equals("ROLE_PATIENT"));
+
+        if (isPatient) {
+            if (!plan.getPatient().getUser().getId().equals(currentUserId)) {
+                throw new AccessDeniedException("error.unauthorized_plan_access");
+            }
+        }
+
         return braceComponentsRepository.findByTreatmentPlanId(treatmentPlanId)
                 .stream()
                 .map(this::convertToDto)

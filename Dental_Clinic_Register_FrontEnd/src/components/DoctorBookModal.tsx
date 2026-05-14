@@ -46,6 +46,8 @@ function DoctorBookModal({ open, onClose, doctorId }: DoctorBookModalProps) {
       setNotes('');
       setResourceLink('');
       setErrorMessage('');
+    } else {
+      setErrorMessage('');
     }
   }, [open]);
 
@@ -85,6 +87,8 @@ function DoctorBookModal({ open, onClose, doctorId }: DoctorBookModalProps) {
   });
 
   const handleSubmit = () => {
+    setErrorMessage('');
+
     if (!patientId || !serviceId || !datetime) {
       setErrorMessage(t('pleaseFillAllFields'));
       return;
@@ -172,7 +176,10 @@ function DoctorBookModal({ open, onClose, doctorId }: DoctorBookModalProps) {
           <InputLabel shrink>{t('selectService')}</InputLabel>
           <Select
             value={serviceId}
-            onChange={(e) => setServiceId(e.target.value as number)}
+            onChange={(e) => {
+              setServiceId(e.target.value as number);
+              setErrorMessage('');
+            }}
             label={t('selectService')}
             notched
           >
@@ -199,7 +206,10 @@ function DoctorBookModal({ open, onClose, doctorId }: DoctorBookModalProps) {
             htmlInput: { min: new Date().toISOString().slice(0, 16) },
           }}
           value={datetime}
-          onChange={(e) => setDatetime(e.target.value)}
+          onChange={(e) => {
+            setDatetime(e.target.value);
+            setErrorMessage('');
+          }}
           sx={darkFieldStyles}
         />
 

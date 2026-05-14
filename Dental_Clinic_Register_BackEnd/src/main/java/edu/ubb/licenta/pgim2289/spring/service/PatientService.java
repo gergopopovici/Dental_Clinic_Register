@@ -13,6 +13,10 @@ public interface PatientService {
     void createPatient(RequestUserDTO dto);
 
     Patient getPatient(User user);
+
     Optional<Patient> findById(Long id);
+
     List<PatientDropDownDTO> getAllPatientsForDropdown();
+
+    Optional<Patient> findByUserId(Long userId);
 }

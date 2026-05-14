@@ -49,7 +49,7 @@ function PatientTreatmentPlansView({ patientId }: PatientViewProps) {
           {t('activePlans', 'Active Plans')}
         </Typography>
         {activePlans.length === 0 ? (
-          <Typography color="textSecondary">{t('noActivePlans', 'No active plans.')}</Typography>
+          <Typography color="textSecondary.light">{t('noActivePlans', 'No active plans.')}</Typography>
         ) : (
           activePlans.map(renderPlanCard)
         )}
@@ -58,11 +58,11 @@ function PatientTreatmentPlansView({ patientId }: PatientViewProps) {
       <Divider sx={{ borderColor: '#333' }} />
 
       <Box>
-        <Typography variant="h6" gutterBottom color="textSecondary">
+        <Typography variant="h6" gutterBottom color="primary.light">
           {t('pastPlans', 'Past Plans')}
         </Typography>
         {pastPlans.length === 0 ? (
-          <Typography color="textSecondary">{t('noPastPlans', 'No past plans.')}</Typography>
+          <Typography color="textSecondary.light">{t('noPastPlans', 'No past plans.')}</Typography>
         ) : (
           pastPlans.map(renderPlanCard)
         )}

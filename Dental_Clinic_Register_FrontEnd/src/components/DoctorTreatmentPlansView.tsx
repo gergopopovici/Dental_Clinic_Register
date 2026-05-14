@@ -95,12 +95,12 @@ function DoctorTreatmentPlansView({ doctorId }: DoctorViewProps) {
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
       <Box sx={{ maxWidth: 400 }}>
         <Autocomplete
-          options={activePatients} // <-- USED FILTERED LIST HERE
+          options={activePatients}
           getOptionLabel={(option) => `${option.fullName} (${option.email})`}
           loading={isLoadingPatients}
           value={selectedPatient}
           onChange={(e, newValue) => setSelectedPatient(newValue)}
-          noOptionsText={t('noPatientsFound', 'No patients found')}
+          noOptionsText={t('noPatientsFound')}
           renderInput={(params) => <TextField {...params} label={t('searchPatient')} sx={darkFieldStyles} />}
         />
       </Box>
@@ -124,18 +124,18 @@ function DoctorTreatmentPlansView({ doctorId }: DoctorViewProps) {
                 {t('activePlans', 'Active Plans')}
               </Typography>
               {activePlans.length === 0 ? (
-                <Typography color="textSecondary">{t('noActivePlans', 'No active plans.')}</Typography>
+                <Typography color="textSecondary.light">{t('noActivePlans', 'No active plans.')}</Typography>
               ) : (
                 activePlans.map(renderPlanCard)
               )}
 
               <Divider sx={{ borderColor: '#333', my: 2 }} />
 
-              <Typography variant="subtitle1" color="textSecondary">
+              <Typography variant="subtitle1" color="textSecondary.light">
                 {t('pastPlans', 'Past Plans')}
               </Typography>
               {pastPlans.length === 0 ? (
-                <Typography color="textSecondary">{t('noPastPlans', 'No past plans.')}</Typography>
+                <Typography color="textSecondary.light">{t('noPastPlans', 'No past plans.')}</Typography>
               ) : (
                 pastPlans.map(renderPlanCard)
               )}

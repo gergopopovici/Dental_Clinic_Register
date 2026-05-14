@@ -49,13 +49,21 @@ public class PatientServiceImpl implements PatientService {
     @Transactional
     public List<PatientDropDownDTO> getAllPatientsForDropdown() {
         return patientRepository.findAll().stream()
+                .filter(patient -> patient.getUser().getEnabled())
                 .map(patient -> {
                     PatientDropDownDTO dto = new PatientDropDownDTO();
                     dto.setUserId(patient.getUser().getId());
                     dto.setFullName(patient.getUser().getFullName());
                     dto.setEmail(patient.getUser().getEmail());
                     return dto;
+
                 })
-                .toList();
+                        .
+                toList();
+    }
+
+    @Override
+    public Optional<Patient> findByUserId(Long userId) {
+        return patientRepository.findByUser_Id(userId);
     }
 }

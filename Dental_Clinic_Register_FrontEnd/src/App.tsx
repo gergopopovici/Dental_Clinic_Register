@@ -1,4 +1,3 @@
-import React from 'react';
 import './i18n/i18n';
 import { BrowserRouter as Router, Routes, Route, Outlet } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -11,29 +10,18 @@ import EmailConfirmation from './pages/EmailConfirmation';
 import Login from './pages/Login';
 import ProfileSettings from './pages/ProfileSettings';
 
-import { ProtectedRoute } from './components/ProtectedRoute'; // Your updated ProtectedRoute
-import { PublicRoute } from './components/PublicRoute'; // Your updated PublicRoute
-import DashboardLayout from './components/DashboardLayout'; // Your DashboardLayout
+import { ProtectedRoute } from './components/ProtectedRoute';
+import { PublicRoute } from './components/PublicRoute';
+import DashboardLayout from './components/DashboardLayout';
 
 import { UserProvider } from './context/UserContext';
 
-import { Box, Typography } from '@mui/material';
 import BracesPage from './pages/Braces';
 import AdminDashboard from './pages/Admin';
 import Appointments from './pages/Appointments/Appointments';
 import TreatmentPlansPage from './pages/TreatmentPlansPage';
-
-const DashboardPage = () => (
-  <Box>
-    <Typography variant="h4" gutterBottom>
-      Dashboard Content
-    </Typography>
-    <Typography>
-      Welcome to your patient dashboard! This is where you can see an overview of your health, upcoming appointments,
-      and more.
-    </Typography>
-  </Box>
-);
+import BracesModelPage from './pages/BracesModalPage';
+import Dashboard from './pages/Dashboard';
 
 const queryClient = new QueryClient();
 
@@ -61,12 +49,20 @@ function App() {
                   </DashboardLayout>
                 }
               >
-                <Route path="/dashboard" element={<DashboardPage />} />
+                <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/appointments" element={<Appointments />} />
                 <Route path="/profile" element={<ProfileSettings />} />
                 <Route path="/braces" element={<BracesPage />} />
                 <Route path="/admin" element={<AdminDashboard />} />
                 <Route path="/treatment-plans" element={<TreatmentPlansPage />} />
+                <Route
+                  path="/treatment-plans/:id/braces"
+                  element={
+                    <DashboardLayout>
+                      <BracesModelPage />
+                    </DashboardLayout>
+                  }
+                />
               </Route>
             </Route>
 
