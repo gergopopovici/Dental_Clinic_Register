@@ -14,10 +14,16 @@ interface DeleteModalprops {
 function DeleteModal({ open, onClose, successMessage, errorMessage, isLoadingDelete, onDelete }: DeleteModalprops) {
   const { t } = useTranslation();
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth="sm"
+      fullWidth
+      slotProps={{ paper: { sx: { bgcolor: '#2c2c2c', color: '#ffffff' } } }}
+    >
       <DialogTitle>{t('confirmDeletion')}</DialogTitle>
       <DialogContent dividers>
-        <Typography variant="body1" gutterBottom>
+        <Typography variant="body1" gutterBottom sx={{ color: '#aaaaaa' }}>
           {t('confirmDeletionMessage')}
         </Typography>
         {successMessage && (

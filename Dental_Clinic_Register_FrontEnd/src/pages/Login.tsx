@@ -17,8 +17,6 @@ function LoginPage() {
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const redirect = searchParams.get('redirect') || '/dashboard';
   const { t } = useTranslation();
 
   const { login } = useUser();
@@ -28,7 +26,13 @@ function LoginPage() {
     onSuccess: (userDetails) => {
       console.log('User details fetched successfully:', userDetails);
       login(userDetails);
-      navigate(redirect);
+      setTimeout(() => {
+        if (userDetails.roles?.includes('ROLE_ADMIN')) {
+          navigate('/admin');
+        } else {
+          navigate('/dashboard');
+        }
+      }, 100);
     },
     onError: (error) => {
       console.error('Failed to fetch user details after login:', error);

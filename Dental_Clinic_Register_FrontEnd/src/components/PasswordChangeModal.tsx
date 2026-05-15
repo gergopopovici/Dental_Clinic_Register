@@ -66,12 +66,17 @@ function PasswordChangeModal({
 }: PasswordChangeModalProps) {
   const isLoading = isLoadingRequest || isLoadingVerify || isLoadingUpdate;
   const { t } = useTranslation();
+  const darkFieldStyles = {
+    '& .MuiOutlinedInput-notchedOutline': { borderColor: '#444' },
+    '& .MuiInputLabel-root': { color: '#aaa' },
+    input: { color: 'white' },
+  };
   const renderContent = () => {
     switch (step) {
       case 'initial':
         return (
           <Box>
-            <Typography variant="body1" sx={{ mb: 2 }}>
+            <Typography variant="body1" sx={{ mb: 2, color: '#aaaaaa' }}>
               {t('clickSendCodePassword')}
             </Typography>
             <Button variant="contained" onClick={onRequestCode} disabled={isLoading} sx={{ textTransform: 'none' }}>
@@ -83,7 +88,7 @@ function PasswordChangeModal({
       case 'verifyCode':
         return (
           <form onSubmit={onVerifyCodeSubmit}>
-            <Typography variant="body1" sx={{ mb: 2 }}>
+            <Typography variant="body1" sx={{ mb: 2, color: '#aaaaaa' }}>
               {t('pleaseentertheverificationcode')}
             </Typography>
             <TextField
@@ -94,6 +99,7 @@ function PasswordChangeModal({
               required
               margin="normal"
               disabled={isLoading}
+              sx={darkFieldStyles}
             />
             <DialogActions sx={{ pt: 2, pb: 0, px: 0 }}>
               {onBack && (
@@ -113,7 +119,7 @@ function PasswordChangeModal({
       case 'enterNewPassword':
         return (
           <form onSubmit={onNewPasswordSubmit}>
-            <Typography variant="body1" sx={{ mb: 2 }}>
+            <Typography variant="body1" sx={{ mb: 2, color: '#aaaaaa' }}>
               {t('enterAndConfirmNewPassword')}
             </Typography>
             <TextField
@@ -125,6 +131,7 @@ function PasswordChangeModal({
               required
               margin="normal"
               disabled={isLoading}
+              sx={darkFieldStyles}
             />
             <TextField
               label={t('confirmNewPassword')}
@@ -135,6 +142,7 @@ function PasswordChangeModal({
               required
               margin="normal"
               disabled={isLoading}
+              sx={darkFieldStyles}
             />
             <DialogActions sx={{ pt: 2, pb: 0, px: 0 }}>
               {onBack && (
@@ -170,7 +178,13 @@ function PasswordChangeModal({
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth="sm"
+      fullWidth
+      slotProps={{ paper: { sx: { bgcolor: '#2c2c2c', color: '#ffffff' } } }}
+    >
       <DialogTitle>{getTitle()}</DialogTitle>
       <DialogContent dividers>
         {successMessage && (

@@ -304,5 +304,20 @@
   "bracesConfigurator": "3D Fogszabályzó Tervező",
   "managingPlanId": "Terv #",
   "backToPlans": "Vissza a tervekhez",
-  "error.unauthorized_plan_access": "Nincs jogosultsága a kezelési terv megtekintéséhez."
+  "error.unauthorized_plan_access": "Nincs jogosultsága a kezelési terv megtekintéséhez.",
+  "planSavedSuccessfully": "Terv sikeresen mentve!",
+  "failedToSavePlan": "A terv mentése sikertelen.",
+  "placeBrace": "Brakett Elhelyezése",
+  "placeRubberBand": "Gumikarika Elhelyezése",
+  "autoPlace": "Automatikus Elhelyezés",
+  "clearAll": "Összes Törlése",
+  "savePlan": "Terv Mentése",
+  "rubberBandLabel": "Gumikarika:",
+  "archwireLabel": "Ív:",
+  "dashboardSubtitle": "Íme egy áttekintés a fogászati egészségéről és a közelgő időpontokról.",
+  "nextAppointment": "Következő időpont",
+  "viewAllAppointments": "Összes időpont megtekintése",
+  "quickActions": "Gyors műveletek",
+  "viewAllPlans": "Összes terv megtekintése",
+  "emailConfirmed": "E-mail megerősítve"
 }

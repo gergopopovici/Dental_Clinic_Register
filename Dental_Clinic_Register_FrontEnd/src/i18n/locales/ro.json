@@ -304,5 +304,21 @@
   "bracesConfigurator": "Configurator aparat dentar 3D",
   "managingPlanId": "Planul #",
   "backToPlans": "Înapoi la planuri",
-  "error.unauthorized_plan_access": "Nu aveți permisiunea de a vizualiza acest plan de tratament."
+  "error.unauthorized_plan_access": "Nu aveți permisiunea de a vizualiza acest plan de tratament.",
+  "planSavedSuccessfully": "Plan salvat cu succes!",
+  "failedToSavePlan": "Salvarea planului a eșuat.",
+  "placeBrace": "Plasează Bracket",
+  "placeRubberBand": "Plasează Elastic",
+  "autoPlace": "Plasare Automată",
+  "clearAll": "Șterge Tot",
+  "savePlan": "Salvează Planul",
+  "rubberBandLabel": "Elastic:",
+  "archwireLabel": "Arc:",
+  "dashboardSubtitle": "Iată o prezentare generală a sănătății tale dentare și a programului viitor.",
+  "nextAppointment": "Următoarea programare",
+  "viewAllAppointments": "Vezi toate programările",
+  "quickActions": "Acțiuni rapide",
+  "viewAllPlans": "Vezi toate planurile",
+    "emailConfirmed": "Email confirmat"
+
 }

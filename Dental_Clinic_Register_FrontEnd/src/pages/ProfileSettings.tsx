@@ -100,6 +100,14 @@ function ProfileSettings() {
     },
   });
 
+  const darkFieldStyles = {
+    bgcolor: '#2c2c2c',
+    borderRadius: 1,
+    '& .MuiOutlinedInput-notchedOutline': { borderColor: '#444' },
+    '& .MuiInputLabel-root': { color: '#aaa' },
+    input: { color: 'white' },
+  };
+
   const verifyCodeMutation = useMutation({
     mutationFn: verifyPasswordChangeCode,
     onSuccess: () => {
@@ -479,8 +487,8 @@ function ProfileSettings() {
       sx={{
         width: '100%',
         minHeight: '100%',
-        bgcolor: 'background.paper',
         boxSizing: 'border-box',
+        ...darkFieldStyles,
       }}
     >
       <Box
@@ -497,7 +505,7 @@ function ProfileSettings() {
             alignItems: 'center',
             marginBottom: '32px',
             paddingBottom: '24px',
-            borderBottom: '1px solid #e0e0e0',
+            borderBottom: '1px solid #444444',
             width: '100%',
           }}
         >
@@ -552,10 +560,10 @@ function ProfileSettings() {
               </Typography>
             </Button>
           </Box>
-          <Typography variant="h4" sx={{ marginBottom: '4px', fontWeight: 'bold', color: 'black' }}>
+          <Typography variant="h4" sx={{ marginBottom: '4px', fontWeight: 'bold', color: '#ffffff' }}>
             {fullName}
           </Typography>
-          <Typography variant="body1" color="text.secondary">
+          <Typography variant="body1" color="#aaaaaa'">
             {userRolesDisplay}
           </Typography>
         </Box>
@@ -581,17 +589,17 @@ function ProfileSettings() {
               alignItems: 'center',
               justifyContent: 'space-between',
               padding: '16px',
-              border: '1px solid #e0e0e0',
+              border: '1px solid #444444',
               borderRadius: '4px',
               width: '100%',
               mb: 2,
             }}
           >
             <Box>
-              <Typography variant="body1" sx={{ fontWeight: 'bold', marginBottom: '4px', color: 'black' }}>
+              <Typography variant="body1" sx={{ fontWeight: 'bold', marginBottom: '4px', color: '#ffffff' }}>
                 {t('firstName')}
               </Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" color="#aaaaaa'">
                 {user.firstName}
               </Typography>
             </Box>
@@ -602,7 +610,7 @@ function ProfileSettings() {
               alignItems: 'center',
               justifyContent: 'space-between',
               padding: '16px',
-              border: '1px solid #e0e0e0',
+              border: '1px solid #444444',
               borderRadius: '4px',
               width: '100%',
               mb: 2,
@@ -610,19 +618,19 @@ function ProfileSettings() {
           >
             {user.middleName ? (
               <Box>
-                <Typography variant="body1" sx={{ fontWeight: 'bold', marginBottom: '4px', color: 'black' }}>
+                <Typography variant="body1" sx={{ fontWeight: 'bold', marginBottom: '4px', color: '#ffffff' }}>
                   {t('middleName')}
                 </Typography>
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" color="#aaaaaa'">
                   {user.middleName}
                 </Typography>
               </Box>
             ) : (
               <Box>
-                <Typography variant="body1" sx={{ fontWeight: 'bold', marginBottom: '4px', color: 'black' }}>
+                <Typography variant="body1" sx={{ fontWeight: 'bold', marginBottom: '4px', color: '#ffffff' }}>
                   {t('middleName')}
                 </Typography>
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" color="#aaaaaa'">
                   -
                 </Typography>
               </Box>
@@ -634,17 +642,17 @@ function ProfileSettings() {
               alignItems: 'center',
               justifyContent: 'space-between',
               padding: '16px',
-              border: '1px solid #e0e0e0',
+              border: '1px solid #444444',
               borderRadius: '4px',
               width: '100%',
               mb: 2,
             }}
           >
             <Box>
-              <Typography variant="body1" sx={{ fontWeight: 'bold', marginBottom: '4px', color: 'black' }}>
+              <Typography variant="body1" sx={{ fontWeight: 'bold', marginBottom: '4px', color: '#ffffff' }}>
                 {t('lastName')}
               </Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" color="#aaaaaa'">
                 {user.lastName}
               </Typography>
             </Box>
@@ -655,17 +663,17 @@ function ProfileSettings() {
               alignItems: 'center',
               justifyContent: 'space-between',
               padding: '16px',
-              border: '1px solid #e0e0e0',
+              border: '1px solid #444444',
               borderRadius: '4px',
               width: '100%',
               mb: 2,
             }}
           >
             <Box>
-              <Typography variant="body1" sx={{ fontWeight: 'bold', marginBottom: '4px', color: 'black' }}>
+              <Typography variant="body1" sx={{ fontWeight: 'bold', marginBottom: '4px', color: '#ffffff' }}>
                 {t('phoneNumber')}
               </Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" color="#aaaaaa">
                 {user.phoneNumber}
               </Typography>
             </Box>
@@ -676,17 +684,17 @@ function ProfileSettings() {
               alignItems: 'center',
               justifyContent: 'space-between',
               padding: '16px',
-              border: '1px solid #e0e0e0',
+              border: '1px solid #444444',
               borderRadius: '4px',
               width: '100%',
               mb: 2,
             }}
           >
             <Box>
-              <Typography variant="body1" sx={{ fontWeight: 'bold', marginBottom: '4px', color: 'black' }}>
+              <Typography variant="body1" sx={{ fontWeight: 'bold', marginBottom: '4px', color: '#ffffff' }}>
                 {t('gender')}
               </Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" color="#aaaaaa'">
                 {user.gender === 'FEMALE' ? t('female') : user.gender === 'MALE' ? t('male') : t('other')}
               </Typography>
             </Box>
@@ -697,17 +705,17 @@ function ProfileSettings() {
               alignItems: 'center',
               justifyContent: 'space-between',
               padding: '16px',
-              border: '1px solid #e0e0e0',
+              border: '1px solid #444444',
               borderRadius: '4px',
               width: '100%',
               mb: 2,
             }}
           >
             <Box>
-              <Typography variant="body1" sx={{ fontWeight: 'bold', marginBottom: '4px', color: 'black' }}>
+              <Typography variant="body1" sx={{ fontWeight: 'bold', marginBottom: '4px', color: '#ffffff' }}>
                 {t('email')}
               </Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" color="#aaaaaa'">
                 {user.email}
               </Typography>
             </Box>
@@ -722,21 +730,21 @@ function ProfileSettings() {
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 padding: '16px',
-                border: '1px solid #e0e0e0',
+                border: '1px solid #444444',
                 borderRadius: '4px',
                 width: '100%',
                 mb: 2,
-                bgcolor: '#f5f5f5',
+                bgcolor: '#3a3a3a',
               }}
             >
               <Box>
-                <Typography variant="body1" sx={{ fontWeight: 'bold', marginBottom: '4px', color: 'black' }}>
+                <Typography variant="body1" sx={{ fontWeight: 'bold', marginBottom: '4px', color: '#ffffff' }}>
                   {t('licenseNumber')}
                 </Typography>
-                <Typography variant="body2" color="text.primary" sx={{ fontWeight: '500' }}>
+                <Typography variant="body2" color="#ffffff" sx={{ fontWeight: '500' }}>
                   {user.licenseNumber}
                 </Typography>
-                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+                <Typography variant="caption" color="#aaaaaa'" sx={{ display: 'block', mt: 0.5 }}>
                   * {t('contactAdminToUpdateCredentials')}
                 </Typography>
               </Box>
@@ -750,21 +758,21 @@ function ProfileSettings() {
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 padding: '16px',
-                border: '1px solid #e0e0e0',
+                border: '1px solid #444444',
                 borderRadius: '4px',
                 width: '100%',
                 mb: 2,
-                bgcolor: '#f5f5f5',
+                bgcolor: '#3a3a3a',
               }}
             >
               <Box>
-                <Typography variant="body1" sx={{ fontWeight: 'bold', marginBottom: '4px', color: 'black' }}>
+                <Typography variant="body1" sx={{ fontWeight: 'bold', marginBottom: '4px', color: '#ffffff' }}>
                   {t('specialisation')}
                 </Typography>
-                <Typography variant="body2" color="text.primary" sx={{ fontWeight: '500' }}>
+                <Typography variant="body2" color="#ffffff" sx={{ fontWeight: '500' }}>
                   {user.specialisation}
                 </Typography>
-                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+                <Typography variant="caption" color="#aaaaaa'" sx={{ display: 'block', mt: 0.5 }}>
                   * {t('contactAdminToUpdateCredentials')}
                 </Typography>
               </Box>
@@ -790,7 +798,7 @@ function ProfileSettings() {
             <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold' }}>
               {t('deleteAccount')}
             </Typography>
-            <Typography variant="body1" color="text.secondary" sx={{ marginBottom: '16px' }}>
+            <Typography variant="body1" color="#aaaaaa'" sx={{ marginBottom: '16px' }}>
               {t('wouldyouliketodeletetheaccount')}
             </Typography>
             <Button

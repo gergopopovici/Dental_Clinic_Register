@@ -98,8 +98,23 @@ function UpdateUserModal({
     onSubmit(formData);
   };
 
+  const darkFieldStyles = {
+    mb: 2,
+    '& .MuiOutlinedInput-notchedOutline': { borderColor: '#444' },
+    '& .MuiInputLabel-root': { color: '#aaa' },
+    input: { color: 'white' },
+    '& .MuiSelect-select': { color: 'white' },
+    '& .MuiSvgIcon-root': { color: '#aaa' },
+  };
+
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth="sm"
+      fullWidth
+      slotProps={{ paper: { sx: { bgcolor: '#2c2c2c', color: '#ffffff' } } }}
+    >
       <DialogTitle>{t('updateUserDetails')}</DialogTitle>
       <DialogContent dividers>
         <TextField
@@ -111,7 +126,7 @@ function UpdateUserModal({
           variant="outlined"
           value={formData.firstName}
           onChange={handleChange}
-          sx={{ mb: 2 }}
+          sx={darkFieldStyles}
         />
         <TextField
           margin="dense"
@@ -123,7 +138,7 @@ function UpdateUserModal({
           value={formData.middleName}
           onChange={handleChange}
           placeholder={user?.middleName ? '' : '-'}
-          sx={{ mb: 2 }}
+          sx={darkFieldStyles}
         />
         <TextField
           margin="dense"
@@ -134,7 +149,7 @@ function UpdateUserModal({
           variant="outlined"
           value={formData.lastName}
           onChange={handleChange}
-          sx={{ mb: 2 }}
+          sx={darkFieldStyles}
         />
         <TextField
           margin="dense"
@@ -145,9 +160,9 @@ function UpdateUserModal({
           variant="outlined"
           value={formData.phoneNumber}
           onChange={handleChange}
-          sx={{ mb: 2 }}
+          sx={darkFieldStyles}
         />
-        <FormControl fullWidth margin="dense" sx={{ mb: 2 }}>
+        <FormControl fullWidth margin="dense" sx={darkFieldStyles}>
           <InputLabel id="gender-label">{t('gender')}</InputLabel>
           <Select
             labelId="gender-label"
