@@ -319,6 +319,6 @@
   "viewAllAppointments": "Vezi toate programările",
   "quickActions": "Acțiuni rapide",
   "viewAllPlans": "Vezi toate planurile",
-    "emailConfirmed": "Email confirmat"
-
+  "emailConfirmed": "Email confirmat",
+  "confirmDeleteService": "Sunteți sigur că doriți să ștergeți acest serviciu?"
 }

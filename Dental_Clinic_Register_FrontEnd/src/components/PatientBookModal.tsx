@@ -102,8 +102,22 @@ function PatientBookModal({ open, onClose, userId }: PatientBookModalProps) {
     '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#888' },
     '& .MuiInputLabel-root': { color: '#aaa' },
     '& .MuiInputLabel-root.Mui-focused': { color: '#1976d2' },
-    color: 'white',
-    input: { color: 'white' },
+    '& .MuiInputBase-input': { color: 'white' },
+    textarea: { color: 'white' },
+    '& .MuiSelect-select': { color: 'white' },
+    '& .MuiSelect-select .MuiTypography-root': { color: 'white' },
+    '& .MuiSvgIcon-root': { color: '#aaa' },
+  };
+
+  const darkMenuProps = {
+    PaperProps: {
+      sx: {
+        bgcolor: '#2c2c2c',
+        color: 'white',
+        '& .MuiMenuItem-root:hover': { bgcolor: '#444' },
+        '& .Mui-selected': { bgcolor: '#1976d2 !important' },
+      },
+    },
   };
 
   return (
@@ -137,6 +151,7 @@ function PatientBookModal({ open, onClose, userId }: PatientBookModalProps) {
             label={t('selectService')}
             notched
             autoFocus
+            MenuProps={darkMenuProps}
           >
             {isLoadingServices ? (
               <MenuItem disabled>
@@ -149,7 +164,7 @@ function PatientBookModal({ open, onClose, userId }: PatientBookModalProps) {
                     <Typography variant="body2">
                       {s.name} ({s.durationMinutes} min)
                     </Typography>
-                    <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#81c784', ml: 2 }}>
+                    <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#81c784 !important', ml: 2 }}>
                       {s.price} {t('currency')}
                     </Typography>
                   </Box>
@@ -176,7 +191,15 @@ function PatientBookModal({ open, onClose, userId }: PatientBookModalProps) {
               sx={darkFieldStyles}
             />
           )}
-          slotProps={{ paper: { sx: { bgcolor: '#2c2c2c', color: 'white' } } }}
+          slotProps={{
+            paper: {
+              sx: {
+                bgcolor: '#2c2c2c',
+                color: 'white',
+                '& .MuiAutocomplete-noOptions': { color: '#aaa' },
+              },
+            },
+          }}
         />
 
         <TextField
@@ -199,6 +222,7 @@ function PatientBookModal({ open, onClose, userId }: PatientBookModalProps) {
             onChange={(e) => setTimePreference(e.target.value as TimePreference)}
             label={t('timePreference')}
             notched
+            MenuProps={darkMenuProps}
           >
             <MenuItem value="MORNING">{t('morning')}</MenuItem>
             <MenuItem value="AFTERNOON">{t('afternoon')}</MenuItem>

@@ -320,5 +320,6 @@
   "viewAllAppointments": "View all appointments",
   "quickActions": "Quick Actions",
   "viewAllPlans": "View all plans",
-  "emailConfirmed": "Email confirmed"
+  "emailConfirmed": "Email confirmed",
+  "confirmDeleteService": "Are you sure you want to delete this service?"
 }

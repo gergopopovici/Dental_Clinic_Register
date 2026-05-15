@@ -319,5 +319,6 @@
   "viewAllAppointments": "Összes időpont megtekintése",
   "quickActions": "Gyors műveletek",
   "viewAllPlans": "Összes terv megtekintése",
-  "emailConfirmed": "E-mail megerősítve"
+  "emailConfirmed": "E-mail megerősítve",
+  "confirmDeleteService": "Biztosan törölni szeretné ezt a szolgáltatást?"
 }

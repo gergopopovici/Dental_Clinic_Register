@@ -813,7 +813,13 @@ function ProfileSettings() {
         )}
       </Box>
 
-      <Dialog open={showCropperModal} onClose={closeCropperModal} maxWidth="sm" fullWidth>
+      <Dialog
+        open={showCropperModal}
+        onClose={closeCropperModal}
+        maxWidth="sm"
+        fullWidth
+        slotProps={{ paper: { sx: { bgcolor: '#2c2c2c', color: '#ffffff' } } }}
+      >
         <Typography variant="h6" sx={{ p: 2 }}>
           {t('cropYourAvatar')}
         </Typography>
@@ -831,8 +837,8 @@ function ProfileSettings() {
               showGrid={false}
               restrictPosition={true}
             />
-          )}{' '}
-        </DialogContent>{' '}
+          )}
+        </DialogContent>
         <DialogActions sx={{ flexDirection: 'column', alignItems: 'center', p: 2 }}>
           <Box sx={{ width: '80%', mb: 2 }}>
             <Typography gutterBottom>{t('zoom')}</Typography>
