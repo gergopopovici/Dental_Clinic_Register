@@ -1,12 +1,15 @@
 import React, { Suspense, useState, useCallback, useEffect, useMemo } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
-import { Box, Button, Typography, CircularProgress } from '@mui/material';
+import { Box, Button, Typography, CircularProgress, Snackbar, Alert } from '@mui/material';
 import * as THREE from 'three';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 
 import DentureModel from './DentureModel';
 import Brace from './Brace';
 import RubberBand from './RubberBand';
+import Archwire from './Archwire';
 import { BraceComponentDTO } from '../models/BraceComponentDTO';
 import { getBraceComponents, syncBraceComponents } from '../services/BraceComponentService';
 
@@ -39,67 +42,52 @@ const DUMMY_TOOTH_CENTERS = [
   { x: 13.051, y: -3.162, z: -3.943 },
 ];
 
-function Archwire({ points, color = '#d3d3d3' }: { points: THREE.Vector3[]; color?: string }) {
-  const tubeGeometry = useMemo(() => {
-    if (points.length < 2) return null;
-    const center = new THREE.Vector3();
-    points.forEach((p) => center.add(p));
-    center.divideScalar(points.length);
-    const pivotZ = center.z - 50;
-    const sortedPoints = [...points].sort((a, b) => {
-      const angleA = Math.atan2(a.x - center.x, a.z - pivotZ);
-      const angleB = Math.atan2(b.x - center.x, b.z - pivotZ);
-      return angleA - angleB;
-    });
-    const curve = new THREE.CatmullRomCurve3(sortedPoints, false, 'centripetal');
-    return new THREE.TubeGeometry(curve, 256, 0.15, 8, false);
-  }, [points]);
-
-  if (!tubeGeometry) return null;
-
-  return (
-    <mesh geometry={tubeGeometry}>
-      <meshStandardMaterial color={color} metalness={0.9} roughness={0.1} />
-    </mesh>
-  );
+interface DenturesSceneProps {
+  treatmentPlanId?: number;
+  readOnly?: boolean;
 }
 
-function DenturesScene({ treatmentPlanId = 1 }: { treatmentPlanId?: number }) {
+function DenturesScene({ treatmentPlanId = 1, readOnly = false }: DenturesSceneProps) {
+  const queryClient = useQueryClient();
+  const { t } = useTranslation();
+
   const [components, setComponents] = useState<BraceComponentDTO[]>([]);
   const [placementMode, setPlacementMode] = useState<PlacementMode>('none');
   const [rubberBandStartPoint, setRubberBandStartPoint] = useState<THREE.Vector3 | null>(null);
   const [rubberBandColor, setRubberBandColor] = useState<string>('#FF0000');
   const [archwireColor, setArchwireColor] = useState<string>('#d3d3d3');
-  const [isLoading, setIsLoading] = useState(false);
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
+
+  const { data: serverComponents, isLoading: isFetching } = useQuery({
+    queryKey: ['braceComponents', treatmentPlanId],
+    queryFn: () => getBraceComponents(treatmentPlanId),
+  });
 
   useEffect(() => {
-    const fetchComponents = async () => {
-      setIsLoading(true);
-      try {
-        const data = await getBraceComponents(treatmentPlanId);
-        setComponents(data);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchComponents();
-  }, [treatmentPlanId]);
-
-  const handleSave = async () => {
-    setIsLoading(true);
-    try {
-      const savedData = await syncBraceComponents(treatmentPlanId, components);
-      setComponents(savedData);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setIsLoading(false);
+    if (serverComponents) {
+      setComponents(serverComponents);
     }
+  }, [serverComponents]);
+
+  const saveMutation = useMutation({
+    mutationFn: (newComponents: BraceComponentDTO[]) => syncBraceComponents(treatmentPlanId, newComponents),
+    onSuccess: (savedData) => {
+      setComponents(savedData);
+      queryClient.invalidateQueries({ queryKey: ['braceComponents', treatmentPlanId] });
+      setSnackbar({ open: true, message: t('planSavedSuccessfully'), severity: 'success' });
+    },
+    onError: () => {
+      setSnackbar({ open: true, message: t('failedToSavePlan'), severity: 'error' });
+    },
+  });
+
+  const handleSave = () => {
+    if (readOnly) return;
+    saveMutation.mutate(components);
   };
 
   const handleAutoPlace = () => {
+    if (readOnly) return;
     const autoBraces: BraceComponentDTO[] = DUMMY_TOOTH_CENTERS.map((point) => ({
       treatmentPlanId,
       type: 'BRACE',
@@ -111,11 +99,17 @@ function DenturesScene({ treatmentPlanId = 1 }: { treatmentPlanId?: number }) {
     setComponents(autoBraces);
   };
 
-  const handleRemoveComponent = useCallback((indexToRemove: number) => {
-    setComponents((prev) => prev.filter((_, index) => index !== indexToRemove));
-  }, []);
+  const handleRemoveComponent = useCallback(
+    (indexToRemove: number) => {
+      if (readOnly) return;
+      setComponents((prev) => prev.filter((_, index) => index !== indexToRemove));
+    },
+    [readOnly],
+  );
 
   const handleModelClick = (point: THREE.Vector3) => {
+    if (readOnly) return;
+
     if (placementMode === 'brace') {
       const newBrace: BraceComponentDTO = {
         treatmentPlanId,
@@ -148,6 +142,7 @@ function DenturesScene({ treatmentPlanId = 1 }: { treatmentPlanId?: number }) {
   };
 
   const toggleMode = (mode: PlacementMode) => {
+    if (readOnly) return;
     setPlacementMode((prev) => (prev === mode ? 'none' : mode));
     setRubberBandStartPoint(null);
   };
@@ -156,60 +151,81 @@ function DenturesScene({ treatmentPlanId = 1 }: { treatmentPlanId?: number }) {
     () =>
       components
         .filter((c) => c.type === 'BRACE' && (c.positionY ?? 0) > 0)
-        .map((c) => {
-          const zOff = (c.positionZ ?? 0) < 5 ? 1.4 : 0.6;
-          return new THREE.Vector3(c.positionX ?? 0, c.positionY ?? 0, (c.positionZ ?? 0) + zOff);
-        }),
+        .map(
+          (c) =>
+            new THREE.Vector3(
+              c.positionX ?? 0,
+              c.positionY ?? 0,
+              (c.positionZ ?? 0) + ((c.positionZ ?? 0) < 5 ? 1.4 : 0.6),
+            ),
+        ),
     [components],
   );
-
   const lowerBrackets = useMemo(
     () =>
       components
         .filter((c) => c.type === 'BRACE' && (c.positionY ?? 0) < 0)
-        .map((c) => {
-          const zOff = (c.positionZ ?? 0) < 5 ? 1.4 : 0.6;
-          return new THREE.Vector3(c.positionX ?? 0, c.positionY ?? 0, (c.positionZ ?? 0) + zOff);
-        }),
+        .map(
+          (c) =>
+            new THREE.Vector3(
+              c.positionX ?? 0,
+              c.positionY ?? 0,
+              (c.positionZ ?? 0) + ((c.positionZ ?? 0) < 5 ? 1.4 : 0.6),
+            ),
+        ),
     [components],
   );
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
-      <Box sx={{ display: 'flex', gap: 2, mb: 2, justifyContent: 'center' }}>
-        <Button variant={placementMode === 'brace' ? 'contained' : 'outlined'} onClick={() => toggleMode('brace')}>
-          Place Brace
-        </Button>
-        <Button
-          variant={placementMode === 'rubberBand' ? 'contained' : 'outlined'}
-          onClick={() => toggleMode('rubberBand')}
-        >
-          Place Rubber Band
-        </Button>
-        <Button variant={placementMode === 'delete' ? 'contained' : 'outlined'} onClick={() => toggleMode('delete')}>
-          Delete
-        </Button>
-        <Button variant="outlined" color="primary" onClick={handleAutoPlace}>
-          Auto-Place
-        </Button>
-        <Button variant="outlined" color="error" onClick={() => setComponents([])}>
-          Clear All
-        </Button>
-        <Button variant="contained" color="success" onClick={handleSave} disabled={isLoading}>
-          {isLoading ? <CircularProgress size={24} /> : 'Save Plan'}
-        </Button>
-      </Box>
+      {!readOnly && (
+        <>
+          <Box sx={{ display: 'flex', gap: 2, mb: 2, justifyContent: 'center' }}>
+            <Button variant={placementMode === 'brace' ? 'contained' : 'outlined'} onClick={() => toggleMode('brace')}>
+              {t('placeBrace')}
+            </Button>
+            <Button
+              variant={placementMode === 'rubberBand' ? 'contained' : 'outlined'}
+              onClick={() => toggleMode('rubberBand')}
+            >
+              {t('placeRubberBand')}
+            </Button>
+            <Button
+              variant={placementMode === 'delete' ? 'contained' : 'outlined'}
+              onClick={() => toggleMode('delete')}
+            >
+              {t('delete')}
+            </Button>
+            <Button variant="outlined" color="primary" onClick={handleAutoPlace}>
+              {t('autoPlace')}
+            </Button>
+            <Button variant="outlined" color="error" onClick={() => setComponents([])}>
+              {t('clearAll')}
+            </Button>
 
-      <Box sx={{ display: 'flex', gap: 4, mb: 2 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Typography variant="body2">Rubber Band:</Typography>
-          <input type="color" value={rubberBandColor} onChange={(e) => setRubberBandColor(e.target.value)} />
-        </Box>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Typography variant="body2">Archwire:</Typography>
-          <input type="color" value={archwireColor} onChange={(e) => setArchwireColor(e.target.value)} />
-        </Box>
-      </Box>
+            <Button
+              variant="contained"
+              color="success"
+              onClick={handleSave}
+              disabled={saveMutation.isPending || isFetching}
+            >
+              {saveMutation.isPending ? <CircularProgress size={24} /> : t('savePlan')}
+            </Button>
+          </Box>
+          <Box sx={{ display: 'flex', gap: 4, mb: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Typography variant="body2">{t('rubberBandLabel')}</Typography>
+              <input type="color" value={rubberBandColor} onChange={(e) => setRubberBandColor(e.target.value)} />
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Typography variant="body2">{t('archwireLabel')}</Typography>
+              <input type="color" value={archwireColor} onChange={(e) => setArchwireColor(e.target.value)} />
+            </Box>
+          </Box>
+        </>
+      )}
+
+      {isFetching && <CircularProgress sx={{ mb: 2 }} />}
 
       <Canvas
         camera={{ position: [0, 0, 45], fov: 45 }}
@@ -237,12 +253,13 @@ function DenturesScene({ treatmentPlanId = 1 }: { treatmentPlanId?: number }) {
               );
             }
             if (comp.type === 'RUBBER_BAND' && comp.startPositionX != null) {
-              const start = new THREE.Vector3(
-                comp.startPositionX ?? 0,
-                comp.startPositionY ?? 0,
-                comp.startPositionZ ?? 0,
-              );
-              const end = new THREE.Vector3(comp.endPositionX ?? 0, comp.endPositionY ?? 0, comp.endPositionZ ?? 0);
+              const startZ = comp.startPositionZ ?? 0;
+              const startOffset = startZ < 5 ? 1.6 : 0.8;
+              const start = new THREE.Vector3(comp.startPositionX ?? 0, comp.startPositionY ?? 0, startZ + startOffset);
+
+              const endZ = comp.endPositionZ ?? 0;
+              const endOffset = endZ < 5 ? 1.6 : 0.8;
+              const end = new THREE.Vector3(comp.endPositionX ?? 0, comp.endPositionY ?? 0, endZ + endOffset);
               return (
                 <RubberBand
                   key={index}
@@ -258,6 +275,16 @@ function DenturesScene({ treatmentPlanId = 1 }: { treatmentPlanId?: number }) {
           <OrbitControls enablePan={true} enableZoom={true} enableRotate={true} target={[0, 0, 0]} />
         </Suspense>
       </Canvas>
+
+      <Snackbar open={snackbar.open} autoHideDuration={6000} onClose={() => setSnackbar({ ...snackbar, open: false })}>
+        <Alert
+          onClose={() => setSnackbar({ ...snackbar, open: false })}
+          severity={snackbar.severity}
+          sx={{ width: '100%' }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

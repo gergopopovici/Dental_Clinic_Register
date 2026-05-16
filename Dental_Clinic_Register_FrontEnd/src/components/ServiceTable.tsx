@@ -76,6 +76,7 @@ function ServiceTable() {
     borderRadius: 1,
     '& .MuiOutlinedInput-notchedOutline': { borderColor: '#444' },
     mb: 2,
+    mt: 1,
   };
 
   const handleDelete = (id: number) => {
@@ -198,7 +199,7 @@ function ServiceTable() {
       <Dialog
         open={isModalOpen}
         onClose={handleCloseModal}
-        PaperProps={{ sx: { bgcolor: '#1e1e1e', color: 'white', minWidth: { xs: '300px', sm: '500px' } } }}
+        slotProps={{ paper: { sx: { bgcolor: '#1e1e1e', color: 'white', minWidth: { xs: '300px', sm: '500px' } } } }}
       >
         <DialogTitle>
           {currentService.id ? t('editService') || 'Edit Service' : t('addService') || 'Add New Service'}

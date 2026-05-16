@@ -13,6 +13,7 @@ import {
   CircularProgress,
   Typography,
   Autocomplete,
+  Box,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -112,9 +113,22 @@ function DoctorBookModal({ open, onClose, doctorId }: DoctorBookModalProps) {
     '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#888' },
     '& .MuiInputLabel-root': { color: '#aaa' },
     '& .MuiInputLabel-root.Mui-focused': { color: '#1976d2' },
-    color: 'white',
-    input: { color: 'white' },
+    '& .MuiInputBase-input': { color: 'white' },
     textarea: { color: 'white' },
+    '& .MuiSelect-select': { color: 'white' },
+    '& .MuiSelect-select .MuiTypography-root': { color: 'white' },
+    '& .MuiSvgIcon-root': { color: '#aaa' },
+  };
+
+  const darkMenuProps = {
+    PaperProps: {
+      sx: {
+        bgcolor: '#2c2c2c',
+        color: 'white',
+        '& .MuiMenuItem-root:hover': { bgcolor: '#444' },
+        '& .Mui-selected': { bgcolor: '#1976d2 !important' },
+      },
+    },
   };
 
   return (
@@ -138,8 +152,11 @@ function DoctorBookModal({ open, onClose, doctorId }: DoctorBookModalProps) {
           options={activeAndSortedPatients}
           loading={isLoadingPatients}
           getOptionLabel={(option: PatientDropDownDTO) => `${option.fullName} (${option.email})`}
-          value={activeAndSortedPatients.find((p) => p.userId === patientId) || null}
-          onChange={(_, newValue) => setPatientId(newValue ? newValue.userId : '')}
+          value={activeAndSortedPatients.find((p) => p.userId === patientId || null)}
+          onChange={(_, newValue: any) => {
+            setPatientId(newValue ? newValue.userId || newValue.id : '');
+            setErrorMessage('');
+          }}
           noOptionsText={t('noPatientsFound', 'No patients found')}
           renderInput={(params) => (
             <TextField
@@ -166,6 +183,7 @@ function DoctorBookModal({ open, onClose, doctorId }: DoctorBookModalProps) {
               sx: {
                 bgcolor: '#2c2c2c',
                 color: 'white',
+                '& .MuiAutocomplete-noOptions': { color: '#aaa' },
                 '& .MuiAutocomplete-option[aria-selected="true"]': { bgcolor: '#444 !important' },
               },
             },
@@ -182,6 +200,7 @@ function DoctorBookModal({ open, onClose, doctorId }: DoctorBookModalProps) {
             }}
             label={t('selectService')}
             notched
+            MenuProps={darkMenuProps}
           >
             {isLoadingServices ? (
               <MenuItem disabled>
@@ -190,7 +209,14 @@ function DoctorBookModal({ open, onClose, doctorId }: DoctorBookModalProps) {
             ) : (
               services?.map((s: any) => (
                 <MenuItem key={s.id} value={s.id}>
-                  {s.name} ({s.durationMinutes} min)
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
+                    <Typography variant="body2">
+                      {s.name} ({s.durationMinutes} min)
+                    </Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#81c784 !important', ml: 2 }}>
+                      {s.price} {t('currency')}
+                    </Typography>
+                  </Box>
                 </MenuItem>
               ))
             )}
