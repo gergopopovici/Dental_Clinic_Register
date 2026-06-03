@@ -122,6 +122,9 @@ function TreatmentPlanModal({
     color: 'white',
     input: { color: 'white' },
     textarea: { color: 'white' },
+    '& .MuiSelect-select': { color: 'white' },
+    '& .MuiChip-root': { color: 'white', bgcolor: '#444' },
+    '& .MuiChip-deleteIcon': { color: '#aaa', '&:hover': { color: 'white' } },
   };
 
   return (

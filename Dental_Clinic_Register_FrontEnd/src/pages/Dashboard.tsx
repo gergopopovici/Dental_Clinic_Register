@@ -2,8 +2,8 @@ import React, { useEffect } from 'react';
 import { CircularProgress, Box } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
-import DoctorDashboard from './Appointments/DoctorDashboard';
-import PatientDashboard from './Appointments/PatientDashboard';
+import PatientDashboard from './PatientDashboard';
+import DoctorDashboard from './DoctorDashboard';
 
 function Dashboard() {
   const { user, isLoading } = useUser();

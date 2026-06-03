@@ -26,11 +26,11 @@ import AppointmentCard from '../../components/AppointmentCard';
 import DoctorActionModal from '../../components/DoctorActionModal';
 import DoctorBookModal from '../../components/DoctorBookModal';
 
-interface DoctorDashboardProps {
+interface DoctorAppointmentsProps {
   userId: number;
 }
 
-function DoctorDashboard({ userId }: DoctorDashboardProps) {
+function DoctorAppointments({ userId }: DoctorAppointmentsProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
@@ -312,4 +312,4 @@ function DoctorDashboard({ userId }: DoctorDashboardProps) {
   );
 }
 
-export default DoctorDashboard;
+export default DoctorAppointments;

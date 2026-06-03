@@ -320,5 +320,11 @@
   "quickActions": "Acțiuni rapide",
   "viewAllPlans": "Vezi toate planurile",
   "emailConfirmed": "Email confirmat",
-  "confirmDeleteService": "Sunteți sigur că doriți să ștergeți acest serviciu?"
+  "confirmDeleteService": "Sunteți sigur că doriți să ștergeți acest serviciu?",
+  "unauthorizedOrNotFound": "Nu aveți permisiunea de a vizualiza acest plan, sau acesta nu există.",
+  "viewAll": "Vezi toate",
+  "todaySummary": "Ai în total {{count}} programări astăzi.",
+  "noAppointmentsToday": "Nu ai nicio programare astăzi.",
+  "pendingRequestsCount": "Ai {{count}} cereri în așteptare pentru aprobare.",
+  "noMoreAppointmentsToday": "Nu mai ai programări pentru astăzi."
 }

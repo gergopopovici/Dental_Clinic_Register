@@ -50,7 +50,7 @@ button {
   border: 1px solid transparent;
   padding: 0.6em 1.2em;
   font-size: 1em;
-  font-weight: 500;
+  font-weight: bold;
   font-family: inherit;
   background-color: #1a1a1a;
   cursor: pointer;
@@ -61,7 +61,7 @@ button:hover {
 }
 button:focus,
 button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+outline: none;
 }
 
 @media (prefers-color-scheme: light) {
@@ -75,4 +75,7 @@ button:focus-visible {
   button {
     background-color: #f9f9f9;
   }
+}
+.MuiButton-root {
+  font-weight: bold !important;
 }

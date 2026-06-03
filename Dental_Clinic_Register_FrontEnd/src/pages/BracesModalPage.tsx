@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import DenturesScene from '../components/DenturesScene';
 import { useUser } from '../context/UserContext';
 
-function BracesModelPage() {
+function BracesModalPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -27,22 +27,16 @@ function BracesModelPage() {
   }
 
   return (
-    <Box sx={{ p: 4, bgcolor: '#121212', minHeight: '100vh', color: 'white' }}>
-      <Button startIcon={<ArrowBackIcon />} onClick={() => navigate(-1)} sx={{ mb: 3, color: '#aaa' }}>
+    <Box sx={{ p: 4, color: 'white', flexGrow: 1 }}>
+      <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/treatment-plans')} sx={{ mb: 3, color: 'white' }}>
         {t('back', 'Back')}
       </Button>
-
       <Typography variant="h4" gutterBottom fontWeight="bold">
         {t('bracesConfigurator', '3D Braces Configurator')}
       </Typography>
-      <Typography variant="body1" color="textSecondary" sx={{ mb: 4 }}>
-        {t('managingPlanId', 'Plan #')}
-        {planId}
-      </Typography>
-
       <DenturesScene treatmentPlanId={planId} readOnly={isReadOnly} />
     </Box>
   );
 }
 
-export default BracesModelPage;
+export default BracesModalPage;

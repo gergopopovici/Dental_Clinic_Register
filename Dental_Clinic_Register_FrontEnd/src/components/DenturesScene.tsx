@@ -58,9 +58,14 @@ function DenturesScene({ treatmentPlanId = 1, readOnly = false }: DenturesSceneP
   const [archwireColor, setArchwireColor] = useState<string>('#d3d3d3');
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
 
-  const { data: serverComponents, isLoading: isFetching } = useQuery({
+  const {
+    data: serverComponents,
+    isLoading: isFetching,
+    isError,
+  } = useQuery({
     queryKey: ['braceComponents', treatmentPlanId],
     queryFn: () => getBraceComponents(treatmentPlanId),
+    retry: false,
   });
 
   useEffect(() => {
@@ -176,6 +181,14 @@ function DenturesScene({ treatmentPlanId = 1, readOnly = false }: DenturesSceneP
     [components],
   );
 
+  if (isError) {
+    return (
+      <Typography color="error" variant="h6" sx={{ textAlign: 'center', mt: 4 }}>
+        {t('unauthorizedOrNotFound')}
+      </Typography>
+    );
+  }
+
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
       {!readOnly && (
@@ -196,10 +209,10 @@ function DenturesScene({ treatmentPlanId = 1, readOnly = false }: DenturesSceneP
             >
               {t('delete')}
             </Button>
-            <Button variant="outlined" color="primary" onClick={handleAutoPlace}>
+            <Button variant="contained" color="primary" onClick={handleAutoPlace}>
               {t('autoPlace')}
             </Button>
-            <Button variant="outlined" color="error" onClick={() => setComponents([])}>
+            <Button variant="contained" color="error" onClick={() => setComponents([])}>
               {t('clearAll')}
             </Button>
 

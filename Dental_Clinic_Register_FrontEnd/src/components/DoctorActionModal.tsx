@@ -156,7 +156,20 @@ function DoctorActionModal({
       </DialogContent>
 
       <DialogActions sx={{ p: 3, borderTop: '1px solid #333' }}>
-        <Button onClick={onClose} sx={{ color: '#aaa' }}>
+        <Button
+          onClick={onClose}
+          sx={{
+            color: 'white',
+            fontWeight: 'bold',
+            backgroundColor: '#d82215',
+            '&:hover': {
+              backgroundColor: 'darkred',
+            },
+            '&:focus': {
+              outline: 'none',
+            },
+          }}
+        >
           {t('cancel')}
         </Button>
         <Button
@@ -164,6 +177,9 @@ function DoctorActionModal({
           color={actionType === 'CONFIRM' ? 'success' : 'primary'}
           onClick={handleSubmit}
           disabled={actionMutation.isPending}
+          sx={{
+            fontWeight: 'bold',
+          }}
         >
           {actionMutation.isPending ? <CircularProgress size={24} color="inherit" /> : t('save')}
         </Button>

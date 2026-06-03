@@ -3,8 +3,9 @@ import { Box, CircularProgress, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../../context/UserContext';
 import { useTranslation } from 'react-i18next';
-import PatientDashboard from './PatientDashboard';
-import DoctorDashboard from './DoctorDashboard';
+import DoctorDashboard from './DoctorAppointments';
+import PatientAppointments from './PatientAppointments';
+import DoctorAppointments from './DoctorAppointments';
 
 function Appointments() {
   const navigate = useNavigate();
@@ -41,7 +42,6 @@ function Appointments() {
       sx={{
         width: '100%',
         minHeight: '100%',
-        bgcolor: 'black',
         boxSizing: 'border-box',
         color: 'white',
       }}
@@ -62,7 +62,7 @@ function Appointments() {
           </Typography>
         </Box>
 
-        {isDoctor ? <DoctorDashboard userId={user.id} /> : <PatientDashboard userId={user.id} />}
+        {isDoctor ? <DoctorAppointments userId={user.id} /> : <PatientAppointments userId={user.id} />}
       </Box>
     </Box>
   );

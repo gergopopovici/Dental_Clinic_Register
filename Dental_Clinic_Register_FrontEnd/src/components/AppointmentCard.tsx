@@ -134,7 +134,9 @@ function AppointmentCard({
                 textTransform: 'none',
                 p: 0,
                 minWidth: 0,
+                fontWeight: 'bold',
                 '&:hover': { background: 'none', textDecoration: 'underline' },
+                '&:focus': { outline: 'none' },
               }}
             >
               🔗 {t('resourceLink')}
@@ -153,7 +155,22 @@ function AppointmentCard({
           }}
         >
           {(appointment.status === 'PENDING' || appointment.status === 'CONFIRMED') && onCancel && (
-            <Button variant="outlined" color="error" size="small" onClick={() => onCancel(appointment.id)}>
+            <Button
+              variant="contained"
+              size="small"
+              onClick={() => onCancel(appointment.id)}
+              sx={{
+                color: 'white',
+                fontWeight: 'bold',
+                backgroundColor: '#d82215',
+                '&:hover': {
+                  backgroundColor: 'darkred',
+                },
+                '&:focus': {
+                  outline: 'none',
+                },
+              }}
+            >
               {t('cancel')}
             </Button>
           )}
@@ -161,22 +178,46 @@ function AppointmentCard({
           {userRole === 'DOCTOR' && (
             <>
               {appointment.status === 'PENDING' && onConfirm && (
-                <Button variant="contained" color="success" size="small" onClick={() => onConfirm(appointment.id)}>
+                <Button
+                  variant="contained"
+                  color="success"
+                  size="small"
+                  onClick={() => onConfirm(appointment.id)}
+                  sx={{ fontWeight: 'bold', '&:focus': { outline: 'none' } }}
+                >
                   {t('confirm')}
                 </Button>
               )}
               {appointment.status === 'CONFIRMED' && onUpdate && (
-                <Button variant="outlined" color="primary" size="small" onClick={() => onUpdate(appointment.id)}>
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  size="small"
+                  onClick={() => onUpdate(appointment.id)}
+                  sx={{ fontWeight: 'bold', '&:focus': { outline: 'none' } }}
+                >
                   {t('reschedule')}
                 </Button>
               )}
               {appointment.status === 'CONFIRMED' && onComplete && (
-                <Button variant="contained" color="info" size="small" onClick={() => onComplete(appointment.id)}>
+                <Button
+                  variant="contained"
+                  color="info"
+                  size="small"
+                  onClick={() => onComplete(appointment.id)}
+                  sx={{ fontWeight: 'bold', '&:focus': { outline: 'none' } }}
+                >
                   {t('complete')}
                 </Button>
               )}
               {appointment.status === 'CONFIRMED' && onNoShow && (
-                <Button variant="outlined" color="warning" size="small" onClick={() => onNoShow(appointment.id)}>
+                <Button
+                  variant="outlined"
+                  color="warning"
+                  size="small"
+                  onClick={() => onNoShow(appointment.id)}
+                  sx={{ fontWeight: 'bold', '&:focus': { outline: 'none' } }}
+                >
                   {t('noShow')}
                 </Button>
               )}

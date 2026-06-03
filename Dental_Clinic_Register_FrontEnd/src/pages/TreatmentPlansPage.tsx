@@ -41,7 +41,7 @@ function TreatmentPlansPage() {
       sx={{
         width: '100%',
         minHeight: '100vh',
-        bgcolor: 'black',
+        bgcolor: '2c2c2c',
         boxSizing: 'border-box',
         color: 'white',
       }}

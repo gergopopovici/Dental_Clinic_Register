@@ -20,7 +20,7 @@ import {
 import PatientBookModal from '../../components/PatientBookModal';
 import AppointmentCard from '../../components/AppointmentCard';
 
-interface PatientDashboardProps {
+interface PatientAppointmentsProps {
   userId: number;
 }
 
@@ -34,7 +34,7 @@ const getSortString = (apt: any) => {
   return '0000-00-00T00:00:00';
 };
 
-function PatientDashboard({ userId }: PatientDashboardProps) {
+function PatientAppointments({ userId }: PatientAppointmentsProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [tabValue, setTabValue] = useState(0);
@@ -60,23 +60,22 @@ function PatientDashboard({ userId }: PatientDashboardProps) {
 
     const upcoming = appointments
       .filter((a) => {
-        const isFutureStatus = a.status === 'CONFIRMED' || a.status === 'PENDING';
-        const isFutureDate = new Date(getSortString(a)).getTime() > now;
-        return isFutureStatus && isFutureDate;
+        if (a.status === 'PENDING') return true;
+        if (a.status === 'CONFIRMED' && new Date(getSortString(a)).getTime() > now) return true;
+        return false;
       })
       .sort((a, b) => getSortString(a).localeCompare(getSortString(b)));
 
     const history = appointments
       .filter((a) => {
-        const isPastStatus = ['COMPLETED', 'CANCELLED', 'NO_SHOW'].includes(a.status);
-        const isPastDate = new Date(getSortString(a)).getTime() <= now;
-        return isPastStatus || isPastDate;
+        if (['COMPLETED', 'CANCELLED', 'NO_SHOW'].includes(a.status)) return true;
+        if (a.status === 'CONFIRMED' && new Date(getSortString(a)).getTime() <= now) return true;
+        return false;
       })
       .sort((a, b) => getSortString(a).localeCompare(getSortString(b)));
 
     return { upcoming, history };
   }, [appointments]);
-
   const cancelMutation = useMutation({
     mutationFn: (appointmentId: number) => cancelAppointmentByPatient(userId, appointmentId),
     onSuccess: async () => {
@@ -111,8 +110,8 @@ function PatientDashboard({ userId }: PatientDashboardProps) {
           textColor="primary"
           indicatorColor="primary"
         >
-          <Tab label={t('upcoming')} sx={{ color: 'white' }} />
-          <Tab label={t('history')} sx={{ color: 'white' }} />
+          <Tab label={t('upcoming')} sx={{ color: 'white', '&:focus': { outline: 'none' } }} />
+          <Tab label={t('history')} sx={{ color: 'white', '&:focus': { outline: 'none' } }} />
         </Tabs>
       </Box>
 
@@ -181,4 +180,4 @@ function PatientDashboard({ userId }: PatientDashboardProps) {
   );
 }
 
-export default PatientDashboard;
+export default PatientAppointments;

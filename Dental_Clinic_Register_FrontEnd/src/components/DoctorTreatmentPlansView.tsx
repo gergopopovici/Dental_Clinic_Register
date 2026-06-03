@@ -71,33 +71,35 @@ function DoctorTreatmentPlansView({ doctorId }: DoctorViewProps) {
             </Typography>
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Chip
-              label={t(plan.status)}
-              color={plan.status === 'ACTIVE' ? 'success' : plan.status === 'CANCELLED' ? 'error' : 'default'}
-              variant="outlined"
-            />
-
             {isBracesPlan && (
               <Button
                 variant="contained"
-                color="info"
+                color="primary"
                 size="small"
                 onClick={() => navigate(`/treatment-plans/${plan.id}/braces`)}
+                sx={{ '&:focus': { outline: 'none' } }}
               >
                 {t('open3DModel', '3D Model')}
               </Button>
             )}
 
             <Button
-              variant="outlined"
+              variant="contained"
               size="small"
               onClick={() => {
                 setEditingPlan(plan);
                 setIsModalOpen(true);
               }}
+              sx={{ '&:focus': { outline: 'none' } }}
             >
               {t('edit')}
             </Button>
+
+            <Chip
+              label={t(plan.status)}
+              color={plan.status === 'ACTIVE' ? 'success' : plan.status === 'CANCELLED' ? 'error' : 'default'}
+              sx={{ color: 'white' }}
+            />
           </Box>
         </CardContent>
       </Card>
@@ -132,6 +134,7 @@ function DoctorTreatmentPlansView({ doctorId }: DoctorViewProps) {
                 setEditingPlan(null);
                 setIsModalOpen(true);
               }}
+              sx={{ '&:focus': { outline: 'none' } }}
             >
               {t('createNewPlan')}
             </Button>
@@ -145,16 +148,16 @@ function DoctorTreatmentPlansView({ doctorId }: DoctorViewProps) {
                 {t('activePlans', 'Active Plans')}
               </Typography>
               {activePlans.length === 0 ? (
-                <Typography color="textSecondary">{t('noActivePlans', 'No active plans.')}</Typography>
+                <Typography color="white">{t('noActivePlans', 'No active plans.')}</Typography>
               ) : (
                 activePlans.map(renderPlanCard)
               )}
               <Divider sx={{ borderColor: '#333', my: 2 }} />
-              <Typography variant="subtitle1" color="textSecondary">
+              <Typography variant="subtitle1" color="primary.light">
                 {t('pastPlans', 'Past Plans')}
               </Typography>
               {pastPlans.length === 0 ? (
-                <Typography color="textSecondary">{t('noPastPlans', 'No past plans.')}</Typography>
+                <Typography color="white">{t('noPastPlans', 'No past plans.')}</Typography>
               ) : (
                 pastPlans.map(renderPlanCard)
               )}

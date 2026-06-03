@@ -131,7 +131,7 @@ function UserTable({ currentUserId }: UserTableProps) {
                 <TableRow key={user.id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
                   <TableCell sx={{ color: 'white' }}>{user.userName}</TableCell>
                   <TableCell sx={{ color: 'white' }}>{user.name}</TableCell>
-                  <TableCell sx={{ color: '#aaaaaaa' }}>{user.email}</TableCell>
+                  <TableCell sx={{ color: 'white' }}>{user.email}</TableCell>
                   <TableCell>
                     <Chip label={user.role} size="small" sx={{ bgcolor: '#333', color: '#90caf9' }} />
                   </TableCell>
@@ -140,7 +140,7 @@ function UserTable({ currentUserId }: UserTableProps) {
                       label={user.enabled ? t('active') : t('banned')}
                       color={user.enabled ? 'success' : 'error'}
                       size="small"
-                      variant="outlined"
+                      sx={{ color: 'white' }}
                     />
                   </TableCell>
                   <TableCell align="right">
@@ -158,7 +158,7 @@ function UserTable({ currentUserId }: UserTableProps) {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={6} align="center" sx={{ color: '#aaaaaa', py: 3 }}>
+                <TableCell colSpan={6} align="center" sx={{ color: 'white', py: 3 }}>
                   {t('noUsersFound')}
                 </TableCell>
               </TableRow>

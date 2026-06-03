@@ -321,5 +321,12 @@
   "quickActions": "Quick Actions",
   "viewAllPlans": "View all plans",
   "emailConfirmed": "Email confirmed",
-  "confirmDeleteService": "Are you sure you want to delete this service?"
+  "confirmDeleteService": "Are you sure you want to delete this service?",
+  "unauthorizedOrNotFound": "You do not have permission to view this plan, or it does not exist.",
+  "viewAll": "View All",
+  "todaySummary": "You have {{count}} appointments today.",
+  "noAppointmentsToday": "You have no appointments today.",
+  "pendingRequestsCount": "You have {{count}} pending request(s) waiting for approval.",
+  "noMoreAppointmentsToday": "You have no more appointments left for today."
+  
 }

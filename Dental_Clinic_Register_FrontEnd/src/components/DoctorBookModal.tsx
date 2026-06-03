@@ -263,10 +263,31 @@ function DoctorBookModal({ open, onClose, doctorId }: DoctorBookModalProps) {
       </DialogContent>
 
       <DialogActions sx={{ p: 3, borderTop: '1px solid #333' }}>
-        <Button onClick={onClose} sx={{ color: '#aaa' }}>
+        <Button
+          onClick={onClose}
+          sx={{
+            color: 'white',
+            fontWeight: 'bold',
+            backgroundColor: '#d82215',
+            '&:hover': {
+              backgroundColor: 'darkred',
+            },
+            '&:focus': {
+              outline: 'none',
+            },
+          }}
+        >
           {t('cancel')}
         </Button>
-        <Button variant="contained" color="primary" onClick={handleSubmit} disabled={bookMutation.isPending}>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={handleSubmit}
+          disabled={bookMutation.isPending}
+          sx={{
+            fontWeight: 'bold',
+          }}
+        >
           {bookMutation.isPending ? <CircularProgress size={24} color="inherit" /> : t('save')}
         </Button>
       </DialogActions>

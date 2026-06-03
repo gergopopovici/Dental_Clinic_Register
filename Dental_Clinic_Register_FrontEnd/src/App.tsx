@@ -16,11 +16,10 @@ import DashboardLayout from './components/DashboardLayout';
 
 import { UserProvider } from './context/UserContext';
 
-import BracesPage from './pages/Braces';
 import AdminDashboard from './pages/Admin';
 import Appointments from './pages/Appointments/Appointments';
 import TreatmentPlansPage from './pages/TreatmentPlansPage';
-import BracesModelPage from './pages/BracesModalPage';
+import BracesModalPage from './pages/BracesModalPage';
 import Dashboard from './pages/Dashboard';
 
 const queryClient = new QueryClient();
@@ -52,17 +51,9 @@ function App() {
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/appointments" element={<Appointments />} />
                 <Route path="/profile" element={<ProfileSettings />} />
-                <Route path="/braces" element={<BracesPage />} />
                 <Route path="/admin" element={<AdminDashboard />} />
                 <Route path="/treatment-plans" element={<TreatmentPlansPage />} />
-                <Route
-                  path="/treatment-plans/:id/braces"
-                  element={
-                    <DashboardLayout>
-                      <BracesModelPage />
-                    </DashboardLayout>
-                  }
-                />
+                <Route path="/treatment-plans/:id/braces" element={<BracesModalPage />} />
               </Route>
             </Route>
 

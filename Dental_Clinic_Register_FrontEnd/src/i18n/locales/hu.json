@@ -320,5 +320,11 @@
   "quickActions": "Gyors műveletek",
   "viewAllPlans": "Összes terv megtekintése",
   "emailConfirmed": "E-mail megerősítve",
-  "confirmDeleteService": "Biztosan törölni szeretné ezt a szolgáltatást?"
+  "confirmDeleteService": "Biztosan törölni szeretné ezt a szolgáltatást?",
+  "unauthorizedOrNotFound": "Nincs jogosultságod megtekinteni ezt a tervet, vagy nem létezik.",
+  "viewAll": "Összes",
+  "todaySummary": "Ma összesen {{count}} időpontod van.",
+  "noAppointmentsToday": "Ma nincsenek időpontjaid.",
+  "pendingRequestsCount": "{{count}} jóváhagyásra váró kérésed van.",
+  "noMoreAppointmentsToday": "Mára nincs több hátralévő időpontod."
 }
