@@ -88,27 +88,9 @@ function DoctorActionModal({
     actionMutation.mutate(payload);
   };
 
-  const darkFieldStyles = {
-    bgcolor: '#2c2c2c',
-    borderRadius: 1,
-    '& .MuiOutlinedInput-notchedOutline': { borderColor: '#444' },
-    '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#888' },
-    '& .MuiInputLabel-root': { color: '#aaa' },
-    '& .MuiInputLabel-root.Mui-focused': { color: '#1976d2' },
-    color: 'white',
-    input: { color: 'white' },
-    textarea: { color: 'white' },
-  };
-
   return (
-    <Dialog
-      open={open}
-      onClose={onClose}
-      maxWidth="sm"
-      fullWidth
-      slotProps={{ paper: { sx: { bgcolor: '#1e1e1e', color: 'white' } } }}
-    >
-      <DialogTitle sx={{ fontWeight: 'bold', borderBottom: '1px solid #333' }}>
+    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+      <DialogTitle sx={{ fontWeight: 'bold' }}>
         {actionType === 'CONFIRM' ? t('confirmAppointmentTime') : t('rescheduleAppointment')}
       </DialogTitle>
 
@@ -129,7 +111,6 @@ function DoctorActionModal({
           }}
           value={dateTime}
           onChange={(e) => setDateTime(e.target.value)}
-          sx={darkFieldStyles}
         />
 
         <TextField
@@ -141,7 +122,6 @@ function DoctorActionModal({
           slotProps={{ inputLabel: { shrink: true } }}
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
-          sx={darkFieldStyles}
         />
 
         <TextField
@@ -151,20 +131,14 @@ function DoctorActionModal({
           slotProps={{ inputLabel: { shrink: true } }}
           value={resourceLink}
           onChange={(e) => setResourceLink(e.target.value)}
-          sx={darkFieldStyles}
         />
       </DialogContent>
 
-      <DialogActions sx={{ p: 3, borderTop: '1px solid #333' }}>
+      <DialogActions sx={{ p: 3 }}>
         <Button
           onClick={onClose}
           sx={{
-            color: 'white',
             fontWeight: 'bold',
-            backgroundColor: '#d82215',
-            '&:hover': {
-              backgroundColor: 'darkred',
-            },
             '&:focus': {
               outline: 'none',
             },

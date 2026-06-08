@@ -24,7 +24,6 @@ public class RequestUserDTO {
     private String password;
     @NotBlank
     private String firstName;
-    private String middleName;
     @NotBlank
     private String lastName;
     @NotBlank

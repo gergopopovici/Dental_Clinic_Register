@@ -11,19 +11,14 @@ interface DeleteModalprops {
   isLoadingDelete: boolean;
   onDelete: () => void;
 }
+
 function DeleteModal({ open, onClose, successMessage, errorMessage, isLoadingDelete, onDelete }: DeleteModalprops) {
   const { t } = useTranslation();
   return (
-    <Dialog
-      open={open}
-      onClose={onClose}
-      maxWidth="sm"
-      fullWidth
-      slotProps={{ paper: { sx: { bgcolor: '#2c2c2c', color: '#ffffff' } } }}
-    >
+    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle>{t('confirmDeletion')}</DialogTitle>
       <DialogContent dividers>
-        <Typography variant="body1" gutterBottom sx={{ color: '#aaaaaa' }}>
+        <Typography variant="body1" gutterBottom>
           {t('confirmDeletionMessage')}
         </Typography>
         {successMessage && (
@@ -54,4 +49,5 @@ function DeleteModal({ open, onClose, successMessage, errorMessage, isLoadingDel
     </Dialog>
   );
 }
+
 export default DeleteModal;

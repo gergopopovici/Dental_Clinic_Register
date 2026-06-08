@@ -1,4 +1,5 @@
 import {
+  Alert,
   Box,
   Button,
   Card,
@@ -9,7 +10,6 @@ import {
   TextField,
   Typography,
   Snackbar,
-  Alert,
 } from '@mui/material';
 import PeopleIcon from '@mui/icons-material/People';
 import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
@@ -88,34 +88,20 @@ function AdminDashboard() {
   const handleCloseSnackbar = () => setSnackbar({ ...snackbar, open: false });
 
   return (
-    <Box
-      sx={{
-        width: '100%',
-        minHeight: '100%',
-        bgcolor: 'black',
-        boxSizing: 'border-box',
-      }}
-    >
-      <Box
-        sx={{
-          maxWidth: '1200px',
-          margin: '0 auto',
-          padding: '2rem',
-          color: 'white',
-        }}
-      >
+    <Box sx={{ width: '100%', minHeight: '100%', boxSizing: 'border-box' }}>
+      <Box sx={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem' }}>
         <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 4 }}>
           {t('adminPanel')}
         </Typography>
-        {isStatsLoading && <CircularProgress sx={{ color: 'white' }} />}
+        {isStatsLoading && <CircularProgress />}
         {isError && <Typography color="error">{t('failedToFetchAdminStats')}</Typography>}
         {stats && (
           <Grid container spacing={4}>
             <Grid size={{ xs: 12, sm: 4 }}>
-              <Card sx={{ bgcolor: '#1e1e1e', color: 'primary.main', height: '100%' }}>
+              <Card sx={{ height: '100%' }}>
                 <CardContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 4 }}>
-                  <PeopleIcon sx={{ fontSize: 40, color: '#90caf9', mb: 1 }} />
-                  <Typography variant="h6" color="text.secondary" sx={{ color: '#aaaaaa' }}>
+                  <PeopleIcon sx={{ fontSize: 40, mb: 1 }} />
+                  <Typography variant="h6" color="text.secondary">
                     {t('totalPatients')}
                   </Typography>
                   <Typography variant="h3" sx={{ fontWeight: 'bold', mt: 1 }}>
@@ -125,10 +111,10 @@ function AdminDashboard() {
               </Card>
             </Grid>
             <Grid size={{ xs: 12, sm: 4 }}>
-              <Card sx={{ bgcolor: '#1e1e1e', color: 'primary.main', height: '100%' }}>
+              <Card sx={{ height: '100%' }}>
                 <CardContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 4 }}>
-                  <LocalHospitalIcon sx={{ fontSize: 40, color: '#90caf9', mb: 1 }} />
-                  <Typography variant="h6" color="text.secondary" sx={{ color: '#aaaaaa' }}>
+                  <LocalHospitalIcon sx={{ fontSize: 40, mb: 1 }} />
+                  <Typography variant="h6" color="text.secondary">
                     {t('totalDoctors')}
                   </Typography>
                   <Typography variant="h3" sx={{ fontWeight: 'bold', mt: 1 }}>
@@ -138,10 +124,10 @@ function AdminDashboard() {
               </Card>
             </Grid>
             <Grid size={{ xs: 12, sm: 4 }}>
-              <Card sx={{ bgcolor: '#1e1e1e', color: 'primary.main', height: '100%' }}>
+              <Card sx={{ height: '100%' }}>
                 <CardContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 4 }}>
-                  <BlockIcon sx={{ fontSize: 40, color: '#90caf9', mb: 1 }} />
-                  <Typography variant="h6" color="text.secondary" sx={{ color: '#aaaaaa' }}>
+                  <BlockIcon sx={{ fontSize: 40, mb: 1 }} />
+                  <Typography variant="h6" color="text.secondary">
                     {t('totalBannedUsers')}
                   </Typography>
                   <Typography variant="h3" sx={{ fontWeight: 'bold', mt: 1 }}>
@@ -153,7 +139,7 @@ function AdminDashboard() {
           </Grid>
         )}
 
-        <Paper sx={{ mt: 4, p: 3, bgcolor: '#1e1e1e', color: 'white' }}>
+        <Paper sx={{ mt: 4, p: 3 }}>
           <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
             {t('inviteNewDoctor')}
           </Typography>
@@ -165,12 +151,6 @@ function AdminDashboard() {
               value={doctorInviteEmail}
               onChange={(e) => setDoctorInviteEmail(e.target.value)}
               disabled={doctorInviteMutation.isPending}
-              sx={{
-                input: { color: 'white' },
-                bgcolor: '#2c2c2c',
-                borderRadius: 1,
-                '& .MuiOutlinedInput-notchedOutline': { borderColor: '#444' },
-              }}
             />
             <Button
               variant="contained"
@@ -184,7 +164,7 @@ function AdminDashboard() {
           </Box>
         </Paper>
 
-        <Paper sx={{ mt: 4, p: 3, bgcolor: '#1e1e1e', color: 'white' }}>
+        <Paper sx={{ mt: 4, p: 3 }}>
           <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
             {t('inviteNewAdmin')}
           </Typography>
@@ -196,12 +176,6 @@ function AdminDashboard() {
               value={adminInviteEmail}
               onChange={(e) => setAdminInviteEmail(e.target.value)}
               disabled={adminInviteMutation.isPending}
-              sx={{
-                input: { color: 'white' },
-                bgcolor: '#2c2c2c',
-                borderRadius: 1,
-                '& .MuiOutlinedInput-notchedOutline': { borderColor: '#444' },
-              }}
             />
             <Button
               variant="contained"

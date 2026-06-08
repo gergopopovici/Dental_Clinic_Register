@@ -22,5 +22,5 @@ public interface AuthService {
 
     ResponseEntity<MessageResponse> registerAdmin(String inviteToken, RequestUserDTO requestUserDTO);
 
-
+    ResponseEntity<MessageResponse> resendActivationEmail(String email);
 }

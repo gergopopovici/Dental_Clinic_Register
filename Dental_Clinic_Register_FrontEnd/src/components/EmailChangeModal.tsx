@@ -12,6 +12,7 @@ import {
 } from '@mui/material';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+
 interface EmailChangeModalProps {
   open: boolean;
   onClose: () => void;
@@ -39,6 +40,7 @@ interface EmailChangeModalProps {
   successMessage: string;
   errorMessage: string;
 }
+
 function EmailChangeModal({
   open,
   onClose,
@@ -60,17 +62,12 @@ function EmailChangeModal({
   const isLoading = isLoadingRequest || isLoadingVerify || isLoadingUpdate;
   const { t } = useTranslation();
 
-  const darkFieldStyles = {
-    '& .MuiOutlinedInput-notchedOutline': { borderColor: '#444' },
-    '& .MuiInputLabel-root': { color: '#aaa' },
-    input: { color: 'white' },
-  };
   const renderContent = () => {
     switch (step) {
       case 'initial':
         return (
           <Box>
-            <Typography variant="body1" sx={{ mb: 2, color: '#aaaaaa' }}>
+            <Typography variant="body1" sx={{ mb: 2 }}>
               {t('clickSendCode')}
             </Typography>
             <Button variant="contained" onClick={onRequestCode} disabled={isLoading} sx={{ textTransform: 'none' }}>
@@ -81,7 +78,7 @@ function EmailChangeModal({
       case 'verifyCode':
         return (
           <form onSubmit={onVerifyCodeSubmit}>
-            <Typography variant="body1" sx={{ mb: 2, color: '#aaaaaa' }}>
+            <Typography variant="body1" sx={{ mb: 2 }}>
               {t('pleaseentertheverificationcode')}
             </Typography>
             <TextField
@@ -92,7 +89,6 @@ function EmailChangeModal({
               required
               margin="normal"
               disabled={isLoading}
-              sx={darkFieldStyles}
             />
             <DialogActions sx={{ pt: 2, pb: 0, px: 0 }}>
               {onBack && (
@@ -112,7 +108,7 @@ function EmailChangeModal({
       case 'enterNewEmailAddress':
         return (
           <form onSubmit={onNewEmailSubmit}>
-            <Typography variant="body1" sx={{ mb: 2, color: '#aaaaaa' }}>
+            <Typography variant="body1" sx={{ mb: 2 }}>
               {t('pleaseenterthenewemailaddress')}
             </Typography>
             <TextField
@@ -123,7 +119,6 @@ function EmailChangeModal({
               margin="normal"
               disabled={isLoading}
               onChange={(e) => onNewEmailChange(e.target.value)}
-              sx={darkFieldStyles}
             />
             <DialogActions sx={{ pt: 2, pb: 0, px: 0 }}>
               {onBack && (
@@ -157,13 +152,7 @@ function EmailChangeModal({
     }
   };
   return (
-    <Dialog
-      open={open}
-      onClose={onClose}
-      maxWidth="sm"
-      fullWidth
-      slotProps={{ paper: { sx: { bgcolor: '#2c2c2c', color: '#ffffff' } } }}
-    >
+    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle>{getTitle()}</DialogTitle>
       <DialogContent dividers>
         {successMessage && (

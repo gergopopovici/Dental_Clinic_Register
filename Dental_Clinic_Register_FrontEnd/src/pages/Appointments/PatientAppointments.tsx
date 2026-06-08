@@ -76,6 +76,7 @@ function PatientAppointments({ userId }: PatientAppointmentsProps) {
 
     return { upcoming, history };
   }, [appointments]);
+
   const cancelMutation = useMutation({
     mutationFn: (appointmentId: number) => cancelAppointmentByPatient(userId, appointmentId),
     onSuccess: async () => {
@@ -103,23 +104,23 @@ function PatientAppointments({ userId }: PatientAppointmentsProps) {
         </Button>
       </Box>
 
-      <Box sx={{ borderBottom: 1, borderColor: '#333', mb: 4 }}>
+      <Box sx={{ mb: 4 }}>
         <Tabs
           value={tabValue}
           onChange={(_, newValue) => setTabValue(newValue)}
           textColor="primary"
           indicatorColor="primary"
         >
-          <Tab label={t('upcoming')} sx={{ color: 'white', '&:focus': { outline: 'none' } }} />
-          <Tab label={t('history')} sx={{ color: 'white', '&:focus': { outline: 'none' } }} />
+          <Tab label={t('upcoming')} />
+          <Tab label={t('history')} />
         </Tabs>
       </Box>
 
-      {isLoading && <CircularProgress sx={{ color: 'white', display: 'block', mx: 'auto', mt: 4 }} />}
+      {isLoading && <CircularProgress sx={{ display: 'block', mx: 'auto', mt: 4 }} />}
       {isError && <Typography color="error">{t('failedToFetchAppointments')}</Typography>}
 
       {!isLoading && !isError && currentDisplayList.length === 0 && (
-        <Typography sx={{ color: '#aaa', fontStyle: 'italic', mt: 2 }}>
+        <Typography sx={{ fontStyle: 'italic', mt: 2 }}>
           {tabValue === 0 ? t('noUpcomingAppointments') : t('noPastAppointments')}
         </Typography>
       )}
@@ -145,19 +146,13 @@ function PatientAppointments({ userId }: PatientAppointmentsProps) {
 
       <PatientBookModal open={isBookModalOpen} onClose={() => setIsBookModalOpen(false)} userId={userId} />
 
-      <Dialog
-        open={cancelDialogOpen}
-        onClose={() => setCancelDialogOpen(false)}
-        slotProps={{ paper: { sx: { bgcolor: '#1e1e1e', color: 'white', minWidth: '400px' } } }}
-      >
-        <DialogTitle sx={{ borderBottom: '1px solid #333' }}>{t('cancelAppointment')}</DialogTitle>
+      <Dialog open={cancelDialogOpen} onClose={() => setCancelDialogOpen(false)}>
+        <DialogTitle>{t('cancelAppointment')}</DialogTitle>
         <DialogContent sx={{ pt: '24px !important' }}>
           <Typography variant="body1">{t('confirmCancelPatientMessage')}</Typography>
         </DialogContent>
-        <DialogActions sx={{ borderTop: '1px solid #333', p: 2 }}>
-          <Button onClick={() => setCancelDialogOpen(false)} sx={{ color: '#aaa' }}>
-            {t('back')}
-          </Button>
+        <DialogActions sx={{ p: 2 }}>
+          <Button onClick={() => setCancelDialogOpen(false)}>{t('back')}</Button>
           <Button
             variant="contained"
             color="error"

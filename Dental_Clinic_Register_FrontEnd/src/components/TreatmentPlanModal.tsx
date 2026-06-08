@@ -114,28 +114,9 @@ function TreatmentPlanModal({
     mutation.mutate(payload);
   };
 
-  const darkFieldStyles = {
-    bgcolor: '#2c2c2c',
-    borderRadius: 1,
-    '& .MuiOutlinedInput-notchedOutline': { borderColor: '#444' },
-    '& .MuiInputLabel-root': { color: '#aaa' },
-    color: 'white',
-    input: { color: 'white' },
-    textarea: { color: 'white' },
-    '& .MuiSelect-select': { color: 'white' },
-    '& .MuiChip-root': { color: 'white', bgcolor: '#444' },
-    '& .MuiChip-deleteIcon': { color: '#aaa', '&:hover': { color: 'white' } },
-  };
-
   return (
-    <Dialog
-      open={open}
-      onClose={onClose}
-      maxWidth="sm"
-      fullWidth
-      slotProps={{ paper: { sx: { bgcolor: '#1e1e1e', color: 'white' } } }}
-    >
-      <DialogTitle sx={{ fontWeight: 'bold', borderBottom: '1px solid #333' }}>
+    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+      <DialogTitle sx={{ fontWeight: 'bold' }}>
         {existingPlan ? t('editTreatmentPlan') : t('createNewPlan')}
       </DialogTitle>
 
@@ -152,7 +133,6 @@ function TreatmentPlanModal({
           fullWidth
           value={planName}
           onChange={(e) => setPlanName(e.target.value)}
-          sx={darkFieldStyles}
         />
 
         <Box sx={{ display: 'flex', gap: 2 }}>
@@ -164,7 +144,6 @@ function TreatmentPlanModal({
             slotProps={{ inputLabel: { shrink: true } }}
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
-            sx={darkFieldStyles}
           />
           <TextField
             type="date"
@@ -173,7 +152,6 @@ function TreatmentPlanModal({
             slotProps={{ inputLabel: { shrink: true } }}
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
-            sx={darkFieldStyles}
           />
         </Box>
 
@@ -183,8 +161,6 @@ function TreatmentPlanModal({
           fullWidth
           value={status}
           onChange={(e) => setStatus(e.target.value as TreatmentPlanStatus)}
-          sx={darkFieldStyles}
-          SelectProps={{ MenuProps: { PaperProps: { sx: { bgcolor: '#2c2c2c', color: 'white' } } } }}
         >
           {Object.values(TreatmentPlanStatus).map((s) => (
             <MenuItem key={s} value={s}>
@@ -205,7 +181,6 @@ function TreatmentPlanModal({
             <TextField
               {...params}
               label={t('selectServicesOptional')}
-              sx={darkFieldStyles}
               slotProps={{
                 input: {
                   ...params.InputProps,
@@ -228,14 +203,11 @@ function TreatmentPlanModal({
           fullWidth
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
-          sx={darkFieldStyles}
         />
       </DialogContent>
 
-      <DialogActions sx={{ p: 3, borderTop: '1px solid #333' }}>
-        <Button onClick={onClose} sx={{ color: '#aaa' }}>
-          {t('cancel')}
-        </Button>
+      <DialogActions sx={{ p: 3 }}>
+        <Button onClick={onClose}>{t('cancel')}</Button>
         <Button variant="contained" color="primary" onClick={handleSubmit} disabled={mutation.isPending}>
           {mutation.isPending ? <CircularProgress size={24} color="inherit" /> : t('save')}
         </Button>

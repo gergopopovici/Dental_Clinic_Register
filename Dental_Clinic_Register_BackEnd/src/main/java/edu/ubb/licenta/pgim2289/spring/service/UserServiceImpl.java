@@ -71,7 +71,6 @@ public class UserServiceImpl implements UserService {
         user.setEmail(dto.getEmail());
         user.setPassword(encoder.encode(dto.getPassword()));
         user.setFirstName(dto.getFirstName());
-        user.setMiddleName(dto.getMiddleName());
         user.setLastName(dto.getLastName());
         user.setPhoneNumber(dto.getPhoneNumber());
         user.setGender(dto.getGender());
@@ -120,7 +119,6 @@ public class UserServiceImpl implements UserService {
             user.setEmail("deleted_" + randomStr + "@anonymised.com");
             user.setUserName("anon_" + randomStr.substring(0, 8));
             user.setFirstName("Deleted");
-            user.setMiddleName(null);
             user.setLastName("Patient");
             user.setPhoneNumber(randomStr.substring(0, 10));
             user.setEnabled(false);
@@ -175,7 +173,6 @@ public class UserServiceImpl implements UserService {
         User user = userOptional.get();
         user.setFirstName(dto.getFirstName());
         user.setLastName(dto.getLastName());
-        user.setMiddleName(dto.getMiddleName());
         user.setDateOfBirth(dto.getDateOfBirth());
         user.setGender(dto.getGender());
         if (!user.getPhoneNumber().equals(dto.getPhoneNumber())
@@ -257,7 +254,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public long countBanned() {
-        return userRepository.countByEnabledFalse();
+        return userRepository.countByAccountNonLockedFalse();
     }
 
 
@@ -273,7 +270,7 @@ public class UserServiceImpl implements UserService {
         return users.stream()
                 .filter(user -> !user.getEmail().endsWith("@anonymised.com"))
                 .map(user -> {
-                    String fullName = Stream.of(user.getFirstName(), user.getMiddleName(), user.getLastName())
+                    String fullName = Stream.of(user.getFirstName(), user.getLastName())
                             .filter(name -> name != null && !name.trim().isEmpty())
                             .collect(Collectors.joining(" "));
                     String role = user.getRoles().isEmpty() ? "NONE" :
@@ -285,7 +282,8 @@ public class UserServiceImpl implements UserService {
                             fullName,
                             user.getEmail(),
                             role,
-                            user.getEnabled()
+                            user.getEnabled(),
+                            user.getAccountNonLocked()
                     );
                 }).toList();
     }
@@ -299,15 +297,15 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new RuntimeException("error.user.not_found"));
 
         if (targetUser.getRoles().stream().anyMatch(role -> role.getRoleName().name().equals("ROLE_ADMIN"))
-                && targetUser.getEnabled()) {
+                && targetUser.getAccountNonLocked()) {
 
             long activeAdminCount = userRepository.countActiveAdmins(Role.RoleName.ROLE_ADMIN);
             if (activeAdminCount <= 1) {
                 return ResponseEntity.badRequest().body(new MessageResponse("error.admin.cannot_ban_last_admin"));
             }
         }
-        targetUser.setEnabled(!targetUser.getEnabled());
-        if (!targetUser.getEnabled()) {
+        targetUser.setAccountNonLocked(!targetUser.getAccountNonLocked());
+        if (!targetUser.getAccountNonLocked()) {
             emailService.sendBanningNotificationEmail(targetUser.getEmail(), targetUser.getUserName());
         } else {
             emailService.sendReactivatingNotificationEmail(targetUser.getEmail(), targetUser.getUserName());

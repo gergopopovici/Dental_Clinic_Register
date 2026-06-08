@@ -24,13 +24,11 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     User findByEmail(@Email String email);
 
-    @Query("SELECT COUNT(u) FROM User u JOIN u.roles r WHERE r.roleName = 2")
+    @Query("SELECT COUNT(u) FROM User u JOIN u.roles r WHERE r.roleName = 2 AND u.accountNonLocked = true")
     long countPatients();
 
-    @Query("SELECT COUNT(u) FROM User u JOIN u.roles r WHERE r.roleName = 1")
+    @Query("SELECT COUNT(u) FROM User u JOIN u.roles r WHERE r.roleName = 1 AND u.accountNonLocked = true")
     long countDoctors();
-
-    long countByEnabledFalse();
 
     @Query("SELECT u FROM User u WHERE " +
             "LOWER(u.userName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
@@ -41,4 +39,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("SELECT COUNT(u) FROM User u JOIN u.roles r WHERE r.roleName = :role AND u.enabled = true")
     long countActiveAdmins(@Param("role") Role.RoleName role);
+
+    long countByAccountNonLockedFalse();
 }

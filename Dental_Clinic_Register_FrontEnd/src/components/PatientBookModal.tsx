@@ -95,43 +95,9 @@ function PatientBookModal({ open, onClose, userId }: PatientBookModalProps) {
     });
   };
 
-  const darkFieldStyles = {
-    bgcolor: '#2c2c2c',
-    borderRadius: 1,
-    '& .MuiOutlinedInput-notchedOutline': { borderColor: '#444' },
-    '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#888' },
-    '& .MuiInputLabel-root': { color: '#aaa' },
-    '& .MuiInputLabel-root.Mui-focused': { color: '#1976d2' },
-    '& .MuiInputBase-input': { color: 'white' },
-    textarea: { color: 'white' },
-    '& .MuiSelect-select': { color: 'white' },
-    '& .MuiSelect-select .MuiTypography-root': { color: 'white' },
-    '& .MuiSvgIcon-root': { color: '#aaa' },
-  };
-
-  const darkMenuProps = {
-    PaperProps: {
-      sx: {
-        bgcolor: '#2c2c2c',
-        color: 'white',
-        '& .MuiMenuItem-root:hover': { bgcolor: '#444' },
-        '& .Mui-selected': { bgcolor: '#1976d2 !important' },
-      },
-    },
-  };
-
   return (
-    <Dialog
-      open={open}
-      onClose={onClose}
-      maxWidth="sm"
-      fullWidth
-      disableRestoreFocus
-      slotProps={{ paper: { sx: { bgcolor: '#1e1e1e', color: 'white' } } }}
-    >
-      <DialogTitle sx={{ fontWeight: 'bold', borderBottom: '1px solid #333' }}>
-        {t('requestNewAppointment')}
-      </DialogTitle>
+    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth disableRestoreFocus>
+      <DialogTitle sx={{ fontWeight: 'bold' }}>{t('requestNewAppointment')}</DialogTitle>
 
       <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 3, pt: '24px !important' }}>
         {errorMessage && (
@@ -140,7 +106,7 @@ function PatientBookModal({ open, onClose, userId }: PatientBookModalProps) {
           </Typography>
         )}
 
-        <FormControl fullWidth variant="outlined" sx={darkFieldStyles}>
+        <FormControl fullWidth variant="outlined">
           <InputLabel shrink>{t('selectService')}</InputLabel>
           <Select
             value={serviceId}
@@ -151,7 +117,6 @@ function PatientBookModal({ open, onClose, userId }: PatientBookModalProps) {
             label={t('selectService')}
             notched
             autoFocus
-            MenuProps={darkMenuProps}
           >
             {isLoadingServices ? (
               <MenuItem disabled>
@@ -164,7 +129,7 @@ function PatientBookModal({ open, onClose, userId }: PatientBookModalProps) {
                     <Typography variant="body2">
                       {s.name} ({s.durationMinutes} min)
                     </Typography>
-                    <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#81c784 !important', ml: 2 }}>
+                    <Typography variant="body2" sx={{ fontWeight: 'bold', ml: 2 }}>
                       {s.price} {t('currency')}
                     </Typography>
                   </Box>
@@ -188,18 +153,8 @@ function PatientBookModal({ open, onClose, userId }: PatientBookModalProps) {
               label={t('selectDoctor')}
               placeholder={t('searchDoctorByName')}
               slotProps={{ inputLabel: { shrink: true } }}
-              sx={darkFieldStyles}
             />
           )}
-          slotProps={{
-            paper: {
-              sx: {
-                bgcolor: '#2c2c2c',
-                color: 'white',
-                '& .MuiAutocomplete-noOptions': { color: '#aaa' },
-              },
-            },
-          }}
         />
 
         <TextField
@@ -212,17 +167,15 @@ function PatientBookModal({ open, onClose, userId }: PatientBookModalProps) {
           }}
           value={date}
           onChange={(e) => setDate(e.target.value)}
-          sx={darkFieldStyles}
         />
 
-        <FormControl fullWidth variant="outlined" sx={darkFieldStyles}>
+        <FormControl fullWidth variant="outlined">
           <InputLabel shrink>{t('timePreference')}</InputLabel>
           <Select
             value={timePreference}
             onChange={(e) => setTimePreference(e.target.value as TimePreference)}
             label={t('timePreference')}
             notched
-            MenuProps={darkMenuProps}
           >
             <MenuItem value="MORNING">{t('morning')}</MenuItem>
             <MenuItem value="AFTERNOON">{t('afternoon')}</MenuItem>
@@ -231,16 +184,11 @@ function PatientBookModal({ open, onClose, userId }: PatientBookModalProps) {
         </FormControl>
       </DialogContent>
 
-      <DialogActions sx={{ p: 3, borderTop: '1px solid #333' }}>
+      <DialogActions sx={{ p: 3 }}>
         <Button
           onClick={onClose}
           sx={{
-            color: 'white',
             fontWeight: 'bold',
-            backgroundColor: '#d82215',
-            '&:hover': {
-              backgroundColor: 'darkred',
-            },
             '&:focus': {
               outline: 'none',
             },

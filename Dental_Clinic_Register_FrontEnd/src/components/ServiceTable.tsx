@@ -70,15 +70,6 @@ function ServiceTable() {
     }
   };
 
-  const textFieldStyles = {
-    input: { color: 'white' },
-    bgcolor: '#2c2c2c',
-    borderRadius: 1,
-    '& .MuiOutlinedInput-notchedOutline': { borderColor: '#444' },
-    mb: 2,
-    mt: 1,
-  };
-
   const handleDelete = (id: number) => {
     if (window.confirm(t('confirmDeleteService') || 'Are you sure you want to delete this service?')) {
       deleteMutation.mutate(id);
@@ -123,11 +114,11 @@ function ServiceTable() {
   });
 
   return (
-    <Paper sx={{ bgcolor: '#1e1e1e', mt: 4, overflow: 'hidden' }}>
+    <Paper sx={{ mt: 4, overflow: 'hidden' }}>
       <Box
         sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}
       >
-        <Typography variant="h6" sx={{ color: 'white', fontWeight: 'bold' }}>
+        <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
           {t('manageServices') || 'Manage Services'}
         </Typography>
         <Button variant="contained" color="primary" startIcon={<AddIcon />} onClick={() => handleOpenModal()}>
@@ -143,13 +134,13 @@ function ServiceTable() {
 
       <TableContainer>
         <Table sx={{ minWidth: 650 }}>
-          <TableHead sx={{ bgcolor: '#2c2c2c' }}>
+          <TableHead>
             <TableRow>
-              <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>{t('serviceName') || 'Name'}</TableCell>
-              <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>{t('description') || 'Description'}</TableCell>
-              <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>{t('price') || 'Price'}</TableCell>
-              <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>{t('duration') || 'Duration (mins)'}</TableCell>
-              <TableCell sx={{ color: 'white', fontWeight: 'bold' }} align="right">
+              <TableCell sx={{ fontWeight: 'bold' }}>{t('serviceName') || 'Name'}</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>{t('description') || 'Description'}</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>{t('price') || 'Price'}</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>{t('duration') || 'Duration (mins)'}</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }} align="right">
                 {t('actions') || 'Actions'}
               </TableCell>
             </TableRow>
@@ -164,10 +155,10 @@ function ServiceTable() {
             ) : services.length > 0 ? (
               services.map((service) => (
                 <TableRow key={service.id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                  <TableCell sx={{ color: 'white' }}>{service.name}</TableCell>
-                  <TableCell sx={{ color: '#aaaaaa' }}>{service.description || '-'}</TableCell>
-                  <TableCell sx={{ color: 'white' }}>{service.price.toFixed(2)} RON</TableCell>
-                  <TableCell sx={{ color: 'white' }}>{service.durationMinutes}</TableCell>
+                  <TableCell>{service.name}</TableCell>
+                  <TableCell>{service.description || '-'}</TableCell>
+                  <TableCell>{service.price.toFixed(2)} RON</TableCell>
+                  <TableCell>{service.durationMinutes}</TableCell>
                   <TableCell align="right">
                     <IconButton
                       color="primary"
@@ -188,7 +179,7 @@ function ServiceTable() {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={5} align="center" sx={{ color: '#aaaaaa', py: 3 }}>
+                <TableCell colSpan={5} align="center" sx={{ py: 3 }}>
                   {t('noServicesFound') || 'No services found.'}
                 </TableCell>
               </TableRow>
@@ -199,7 +190,7 @@ function ServiceTable() {
       <Dialog
         open={isModalOpen}
         onClose={handleCloseModal}
-        slotProps={{ paper: { sx: { bgcolor: '#1e1e1e', color: 'white', minWidth: { xs: '300px', sm: '500px' } } } }}
+        slotProps={{ paper: { sx: { minWidth: { xs: '300px', sm: '500px' } } } }}
       >
         <DialogTitle>
           {currentService.id ? t('editService') || 'Edit Service' : t('addService') || 'Add New Service'}
@@ -208,8 +199,7 @@ function ServiceTable() {
           <TextField
             fullWidth
             label={t('serviceName') || 'Service Name'}
-            InputLabelProps={{ style: { color: '#aaaaaa' } }}
-            sx={textFieldStyles}
+            sx={{ mb: 2, mt: 1 }}
             value={currentService.name}
             onChange={(e) => setCurrentService({ ...currentService, name: e.target.value })}
           />
@@ -218,8 +208,7 @@ function ServiceTable() {
             label={t('description') || 'Description'}
             multiline
             rows={3}
-            InputLabelProps={{ style: { color: '#aaaaaa' } }}
-            sx={{ ...textFieldStyles, textarea: { color: 'white' } }}
+            sx={{ mb: 2, mt: 1 }}
             value={currentService.description || ''}
             onChange={(e) => setCurrentService({ ...currentService, description: e.target.value })}
           />
@@ -228,8 +217,7 @@ function ServiceTable() {
               fullWidth
               label={t('price') || 'Price'}
               type="number"
-              InputLabelProps={{ style: { color: '#aaaaaa' } }}
-              sx={textFieldStyles}
+              sx={{ mb: 2, mt: 1 }}
               value={currentService.price}
               onChange={(e) => setCurrentService({ ...currentService, price: parseFloat(e.target.value) || 0 })}
             />
@@ -237,17 +225,14 @@ function ServiceTable() {
               fullWidth
               label={t('duration') || 'Duration (mins)'}
               type="number"
-              InputLabelProps={{ style: { color: '#aaaaaa' } }}
-              sx={textFieldStyles}
+              sx={{ mb: 2, mt: 1 }}
               value={currentService.durationMinutes}
               onChange={(e) => setCurrentService({ ...currentService, durationMinutes: parseInt(e.target.value) || 0 })}
             />
           </Box>
         </DialogContent>
         <DialogActions sx={{ p: 3, pt: 0 }}>
-          <Button onClick={handleCloseModal} sx={{ color: '#aaaaaa' }}>
-            {t('cancel') || 'Cancel'}
-          </Button>
+          <Button onClick={handleCloseModal}>{t('cancel') || 'Cancel'}</Button>
           <Button
             variant="contained"
             onClick={handleSave}

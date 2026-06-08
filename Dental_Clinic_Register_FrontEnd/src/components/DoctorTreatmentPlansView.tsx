@@ -50,23 +50,15 @@ function DoctorTreatmentPlansView({ doctorId }: DoctorViewProps) {
   const pastPlans = plans?.filter((p) => p.status === 'COMPLETED' || p.status === 'CANCELLED') || [];
   const activePatients = patients?.filter((p) => !p.email.includes('@anonymised.com')) || [];
 
-  const darkFieldStyles = {
-    bgcolor: '#2c2c2c',
-    borderRadius: 1,
-    '& .MuiOutlinedInput-notchedOutline': { borderColor: '#444' },
-    '& .MuiInputLabel-root': { color: '#aaa' },
-    input: { color: 'white' },
-  };
-
   const renderPlanCard = (plan: TreatmentPlanDTO) => {
-    const isBracesPlan = plan.planName.toLowerCase().match(/(brace|aparat|ortho|orto)/i);
+    const isBracesPlan = plan.planName.toLowerCase().match(/(brace|aparat|ortho|orto|fogsz)/i);
 
     return (
-      <Card key={plan.id} sx={{ bgcolor: '#1e1e1e', color: 'white', border: '1px solid #333', mb: 2 }}>
+      <Card key={plan.id} sx={{ mb: 2 }}>
         <CardContent sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Box>
             <Typography variant="h6">{plan.planName}</Typography>
-            <Typography variant="body2" color="#aaa">
+            <Typography variant="body2">
               {t('startDate')}: {plan.startDate} | {t('endDate')}: {plan.endDate || t('ongoing')}
             </Typography>
           </Box>
@@ -98,7 +90,6 @@ function DoctorTreatmentPlansView({ doctorId }: DoctorViewProps) {
             <Chip
               label={t(plan.status)}
               color={plan.status === 'ACTIVE' ? 'success' : plan.status === 'CANCELLED' ? 'error' : 'default'}
-              sx={{ color: 'white' }}
             />
           </Box>
         </CardContent>
@@ -116,7 +107,7 @@ function DoctorTreatmentPlansView({ doctorId }: DoctorViewProps) {
           value={selectedPatient}
           onChange={(e, newValue) => setSelectedPatient(newValue)}
           noOptionsText={t('noPatientsFound', 'No patients found')}
-          renderInput={(params) => <TextField {...params} label={t('searchPatient')} sx={darkFieldStyles} />}
+          renderInput={(params) => <TextField {...params} label={t('searchPatient')} />}
         />
       </Box>
 
@@ -148,16 +139,16 @@ function DoctorTreatmentPlansView({ doctorId }: DoctorViewProps) {
                 {t('activePlans', 'Active Plans')}
               </Typography>
               {activePlans.length === 0 ? (
-                <Typography color="white">{t('noActivePlans', 'No active plans.')}</Typography>
+                <Typography>{t('noActivePlans', 'No active plans.')}</Typography>
               ) : (
                 activePlans.map(renderPlanCard)
               )}
-              <Divider sx={{ borderColor: '#333', my: 2 }} />
+              <Divider sx={{ my: 2 }} />
               <Typography variant="subtitle1" color="primary.light">
                 {t('pastPlans', 'Past Plans')}
               </Typography>
               {pastPlans.length === 0 ? (
-                <Typography color="white">{t('noPastPlans', 'No past plans.')}</Typography>
+                <Typography>{t('noPastPlans', 'No past plans.')}</Typography>
               ) : (
                 pastPlans.map(renderPlanCard)
               )}

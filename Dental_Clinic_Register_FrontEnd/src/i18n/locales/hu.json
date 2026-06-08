@@ -4,7 +4,7 @@
   "middleName": "Középső név",
   "phoneNumber": "Telefonszám",
   "email": "Email",
-  "gender": "Neme",
+  "gender": "Nem",
   "female": "Nő",
   "male": "Férfi",
   "other": "Egyéb",
@@ -138,7 +138,7 @@
   "error.signup.email_in_use": "Hiba: Az email cím már használatban van!",
   "error.role.not_found": "Hiba: A szerepkör nem található a rendszerben.",
   "success.doctor.registered": "Orvos sikeresen regisztrálva!",
-  "success.user.registered": "Felhasználó sikeresen regisztrálva!",
+  "success.user.registered": "A regisztráció sikeres! Fiókja aktiválásához kérjük, ellenőrizze a beérkező leveleit.",
   "error.unknown": "Ismeretlen hiba történt. Kérjük, próbálja újra.",
   "error.signup.invalid_phone": "Hiba: Érvénytelen romániai telefonszám!",
   "licenseNumber": "Engedély száma",
@@ -326,5 +326,14 @@
   "todaySummary": "Ma összesen {{count}} időpontod van.",
   "noAppointmentsToday": "Ma nincsenek időpontjaid.",
   "pendingRequestsCount": "{{count}} jóváhagyásra váró kérésed van.",
-  "noMoreAppointmentsToday": "Mára nincs több hátralévő időpontod."
+  "noMoreAppointmentsToday": "Mára nincs több hátralévő időpontod.",
+  "success.activation.resent": "Ha létezik nem megerősített fiók ezzel az e-mail címmel, elküldtünk egy új linket.",
+  "error.email.required": "Az e-mail cím megadása kötelező.",
+  "resendActivationLink": "Aktivációs link újraküldése?",
+  "resendActivationTitle": "Aktivációs e-mail újraküldése",
+  "resendActivationDescription": "Adja meg e-mail címét. Ha létezik nem megerősített fiók, küldünk egy új aktivációs linket.",
+  "send": "Küldés",
+  "switchToLightMode": "Váltás világos módra",
+"switchToDarkMode": "Váltás sötét módra",
+"navDashboard": "Vezérlőpult"
 }

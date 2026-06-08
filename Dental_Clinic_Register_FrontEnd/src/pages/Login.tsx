@@ -1,30 +1,47 @@
 import React, { useState } from 'react';
-import { Box, Button, Link, TextField, Typography, CircularProgress, FormControlLabel, Checkbox } from '@mui/material';
+import {
+  Box,
+  Button,
+  Link,
+  TextField,
+  Typography,
+  CircularProgress,
+  FormControlLabel,
+  Checkbox,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Paper,
+} from '@mui/material';
 import { loginLeftSvg, loginRightSvg } from '../assets';
 import { useMutation } from '@tanstack/react-query';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { loginIn } from '../services/AuthorisationService';
+import { useNavigate } from 'react-router-dom';
+import { loginIn, resendActivation } from '../services/AuthorisationService';
 import { getCurrentUserDetails } from '../services/UserService';
 import { Login, LoginResponse } from '../models/Login';
 import { useUser, UserDetails } from '../context/UserContext';
 import axios from 'axios';
 import LanguageSelector from '../components/LanguageSelector';
+import { ThemeToggleButton } from '../components/ThemeToggleButton';
 import { useTranslation } from 'react-i18next';
+import { MessageResponse } from '../models/MessageResponse';
 
 function LoginPage() {
   const [hoveredSection, setHoveredSection] = useState<'login' | 'signup' | null>(null);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
+  const [resendDialogOpen, setResendDialogOpen] = useState(false);
+  const [resendEmail, setResendEmail] = useState('');
   const navigate = useNavigate();
   const { t } = useTranslation();
-
   const { login } = useUser();
 
   const fetchUserDetailsMutation = useMutation<UserDetails, Error>({
     mutationFn: () => getCurrentUserDetails(),
     onSuccess: (userDetails) => {
-      console.log('User details fetched successfully:', userDetails);
       login(userDetails);
       setTimeout(() => {
         if (userDetails.roles?.includes('ROLE_ADMIN')) {
@@ -34,13 +51,7 @@ function LoginPage() {
         }
       }, 100);
     },
-    onError: (error) => {
-      console.error('Failed to fetch user details after login:', error);
-      console.log('Error object details (stringified):', JSON.stringify(error, null, 2));
-      if (axios.isAxiosError(error)) {
-        console.error('Axios error response (if available):', error.response);
-        console.error('Axios error data (if available):', error.response?.data);
-      }
+    onError: () => {
       if (typeof window !== 'undefined') {
         localStorage.removeItem('refresh_token');
       }
@@ -52,20 +63,29 @@ function LoginPage() {
   const loginMutation = useMutation<LoginResponse, Error, Login>({
     mutationFn: (loginData: Login) => loginIn(loginData),
     onSuccess: (data) => {
-      console.log('You were successfully logged in');
       if (typeof window !== 'undefined') {
         localStorage.setItem('refresh_token', data.refreshToken);
       }
-
       fetchUserDetailsMutation.mutate();
     },
     onError: (error) => {
-      console.error('Login failed:', error);
-      if (axios.isAxiosError(error) && error.response && error.response.data && error.response.data.message) {
+      if (axios.isAxiosError(error) && error.response?.data?.message) {
         alert(`${t('loginFailed')}: ${error.response.data.message}`);
       } else {
         alert(t('loginCredentialsInvalid'));
       }
+    },
+  });
+
+  const resendMutation = useMutation<MessageResponse, Error, string>({
+    mutationFn: (email: string) => resendActivation(email),
+    onSuccess: () => {
+      alert(t('success.activation.resent'));
+      setResendDialogOpen(false);
+      setResendEmail('');
+    },
+    onError: () => {
+      alert(t('error.email.required'));
     },
   });
 
@@ -76,18 +96,25 @@ function LoginPage() {
     loginMutation.mutate({ username, password });
   };
 
+  const handleResendSubmit = () => {
+    if (!resendEmail) return;
+    resendMutation.mutate(resendEmail);
+  };
+
   const sharedSectionStyles = {
     transition: 'width 0.5s ease-in-out, opacity 0.5s ease-in-out',
     padding: '32px',
     display: 'flex',
-    flexDirection: 'column',
+    flexDirection: 'column' as const,
     justifyContent: 'center',
     alignItems: 'center',
-    color: 'black',
     backgroundSize: 'cover',
     backgroundPosition: 'center',
     height: '100%',
     minHeight: '100vh',
+    backgroundColor: 'transparent',
+    backgroundBlendMode: 'normal' as const,
+    filter: 'none',
   };
 
   if (isLoading) {
@@ -99,7 +126,7 @@ function LoginPage() {
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          backgroundColor: '#f9f9f9',
+          bgcolor: 'background.default',
         }}
       >
         <CircularProgress />
@@ -111,29 +138,38 @@ function LoginPage() {
   }
 
   return (
-    <Box sx={{ height: '100vh', width: '100vw', overflow: 'hidden' }}>
+    <Box
+      sx={{
+        height: '100vh',
+        width: '100vw',
+        overflow: 'hidden',
+        bgcolor: 'transparent',
+        '& img, & svg': { filter: 'none' },
+      }}
+    >
       <Box
         sx={{
           position: 'absolute',
           top: 24,
           right: 24,
           zIndex: 1000,
-          backgroundColor: 'rgba(0, 0, 0, 0.6)',
-          borderRadius: '4px',
+          display: 'flex',
+          gap: 1,
+          alignItems: 'center',
         }}
       >
+        <ThemeToggleButton />
         <LanguageSelector />
       </Box>
+
       <Box
         sx={{
           display: 'flex',
           flexDirection: 'row',
           minHeight: '100%',
           width: '100%',
-          fontFamily: 'Arial, sans-serif',
         }}
       >
-        {/* LOGIN SECTION */}
         <Box
           onMouseEnter={() => setHoveredSection('login')}
           onMouseLeave={() => setHoveredSection(null)}
@@ -141,23 +177,22 @@ function LoginPage() {
             ...sharedSectionStyles,
             width: hoveredSection === 'login' ? '66.67%' : hoveredSection === 'signup' ? '33.33%' : '50%',
             opacity: hoveredSection === 'signup' ? 0.5 : 1,
-            backgroundColor: '#f9f9f9',
             backgroundImage: loginLeftSvg,
+            backgroundColor: '#ffffff',
           }}
         >
-          <form
+          <Paper
+            component="form"
             onSubmit={handleLoginSubmit}
-            style={{
+            elevation={3}
+            sx={{
               width: '100%',
               maxWidth: 320,
               display: 'flex',
               flexDirection: 'column',
-              backgroundColor: 'rgba(255,255,255,0.85)',
-              padding: 24,
-              borderRadius: 16,
-              boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.37)',
-              backdropFilter: 'blur(5px)',
-              border: '1px solid rgba(255, 255, 255, 0.18)',
+              padding: 4,
+              borderRadius: 2,
+              bgcolor: 'background.paper',
             }}
           >
             <Typography variant="h4" gutterBottom sx={{ textAlign: 'center', mb: 3 }}>
@@ -181,36 +216,39 @@ function LoginPage() {
               sx={{ mb: 2 }}
             />
             <FormControlLabel
-              control={
-                <Checkbox checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} color="primary" />
-              }
+              control={<Checkbox checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} />}
               label={t('rememberMe')}
-            ></FormControlLabel>
-            <Box sx={{ width: '100%', textAlign: 'right', mb: 2 }}>
-              <Link href="/forgot-password" underline="hover">
+            />
+            <Box sx={{ width: '100%', display: 'flex', justifyContent: 'space-between', mb: 2, mt: 1 }}>
+              <Link
+                component="button"
+                type="button"
+                variant="body2"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setResendDialogOpen(true);
+                }}
+                underline="hover"
+              >
+                {t('resendActivationLink')}
+              </Link>
+              <Link href="/forgot-password" variant="body2" underline="hover">
                 {t('forgotPassword')}
               </Link>
             </Box>
-            <Button variant="contained" color="primary" type="submit" sx={{ py: 1.5, fontWeight: 'bold' }}>
+            <Button variant="contained" type="submit" sx={{ py: 1.5, fontWeight: 'bold' }}>
               {t('login')}
             </Button>
             <Box display="flex" justifyContent="center" mt={2}>
-              <Typography variant="body2" sx={{ color: 'red', textAlign: 'center' }}>
-                <Link
-                  href="http://www.freepik.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  underline="hover"
-                  color="red"
-                >
+              <Typography variant="body2" sx={{ textAlign: 'center' }}>
+                <Link href="http://www.freepik.com" target="_blank" rel="noopener noreferrer" underline="hover">
                   Design from publicdomainvectors.org
                 </Link>
               </Typography>
             </Box>
-          </form>
+          </Paper>
         </Box>
 
-        {/* SIGNUP SECTION */}
         <Box
           onMouseEnter={() => setHoveredSection('signup')}
           onMouseLeave={() => setHoveredSection(null)}
@@ -218,11 +256,11 @@ function LoginPage() {
             ...sharedSectionStyles,
             width: hoveredSection === 'signup' ? '66.67%' : hoveredSection === 'login' ? '33.33%' : '50%',
             opacity: hoveredSection === 'login' ? 0.5 : 1,
-            backgroundColor: '#e0f7fa',
             backgroundImage: loginRightSvg,
           }}
         >
-          <Box
+          <Paper
+            elevation={3}
             sx={{
               width: '100%',
               maxWidth: 320,
@@ -230,12 +268,9 @@ function LoginPage() {
               flexDirection: 'column',
               alignItems: 'center',
               textAlign: 'center',
-              backgroundColor: 'rgba(255,255,255,0.85)',
-              padding: 3,
+              padding: 4,
               borderRadius: 2,
-              boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.37)',
-              backdropFilter: 'blur(5px)',
-              border: '1px solid rgba(255, 255, 255, 0.18)',
+              bgcolor: 'background.paper',
             }}
           >
             <Typography variant="h4" gutterBottom>
@@ -246,26 +281,47 @@ function LoginPage() {
             </Typography>
             <Button
               variant="outlined"
-              color="primary"
-              sx={{ py: 1.5, px: 5, fontWeight: 'bold' }}
               onClick={() => navigate('/register')}
+              sx={{ py: 1.5, px: 5, fontWeight: 'bold' }}
             >
               {t('signUp')}
             </Button>
-            <Typography variant="body2" sx={{ mt: 2, color: 'red' }}>
-              <Link
-                href="http://www.freepik.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                underline="hover"
-                color="red"
-              >
+            <Typography variant="body2" sx={{ mt: 2 }}>
+              <Link href="http://www.freepik.com" target="_blank" rel="noopener noreferrer" underline="hover">
                 Designed by macrovector / Freepik
               </Link>
             </Typography>
-          </Box>
+          </Paper>
         </Box>
       </Box>
+
+      <Dialog open={resendDialogOpen} onClose={() => setResendDialogOpen(false)}>
+        <DialogTitle>{t('resendActivationTitle')}</DialogTitle>
+        <DialogContent>
+          <DialogContentText sx={{ mb: 2 }}>{t('resendActivationDescription')}</DialogContentText>
+          <TextField
+            autoFocus
+            margin="dense"
+            label={t('emailAddress')}
+            type="email"
+            fullWidth
+            variant="outlined"
+            value={resendEmail}
+            onChange={(e) => setResendEmail(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions sx={{ p: 2, pt: 0 }}>
+          <Button onClick={() => setResendDialogOpen(false)}>{t('cancel')}</Button>
+          <Button
+            onClick={handleResendSubmit}
+            variant="contained"
+            disabled={resendMutation.isPending || !resendEmail}
+            sx={{ fontWeight: 'bold' }}
+          >
+            {resendMutation.isPending ? <CircularProgress size={24} color="inherit" /> : t('send')}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

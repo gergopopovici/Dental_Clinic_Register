@@ -138,7 +138,8 @@
   "error.signup.email_in_use": "Error: Email is already in use!",
   "error.role.not_found": "Error: Role is not found in the system.",
   "success.doctor.registered": "Doctor registered successfully!",
-  "success.user.registered": "User registered successfully!",
+  "success.user.registered": "Account created successfully! Please check your inbox to activate your account.",
+  "success.admin.registered": "Administrator registered successfully!",
   "error.unknown": "An unknown error occurred. Please try again.",
   "error.signup.invalid_phone": "Error: Invalid Romanian phone number!",
   "licenseNumber": "License Number",
@@ -156,7 +157,6 @@
   "error.user.not_found": "User not found.",
   "success.user.deleted": "User account deleted successfully.",
   "error.user.email.exists": "Error: A user with this email already exists!",
-  "success.admin.registered": "Admin registered successfully!",
   "error.admin.cannot_ban_self": "Error: Admins cannot ban themselves!",
   "error.admin.cannot_ban_last_admin": "Error: Cannot ban the last remaining admin!",
   "success.user.status_toggled": "User status toggled successfully!",
@@ -327,6 +327,14 @@
   "todaySummary": "You have {{count}} appointments today.",
   "noAppointmentsToday": "You have no appointments today.",
   "pendingRequestsCount": "You have {{count}} pending request(s) waiting for approval.",
-  "noMoreAppointmentsToday": "You have no more appointments left for today."
-  
+  "noMoreAppointmentsToday": "You have no more appointments left for today.",
+  "success.activation.resent": "If an unverified account exists with that email, a new link has been sent.",
+  "error.email.required": "Email address is required.",
+  "resendActivationLink": "Resend Activation Link?",
+  "resendActivationTitle": "Resend Activation Email",
+  "resendActivationDescription": "Enter your email address below. If an unverified account exists, we will send a new activation link.",
+  "send": "Send",
+  "switchToLightMode": "Switch to Light Mode",
+"switchToDarkMode": "Switch to Dark Mode",
+"navDashboard": "Dashboard"
 }

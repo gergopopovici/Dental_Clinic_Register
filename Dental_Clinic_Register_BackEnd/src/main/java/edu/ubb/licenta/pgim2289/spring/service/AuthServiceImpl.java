@@ -136,14 +136,19 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public ResponseEntity<MessageResponse> registerAdmin(String inviteToken, RequestUserDTO requestUserDTO) {
-        AdminInvite invite  = adminInviteService.validateToken(inviteToken);
-        if(!invite.getEmail().equalsIgnoreCase(requestUserDTO.getEmail())){
+        AdminInvite invite = adminInviteService.validateToken(inviteToken);
+        if (!invite.getEmail().equalsIgnoreCase(requestUserDTO.getEmail())) {
             return ResponseEntity.badRequest().body(new MessageResponse("error.invite.email_mismatch"));
         }
         ResponseEntity<MessageResponse> response = userRegistrationService.registerAdmin(requestUserDTO);
-        if(response.getStatusCode().is2xxSuccessful()){
+        if (response.getStatusCode().is2xxSuccessful()) {
             adminInviteService.markedAsUsed(invite);
         }
         return response;
+    }
+
+    @Override
+    public ResponseEntity<MessageResponse> resendActivationEmail(String email) {
+        return userRegistrationService.resendActivationEmail(email);
     }
 }

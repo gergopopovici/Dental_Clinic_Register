@@ -148,28 +148,22 @@ function DoctorAppointments({ userId }: DoctorAppointmentsProps) {
           <TextField
             type="date"
             label={t('selectDate')}
-            slotProps={{ inputLabel: { shrink: true, sx: { color: '#aaa' } } }}
+            slotProps={{ inputLabel: { shrink: true } }}
             value={selectedDate}
             onChange={(e) => setSelectedDate(e.target.value)}
-            sx={{
-              bgcolor: '#2c2c2c',
-              borderRadius: 1,
-              input: { color: 'white' },
-              '& .MuiOutlinedInput-notchedOutline': { borderColor: '#444' },
-            }}
           />
         </Box>
       </Box>
 
-      {isLoading && <CircularProgress sx={{ color: 'white', display: 'block', mx: 'auto', mt: 4 }} />}
+      {isLoading && <CircularProgress sx={{ display: 'block', mx: 'auto', mt: 4 }} />}
       {isError && <Typography color="error">{t('failedToFetchAppointments')}</Typography>}
 
       <Box sx={{ mb: 5 }}>
-        <Typography variant="h6" sx={{ color: '#ffb74d', mb: 2, fontWeight: 'bold' }}>
+        <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
           {t('pendingRequests')}
         </Typography>
         {pendingAppointments.length === 0 && !isLoading && (
-          <Typography sx={{ color: '#aaa', fontStyle: 'italic' }}>{t('noPendingRequestsForThisDate')}</Typography>
+          <Typography sx={{ fontStyle: 'italic' }}>{t('noPendingRequestsForThisDate')}</Typography>
         )}
         <Grid container spacing={3}>
           {pendingAppointments.map((apt) => {
@@ -197,14 +191,14 @@ function DoctorAppointments({ userId }: DoctorAppointmentsProps) {
         </Grid>
       </Box>
 
-      <Divider sx={{ borderColor: '#444', mb: 4 }} />
+      <Divider sx={{ mb: 4 }} />
 
       <Box>
-        <Typography variant="h6" sx={{ color: '#81c784', mb: 2, fontWeight: 'bold' }}>
+        <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
           {t('scheduledAppointments')}
         </Typography>
         {confirmedAppointments.length === 0 && !isLoading && (
-          <Typography sx={{ color: '#aaa', fontStyle: 'italic' }}>{t('noScheduledAppointments')}</Typography>
+          <Typography sx={{ fontStyle: 'italic' }}>{t('noScheduledAppointments')}</Typography>
         )}
         <Grid container spacing={3}>
           {confirmedAppointments.map((apt) => {
@@ -255,14 +249,10 @@ function DoctorAppointments({ userId }: DoctorAppointmentsProps) {
 
       <DoctorBookModal open={isBookModalOpen} onClose={() => setIsBookModalOpen(false)} doctorId={userId} />
 
-      <Dialog
-        open={cancelDialogOpen}
-        onClose={() => setCancelDialogOpen(false)}
-        slotProps={{ paper: { sx: { bgcolor: '#1e1e1e', color: 'white', minWidth: '400px' } } }}
-      >
-        <DialogTitle sx={{ borderBottom: '1px solid #333' }}>{t('cancelAppointment')}</DialogTitle>
+      <Dialog open={cancelDialogOpen} onClose={() => setCancelDialogOpen(false)}>
+        <DialogTitle>{t('cancelAppointment')}</DialogTitle>
         <DialogContent sx={{ pt: '24px !important' }}>
-          <Typography variant="body2" sx={{ mb: 2, color: '#aaa' }}>
+          <Typography variant="body2" sx={{ mb: 2 }}>
             {t('pleaseProvideReason')}
           </Typography>
           <TextField
@@ -273,19 +263,10 @@ function DoctorAppointments({ userId }: DoctorAppointmentsProps) {
             label={t('reason')}
             value={cancelReason}
             onChange={(e) => setCancelReason(e.target.value)}
-            sx={{
-              bgcolor: '#2c2c2c',
-              borderRadius: 1,
-              '& .MuiOutlinedInput-notchedOutline': { borderColor: '#444' },
-              '& .MuiInputLabel-root': { color: '#aaa' },
-              textarea: { color: 'white' },
-            }}
           />
         </DialogContent>
-        <DialogActions sx={{ borderTop: '1px solid #333', p: 2 }}>
-          <Button onClick={() => setCancelDialogOpen(false)} sx={{ color: '#aaa' }}>
-            {t('back')}
-          </Button>
+        <DialogActions sx={{ p: 2 }}>
+          <Button onClick={() => setCancelDialogOpen(false)}>{t('back')}</Button>
           <Button
             variant="contained"
             color="error"

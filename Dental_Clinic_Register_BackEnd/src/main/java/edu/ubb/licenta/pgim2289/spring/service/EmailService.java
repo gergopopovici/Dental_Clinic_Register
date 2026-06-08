@@ -42,6 +42,7 @@ public interface EmailService {
 
     void sendAppointmentCancelledByDoctorEmailToPatient(String patientEmail, String patientName, String doctorName, String dateInfo, String reason);
 
-    public void sendAppointmentReminder(String to, String userName, LocalDateTime startTime, String doctorName, String type);
+    void sendAppointmentReminder(String to, String userName, LocalDateTime startTime, String doctorName, String type);
 
-    }
+    void sendRegistrationConfirmationEmail(String to, String token, String userName);
+}

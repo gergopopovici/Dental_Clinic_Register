@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { Box, Button, CircularProgress, Typography, Card, CardContent, Grid } from '@mui/material';
 import AppointmentCard from '../components/AppointmentCard';
 import { getDoctorDailyAppointments } from '../services/AppointmentService';
-import { ResponseAppointmentDTO } from '../models/Appointment'; // Frissítsd az import útvonalát!
+import { ResponseAppointmentDTO } from '../models/Appointment';
 
 interface DoctorDashboardProps {
   userId: number;
@@ -55,7 +55,7 @@ function DoctorDashboard({ userId }: DoctorDashboardProps) {
   }, [appointments]);
 
   return (
-    <Box sx={{ color: 'white' }}>
+    <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
         <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
           {t('dashboard')}
@@ -65,15 +65,15 @@ function DoctorDashboard({ userId }: DoctorDashboardProps) {
         </Button>
       </Box>
 
-      {isLoading && <CircularProgress sx={{ color: 'white', display: 'block', mb: 4 }} />}
+      {isLoading && <CircularProgress sx={{ display: 'block', mb: 4 }} />}
       {isError && <Typography color="error">{t('failedToFetchAppointments')}</Typography>}
 
       {!isLoading && !isError && (
         <Grid container spacing={4}>
           <Grid size={{ xs: 12, md: 6 }}>
-            <Card sx={{ bgcolor: '#1e1e1e', color: 'white', border: '1px solid #333', mb: 4 }}>
+            <Card sx={{ mb: 4 }}>
               <CardContent>
-                <Typography variant="h6" sx={{ color: '#aaa', mb: 1 }}>
+                <Typography variant="h6" sx={{ mb: 1 }}>
                   {t('dailySchedule')}
                 </Typography>
                 <Typography variant="h5">
@@ -83,14 +83,12 @@ function DoctorDashboard({ userId }: DoctorDashboardProps) {
             </Card>
 
             {pending.length > 0 && (
-              <Card sx={{ bgcolor: 'rgba(255, 183, 77, 0.1)', border: '1px solid #ffb74d' }}>
+              <Card>
                 <CardContent>
-                  <Typography variant="h6" sx={{ color: '#ffb74d', mb: 1, fontWeight: 'bold' }}>
+                  <Typography variant="h6" sx={{ mb: 1, fontWeight: 'bold' }}>
                     {t('pendingRequests')}
                   </Typography>
-                  <Typography sx={{ color: 'white', mb: 2 }}>
-                    {t('pendingRequestsCount', { count: pending.length })}
-                  </Typography>
+                  <Typography sx={{ mb: 2 }}>{t('pendingRequestsCount', { count: pending.length })}</Typography>
                   <Button
                     variant="contained"
                     color="warning"
@@ -106,13 +104,11 @@ function DoctorDashboard({ userId }: DoctorDashboardProps) {
 
           <Grid size={{ xs: 12, md: 6 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-              <Typography variant="h6" sx={{ color: 'white' }}>
-                {t('nextAppointment')}
-              </Typography>
+              <Typography variant="h6">{t('nextAppointment')}</Typography>
             </Box>
 
             {nextAppointments.length === 0 ? (
-              <Typography sx={{ color: '#aaa', fontStyle: 'italic' }}>
+              <Typography sx={{ fontStyle: 'italic' }}>
                 {totalToday > 0 ? t('noMoreAppointmentsToday') : t('noScheduledAppointments')}
               </Typography>
             ) : (

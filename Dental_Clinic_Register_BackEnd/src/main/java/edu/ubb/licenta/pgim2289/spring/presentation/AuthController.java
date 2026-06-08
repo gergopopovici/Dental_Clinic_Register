@@ -38,7 +38,10 @@ public class AuthController {
     public ResponseEntity<?> verifyAccount(@RequestParam("token") String token) {
         return authService.verifyAccount(token);
     }
-
+    @PostMapping("/resend-activation")
+    public ResponseEntity<MessageResponse> resendActivation(@RequestBody String email) {
+        return authService.resendActivationEmail(email);
+    }
     @PostMapping("/forgot-password")
     public ResponseEntity<MessageResponse> forgotPassword(
             @Valid @RequestBody RequestPasswordResetTokenDTO passwordResetTokenDTO) {

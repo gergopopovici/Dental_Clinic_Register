@@ -14,9 +14,9 @@ public class ResponseUserDTO {
     private String email;
     private String phoneNumber;
     private String firstName;
-    private String middleName;
     private String lastName;
     private Boolean enabled;
+    private Boolean accountNonLocked;
     private Gender gender;
     private LocalDate LocalDate;
     private String profilePictureUrl;

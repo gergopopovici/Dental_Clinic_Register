@@ -9,6 +9,7 @@ import {
   refreshTokenApiUrl,
   registerDoctorApiUrl,
   registerAdminApiUrl,
+  resendActivationApiUrl,
 } from '../config/apiUrl';
 import { Login, LoginResponse } from '../models/Login';
 import { RequestPasswordResetTokenDTO, ResponsePasswordResetTokenDTO } from '../models/ForgotPassword';
@@ -170,4 +171,18 @@ export const refreshAccessToken = async (refreshToken: string): Promise<LoginRes
     throw error;
   }
   
+};
+
+export const resendActivation = async (email:string) => {
+  try {
+    const response = await axios.post(resendActivationApiUrl,email,{
+      headers:{
+        'Content-Type':'application/json',
+      },
+    });
+    return response.data;
+  }catch(error){
+    console.error('Error response:', error);
+    throw error;
+  }
 };

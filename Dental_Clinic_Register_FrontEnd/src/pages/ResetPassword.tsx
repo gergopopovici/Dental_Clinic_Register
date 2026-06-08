@@ -20,6 +20,7 @@ import { ResponsePasswordResetTokenDTO } from '../models/ForgotPassword';
 import { genericBackground } from '../assets';
 import { useTranslation } from 'react-i18next';
 import LanguageSelector from '../components/LanguageSelector';
+import { ThemeToggleButton } from '../components/ThemeToggleButton';
 
 function ResetPassword() {
   const [searchParams] = useSearchParams();
@@ -76,7 +77,6 @@ function ResetPassword() {
       flexDirection="column"
       minHeight="100vh"
       minWidth="100vw"
-      bgcolor="#f4f6f8"
       sx={{
         backgroundImage: genericBackground,
         width: '100%',
@@ -92,10 +92,12 @@ function ResetPassword() {
           top: 24,
           right: 24,
           zIndex: 1000,
-          backgroundColor: 'rgba(0, 0, 0, 0.6)',
-          borderRadius: '4px',
+          display: 'flex',
+          gap: 1,
+          alignItems: 'center',
         }}
       >
+        <ThemeToggleButton />
         <LanguageSelector />
       </Box>
       <Box display="flex" flexGrow={1} justifyContent="center" alignItems="center">
@@ -162,13 +164,7 @@ function ResetPassword() {
               </Button>
             </form>
             <Box component="footer" textAlign="center" py={2}>
-              <Link
-                href="http://www.vecteezy.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                underline="hover"
-                color="red"
-              >
+              <Link href="http://www.vecteezy.com" target="_blank" rel="noopener noreferrer" underline="hover">
                 Background designed by vecteezy.com
               </Link>
             </Box>

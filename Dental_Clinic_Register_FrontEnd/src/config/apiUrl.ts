@@ -30,6 +30,7 @@ const getDoctorsByServiceBaseApiUrl = `${api}/api/doctor/by-service`;
 const appointmentsApiUrl = `${api}/api/appointments`;
 const braceComponenetsApiUrl = `${api}/api/components`;
 const treatmentPlanApiUrl = `${api}/api/treatment-plans`;
+const resendActivationApiUrl = `${api}/api/auth/resend-activation`;
 const apiURL = api;
 
 export {
@@ -64,4 +65,5 @@ export {
   appointmentsApiUrl,
   braceComponenetsApiUrl,
   treatmentPlanApiUrl,
+  resendActivationApiUrl,
 };

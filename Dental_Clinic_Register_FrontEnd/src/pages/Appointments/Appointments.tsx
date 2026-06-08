@@ -3,7 +3,6 @@ import { Box, CircularProgress, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../../context/UserContext';
 import { useTranslation } from 'react-i18next';
-import DoctorDashboard from './DoctorAppointments';
 import PatientAppointments from './PatientAppointments';
 import DoctorAppointments from './DoctorAppointments';
 
@@ -27,7 +26,7 @@ function Appointments() {
 
   if (isLoading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', bgcolor: 'black' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
         <CircularProgress />
       </Box>
     );
@@ -38,30 +37,16 @@ function Appointments() {
   }
 
   return (
-    <Box
-      sx={{
-        width: '100%',
-        minHeight: '100%',
-        boxSizing: 'border-box',
-        color: 'white',
-      }}
-    >
-      <Box
-        sx={{
-          maxWidth: '1200px',
-          margin: '0 auto',
-          padding: '2rem',
-        }}
-      >
+    <Box sx={{ width: '100%', minHeight: '100%', boxSizing: 'border-box' }}>
+      <Box sx={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem' }}>
         <Box sx={{ mb: 4 }}>
           <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 1 }}>
             {t('appointments')}
           </Typography>
-          <Typography variant="body1" sx={{ color: '#aaaaaa' }}>
+          <Typography variant="body1">
             {isDoctor ? t('doctorAppointmentsSubtitle') : t('appointmentsSubtitle')}
           </Typography>
         </Box>
-
         {isDoctor ? <DoctorAppointments userId={user.id} /> : <PatientAppointments userId={user.id} />}
       </Box>
     </Box>

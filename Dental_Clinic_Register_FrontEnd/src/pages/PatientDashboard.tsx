@@ -96,7 +96,7 @@ function PatientDashboard({ userId }: PatientDashboardProps) {
   });
 
   return (
-    <Box sx={{ color: 'white' }}>
+    <Box>
       <Box
         sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4, flexWrap: 'wrap', gap: 2 }}
       >
@@ -108,9 +108,7 @@ function PatientDashboard({ userId }: PatientDashboardProps) {
       <Grid container spacing={4}>
         <Grid size={{ xs: 12, md: 6 }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-            <Typography variant="h6" sx={{ color: 'white' }}>
-              {t('nextAppointment')}
-            </Typography>
+            <Typography variant="h6">{t('nextAppointment')}</Typography>
             <Button
               variant="text"
               size="small"
@@ -121,11 +119,11 @@ function PatientDashboard({ userId }: PatientDashboardProps) {
             </Button>
           </Box>
 
-          {isAppointmentsLoading && <CircularProgress sx={{ color: 'white', display: 'block' }} />}
+          {isAppointmentsLoading && <CircularProgress sx={{ display: 'block' }} />}
           {isAppointmentsError && <Typography color="error">{t('failedToFetchAppointments')}</Typography>}
 
           {!isAppointmentsLoading && !isAppointmentsError && !nextAppointment && (
-            <Typography sx={{ color: '#aaa', fontStyle: 'italic' }}>{t('noUpcomingAppointments')}</Typography>
+            <Typography sx={{ fontStyle: 'italic' }}>{t('noUpcomingAppointments')}</Typography>
           )}
 
           {!isAppointmentsLoading && !isAppointmentsError && nextAppointment && (
@@ -142,9 +140,7 @@ function PatientDashboard({ userId }: PatientDashboardProps) {
 
         <Grid size={{ xs: 12, md: 6 }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-            <Typography variant="h6" sx={{ color: 'white' }}>
-              {t('activePlans')}
-            </Typography>
+            <Typography variant="h6">{t('activePlans')}</Typography>
             <Button
               variant="text"
               size="small"
@@ -155,19 +151,17 @@ function PatientDashboard({ userId }: PatientDashboardProps) {
             </Button>
           </Box>
 
-          {isPlansLoading && <CircularProgress sx={{ color: 'white', display: 'block' }} />}
+          {isPlansLoading && <CircularProgress sx={{ display: 'block' }} />}
 
-          {!isPlansLoading && !activePlan && (
-            <Typography sx={{ color: '#aaa', fontStyle: 'italic' }}>{t('noActivePlans')}</Typography>
-          )}
+          {!isPlansLoading && !activePlan && <Typography sx={{ fontStyle: 'italic' }}>{t('noActivePlans')}</Typography>}
 
           {!isPlansLoading && activePlan && (
-            <Card sx={{ bgcolor: 'rgba(33, 150, 243, 0.1)', border: '1px solid #2196f3', boxShadow: 'none' }}>
+            <Card>
               <CardContent>
-                <Typography variant="h6" sx={{ color: '#6fb6fc', mb: 1, fontWeight: 'bold' }}>
+                <Typography variant="h6" sx={{ mb: 1, fontWeight: 'bold' }}>
                   {activePlan.planName || t('planName')}
                 </Typography>
-                <Typography variant="body2" sx={{ color: 'white', mb: 2 }}>
+                <Typography variant="body2" sx={{ mb: 2 }}>
                   {t('status')}: {t(activePlan.status)}
                 </Typography>
                 <Button
@@ -184,17 +178,13 @@ function PatientDashboard({ userId }: PatientDashboardProps) {
         </Grid>
       </Grid>
 
-      <Dialog
-        open={cancelDialogOpen}
-        onClose={() => setCancelDialogOpen(false)}
-        slotProps={{ paper: { sx: { bgcolor: '#1e1e1e', color: 'white' } } }}
-      >
+      <Dialog open={cancelDialogOpen} onClose={() => setCancelDialogOpen(false)}>
         <DialogTitle>{t('cancelAppointment')}</DialogTitle>
         <DialogContent>
           <Typography>{t('confirmCancelPatientMessage')}</Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setCancelDialogOpen(false)} sx={{ color: '#aaa', '&:focus': { outline: 'none' } }}>
+          <Button onClick={() => setCancelDialogOpen(false)} sx={{ '&:focus': { outline: 'none' } }}>
             {t('back')}
           </Button>
           <Button

@@ -138,7 +138,7 @@
   "error.signup.email_in_use": "Eroare: Emailul este deja folosit!",
   "error.role.not_found": "Eroare: Rolul nu a fost găsit în sistem.",
   "success.doctor.registered": "Medic înregistrat cu succes!",
-  "success.user.registered": "Utilizator înregistrat cu succes!",
+  "success.user.registered": "Înregistrare reușită! Vă rugăm să verificați căsuța de e-mail pentru a vă activa contul.",
   "error.unknown": "A apărut o eroare necunoscută. Vă rugăm să încercați din nou.",
   "error.signup.invalid_phone": "Eroare: Număr de telefon românesc invalid!",
   "licenseNumber": "Număr de Licență",
@@ -326,5 +326,14 @@
   "todaySummary": "Ai în total {{count}} programări astăzi.",
   "noAppointmentsToday": "Nu ai nicio programare astăzi.",
   "pendingRequestsCount": "Ai {{count}} cereri în așteptare pentru aprobare.",
-  "noMoreAppointmentsToday": "Nu mai ai programări pentru astăzi."
+  "noMoreAppointmentsToday": "Nu mai ai programări pentru astăzi.",
+  "success.activation.resent": "Dacă există un cont neconfirmat cu acest e-mail, a fost trimis un nou link de activare.",
+  "error.email.required": "Adresa de e-mail este obligatorie.",
+  "resendActivationLink": "Retrimiteți linkul de activare?",
+  "resendActivationTitle": "Retrimiteți e-mailul de activare",
+  "resendActivationDescription": "Introduceți adresa de e-mail. Dacă există un cont neconfirmat, vom trimite un nou link de activare.",
+  "send": "Trimite",
+  "switchToLightMode": "Comutare la modul luminos",
+"switchToDarkMode": "Comutare la modul întunecat",
+"navDashboard": "Panou de control"
 }

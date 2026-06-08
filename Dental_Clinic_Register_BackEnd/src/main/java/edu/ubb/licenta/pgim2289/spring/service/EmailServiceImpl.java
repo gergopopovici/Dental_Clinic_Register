@@ -240,4 +240,17 @@ public class EmailServiceImpl implements EmailService {
                 + "\n\nWe look forward to seeing you!");
         mailSender.send(message);
     }
+
+    @Override
+    public void sendRegistrationConfirmationEmail(String to, String token, String userName) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(fromEmail);
+        message.setTo(to);
+        message.setSubject("Activate Your Account");
+        message.setText("Hello " + userName + ",\n\n"
+                + "Please click the link below to activate your account:\n\n"
+                + "http://localhost:5175/verify?token=" + token + "\n\n"
+                + "Thank you!");
+        mailSender.send(message);
+    }
 }

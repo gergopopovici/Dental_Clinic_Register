@@ -26,7 +26,7 @@ function TreatmentPlansPage() {
 
   if (isLoading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', bgcolor: 'black' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
         <CircularProgress />
       </Box>
     );
@@ -37,31 +37,16 @@ function TreatmentPlansPage() {
   }
 
   return (
-    <Box
-      sx={{
-        width: '100%',
-        minHeight: '100vh',
-        bgcolor: '2c2c2c',
-        boxSizing: 'border-box',
-        color: 'white',
-      }}
-    >
-      <Box
-        sx={{
-          maxWidth: '1200px',
-          margin: '0 auto',
-          padding: '2rem',
-        }}
-      >
+    <Box sx={{ width: '100%', minHeight: '100vh', boxSizing: 'border-box' }}>
+      <Box sx={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem' }}>
         <Box sx={{ mb: 4 }}>
           <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 1 }}>
             {t('treatmentPlans')}
           </Typography>
-          <Typography variant="body1" sx={{ color: '#aaaaaa' }}>
+          <Typography variant="body1">
             {isDoctor ? t('doctorTreatmentPlansSubtitle') : t('patientTreatmentPlansSubtitle')}
           </Typography>
         </Box>
-
         {isDoctor ? <DoctorTreatmentPlansView doctorId={user.id} /> : <PatientTreatmentPlansView patientId={user.id} />}
       </Box>
     </Box>

@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { getAllUsersForAdminList, toggleUserStatus } from '../services/UserService';
+import { UserManagemenetDTO } from '../models/User';
 import {
   Alert,
   Box,
@@ -21,14 +22,6 @@ import {
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 
-interface UserManagemenetDTO {
-  id: number;
-  userName: string;
-  name: string;
-  email: string;
-  role: string;
-  enabled: boolean;
-}
 interface UserTableProps {
   currentUserId?: number;
 }
@@ -67,11 +60,11 @@ function UserTable({ currentUserId }: UserTableProps) {
     },
   });
   return (
-    <Paper sx={{ bgcolor: '#1e1e1e', mt: 4, overflow: 'hidden' }}>
+    <Paper sx={{ mt: 4, overflow: 'hidden' }}>
       <Box
         sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}
       >
-        <Typography variant="h6" sx={{ color: 'white', fontWeight: 'bold' }}>
+        <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
           {t('admin.user_management')}
         </Typography>
         <TextField
@@ -81,17 +74,13 @@ function UserTable({ currentUserId }: UserTableProps) {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           sx={{
-            input: { color: 'white' },
-            bgcolor: '#2c2c2c',
-            borderRadius: 1,
-            '& .MuiOutlinedInput-notchedOutline': { borderColor: '#444' },
             minWidth: '250px',
           }}
           slotProps={{
             input: {
               startAdornment: (
                 <InputAdornment position="start">
-                  <SearchIcon sx={{ color: '#aaaaaa' }} />
+                  <SearchIcon />
                 </InputAdornment>
               ),
             },
@@ -107,14 +96,14 @@ function UserTable({ currentUserId }: UserTableProps) {
 
       <TableContainer>
         <Table sx={{ minWidth: 650 }}>
-          <TableHead sx={{ bgcolor: '#2c2c2c' }}>
+          <TableHead>
             <TableRow>
-              <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>{t('username')}</TableCell>
-              <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>{t('fullName')}</TableCell>
-              <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>{t('email')}</TableCell>
-              <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>{t('role')}</TableCell>
-              <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>{t('status')}</TableCell>
-              <TableCell sx={{ color: 'white', fontWeight: 'bold' }} align="right">
+              <TableCell sx={{ fontWeight: 'bold' }}>{t('username')}</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>{t('fullName')}</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>{t('email')}</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>{t('role')}</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>{t('status')}</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }} align="right">
                 {t('actions')}
               </TableCell>
             </TableRow>
@@ -129,36 +118,35 @@ function UserTable({ currentUserId }: UserTableProps) {
             ) : users.length > 0 ? (
               users.map((user) => (
                 <TableRow key={user.id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                  <TableCell sx={{ color: 'white' }}>{user.userName}</TableCell>
-                  <TableCell sx={{ color: 'white' }}>{user.name}</TableCell>
-                  <TableCell sx={{ color: 'white' }}>{user.email}</TableCell>
+                  <TableCell>{user.userName}</TableCell>
+                  <TableCell>{user.name}</TableCell>
+                  <TableCell>{user.email}</TableCell>
                   <TableCell>
-                    <Chip label={user.role} size="small" sx={{ bgcolor: '#333', color: '#90caf9' }} />
+                    <Chip label={user.role} size="small" />
                   </TableCell>
                   <TableCell>
                     <Chip
-                      label={user.enabled ? t('active') : t('banned')}
-                      color={user.enabled ? 'success' : 'error'}
+                      label={user.accountNonLocked ? t('active') : t('banned')}
+                      color={user.accountNonLocked ? 'success' : 'error'}
                       size="small"
-                      sx={{ color: 'white' }}
                     />
                   </TableCell>
                   <TableCell align="right">
                     <Button
                       variant="contained"
-                      color={user.enabled ? 'error' : 'success'}
+                      color={user.accountNonLocked ? 'error' : 'success'}
                       size="small"
                       disabled={user.id === currentUserId || toggleMutation.isPending}
                       onClick={() => toggleMutation.mutate(user.id)}
                     >
-                      {user.enabled ? t('disable') : t('enable')}
+                      {user.accountNonLocked ? t('disable') : t('enable')}
                     </Button>
                   </TableCell>
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={6} align="center" sx={{ color: 'white', py: 3 }}>
+                <TableCell colSpan={6} align="center" sx={{ py: 3 }}>
                   {t('noUsersFound')}
                 </TableCell>
               </TableRow>

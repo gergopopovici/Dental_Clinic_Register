@@ -20,11 +20,12 @@ import PersonIcon from '@mui/icons-material/Person';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
-import { signOut } from '../services/AuthorisationService'; // Assuming signOut is your logout API call
-import { useUser } from '../context/UserContext'; // Your UserContext hook
+import { signOut } from '../services/AuthorisationService';
+import { useUser } from '../context/UserContext';
 import { getAvatar } from '../services/UserService';
 import LanguageSelector from './LanguageSelector';
 import { useTranslation } from 'react-i18next';
+import { ThemeToggleButton } from './ThemeToggleButton';
 
 const drawerWidth = 240;
 
@@ -91,10 +92,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       showForDoctor: true,
     },
   ];
+
   useEffect(() => {
-    console.log('DashboardLayout useEffect: isLoading:', isLoading, 'user:', user);
     if (!isLoading && !user) {
-      console.log('DashboardLayout: User is null and not loading, navigating to /login');
       navigate('/login');
     }
   }, [user, navigate, isLoading]);
@@ -102,32 +102,26 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const logoutMutation = useMutation({
     mutationFn: signOut,
     onSuccess: () => {
-      console.log('DashboardLayout: Logout mutation (API call) successful. Triggering frontend logout.');
       logout();
     },
     onError: (error) => {
-      console.error('DashboardLayout: Logout failed (mutation onError):', error);
       logout();
     },
   });
 
   if (!isLoading && !user) {
-    console.log('DashboardLayout: User is not authenticated or session expired. Redirecting immediately.');
     navigate('/login');
     return null;
   }
 
   if (isLoading) {
-    console.log('DashboardLayout: User data is loading...');
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
         <CircularProgress />
       </Box>
     );
   }
-  const fullName = [user?.firstName, user?.middleName, user?.lastName].filter(Boolean).join(' ');
-  console.log('DashboardLayout: User found:', fullName);
-  console.log('DashboardLayout: User middleName:', user?.middleName);
+  const fullName = [user?.firstName, user?.lastName].filter(Boolean).join(' ');
 
   const userRolesDisplay =
     user?.roles && user.roles.length > 0
@@ -151,9 +145,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           '& .MuiDrawer-paper': {
             width: drawerWidth,
             boxSizing: 'border-box',
-            backgroundColor: '#212121',
-            color: '#ffffff',
-            borderRight: '1px solid rgba(255, 255, 255, 0.12)',
           },
         }}
         variant="permanent"
@@ -164,20 +155,18 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             <Avatar
               alt="Patient Name"
               src={avatarUrl || undefined}
-              sx={{ width: 60, height: 60, mb: 1, bgcolor: 'primary.light' }}
+              sx={{ width: 60, height: 60, mb: 1, bgcolor: 'primary.main' }}
             >
               {userInitials}
             </Avatar>
           </IconButton>
-          <Typography variant="h6" sx={{ color: 'white', mb: 0.5, textAlign: 'center' }}>
+          <Typography variant="h6" sx={{ mb: 0.5, textAlign: 'center' }}>
             {fullName}
           </Typography>
-          <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)' }}>
-            {userRolesDisplay}
-          </Typography>
+          <Typography variant="body2">{userRolesDisplay}</Typography>
         </Box>
 
-        <Divider sx={{ borderColor: 'rgba(255, 255, 255, 0.12)' }} />
+        <Divider />
 
         <List>
           {menuItems
@@ -200,29 +189,16 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
               return (
                 <ListItem key={label} disablePadding>
-                  <ListItemButton
-                    selected={isActive}
-                    onClick={handleClick}
-                    sx={{
-                      '&.Mui-selected': {
-                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                        '&:hover': {
-                          backgroundColor: 'rgba(255, 255, 255, 0.15)',
-                        },
-                      },
-                      '&:hover': {
-                        backgroundColor: 'rgba(255, 255, 255, 0.08)',
-                      },
-                    }}
-                  >
-                    <ListItemIcon sx={{ color: 'white' }}>{icon}</ListItemIcon>
-                    <ListItemText primary={label} sx={{ color: 'white' }} />
+                  <ListItemButton selected={isActive} onClick={handleClick}>
+                    <ListItemIcon>{icon}</ListItemIcon>
+                    <ListItemText primary={label} />
                   </ListItemButton>
                 </ListItem>
               );
             })}
         </List>
-        <Box sx={{ mt: 'auto', p: 2, display: 'flex', justifyContent: 'center' }}>
+        <Box sx={{ mt: 'auto', p: 2, display: 'flex', justifyContent: 'center', gap: 1, alignItems: 'center' }}>
+          <ThemeToggleButton />
           <LanguageSelector />
         </Box>
       </Drawer>

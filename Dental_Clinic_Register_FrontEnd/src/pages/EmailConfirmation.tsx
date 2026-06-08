@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react';
 import { genericBackground2 } from '../assets';
 import { useTranslation } from 'react-i18next';
 import LanguageSelector from '../components/LanguageSelector';
+import { ThemeToggleButton } from '../components/ThemeToggleButton';
 
 function EmailConfirmation() {
   const [searchparams] = useSearchParams();
@@ -22,7 +23,6 @@ function EmailConfirmation() {
 
   useEffect(() => {
     if (token && !hasMutated) {
-      console.log('This is the token' + token);
       verifyMutation.mutate(token);
       setHasMutated(true);
     }
@@ -105,10 +105,12 @@ function EmailConfirmation() {
           top: 24,
           right: 24,
           zIndex: 1000,
-          backgroundColor: 'rgba(0, 0, 0, 0.6)',
-          borderRadius: '4px',
+          display: 'flex',
+          gap: 1,
+          alignItems: 'center',
         }}
       >
+        <ThemeToggleButton />
         <LanguageSelector />
       </Box>
       <Card sx={{ maxWidth: 400, width: '90%', p: 3 }}>
@@ -121,7 +123,7 @@ function EmailConfirmation() {
               href="http://www.freepik.com"
               target="_blank"
               rel="noopener noreferrer"
-              style={{ color: 'red', textDecoration: 'none' }}
+              style={{ textDecoration: 'none' }}
             >
               Background designed by freepik.com
             </a>

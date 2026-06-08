@@ -213,7 +213,6 @@ public class UserController {
         userDTO.setEmail(user.getEmail());
         userDTO.setPhoneNumber(user.getPhoneNumber());
         userDTO.setFirstName(user.getFirstName());
-        userDTO.setMiddleName(user.getMiddleName());
         userDTO.setLastName(user.getLastName());
         userDTO.setGender(user.getGender());
         userDTO.setLocalDate(user.getDateOfBirth());

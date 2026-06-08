@@ -29,6 +29,7 @@ import { AxiosError } from 'axios';
 import { registerPageBackground } from '../assets';
 import { useTranslation } from 'react-i18next';
 import LanguageSelector from '../components/LanguageSelector';
+import { ThemeToggleButton } from '../components/ThemeToggleButton';
 
 function Register() {
   const [searchParams] = useSearchParams();
@@ -41,7 +42,6 @@ function Register() {
   const [email, setEmail] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [firstName, setFirstName] = useState('');
-  const [middleName, setMiddleName] = useState('');
   const [lastName, setLastName] = useState('');
   const [dobDay, setDobDay] = useState('');
   const [dobMonth, setDobMonth] = useState('');
@@ -131,7 +131,6 @@ function Register() {
       const formattedDay = String(dayNum).padStart(2, '0');
       dateOfBirth = `${yearNum}-${formattedMonth}-${formattedDay}`;
     } catch (error) {
-      console.error('Error formatting date of birth:', error);
       setErrorMessage(t('errorMessage'));
       return;
     }
@@ -149,7 +148,6 @@ function Register() {
       email,
       phoneNumber,
       firstName,
-      middleName,
       lastName,
       dateOfBirth,
       gender,
@@ -199,21 +197,11 @@ function Register() {
       minWidth="100vw"
       sx={{
         backgroundImage: registerPageBackground,
-        backgroundColor: '#f4f6f8',
         backgroundRepeat: 'repeat',
         backgroundPosition: 'top left',
         backgroundSize: '800px 800px',
         backgroundAttachment: 'scroll',
-        '&::before': {
-          content: '""',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(244, 246, 248, 0.7)',
-          zIndex: 1,
-        },
+        backgroundColor: '#ffffff',
         position: 'relative',
         overflow: 'auto',
       }}
@@ -224,10 +212,12 @@ function Register() {
           top: 24,
           right: 24,
           zIndex: 1000,
-          backgroundColor: 'rgba(0, 0, 0, 0.6)',
-          borderRadius: '4px',
+          display: 'flex',
+          gap: 1,
+          alignItems: 'center',
         }}
       >
+        <ThemeToggleButton />
         <LanguageSelector />
       </Box>
       <Box
@@ -247,9 +237,8 @@ function Register() {
             maxWidth: 400,
             width: '90%',
             p: 3,
-            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
             borderRadius: 2,
-            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+            boxShadow: 3,
           }}
         >
           <Box display={'flex'} justifyContent={'center'} mb={2}>
@@ -346,18 +335,6 @@ function Register() {
                 sx={{ mb: 2 }}
               />
               <Typography variant="body2" sx={{ mt: 1, mb: 1, fontWeight: 'bold' }}>
-                {t('middleName')}:
-              </Typography>
-              <TextField
-                label={t('middleName')}
-                type={'text'}
-                fullWidth={true}
-                required={false}
-                value={middleName}
-                onChange={(e) => setMiddleName(e.target.value)}
-                sx={{ mb: 2 }}
-              />
-              <Typography variant="body2" sx={{ mt: 1, mb: 1, fontWeight: 'bold' }}>
                 {t('lastName')}:
               </Typography>
               <TextField
@@ -376,12 +353,7 @@ function Register() {
                 <TextField
                   label={t('day')}
                   type="number"
-                  InputProps={{
-                    inputProps: {
-                      min: 1,
-                      max: 31,
-                    },
-                  }}
+                  InputProps={{ inputProps: { min: 1, max: 31 } }}
                   value={dobDay}
                   onChange={(e) => setDobDay(e.target.value)}
                   sx={{ width: '30%' }}
@@ -390,12 +362,7 @@ function Register() {
                 <TextField
                   label={t('month')}
                   type="number"
-                  InputProps={{
-                    inputProps: {
-                      min: 1,
-                      max: 12,
-                    },
-                  }}
+                  InputProps={{ inputProps: { min: 1, max: 12 } }}
                   value={dobMonth}
                   onChange={(e) => setDobMonth(e.target.value)}
                   sx={{ width: '30%' }}
@@ -404,12 +371,7 @@ function Register() {
                 <TextField
                   label={t('year')}
                   type="number"
-                  InputProps={{
-                    inputProps: {
-                      min: 1900,
-                      max: new Date().getFullYear(),
-                    },
-                  }}
+                  InputProps={{ inputProps: { min: 1900, max: new Date().getFullYear() } }}
                   value={dobYear}
                   onChange={(e) => setDobYear(e.target.value)}
                   sx={{ width: '40%' }}
@@ -507,13 +469,7 @@ function Register() {
               </Button>
             </form>
             <Box component="footer" textAlign="center" py={2}>
-              <Link
-                href="http://www.vecteezy.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                underline="hover"
-                color="red"
-              >
+              <Link href="http://www.vecteezy.com" target="_blank" rel="noopener noreferrer" underline="hover">
                 Background designed by vecteezy.com
               </Link>
             </Box>

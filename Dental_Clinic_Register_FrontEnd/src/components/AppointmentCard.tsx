@@ -51,14 +51,11 @@ function AppointmentCard({
   return (
     <Card
       sx={{
-        bgcolor: '#1e1e1e',
-        color: 'white',
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
         opacity: isInactive ? 0.7 : 1,
         transition: 'opacity 0.3s ease',
-        border: isInactive ? '1px solid #333' : '1px solid transparent',
       }}
     >
       <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', p: 2 }}>
@@ -70,7 +67,7 @@ function AppointmentCard({
             sx={{ fontWeight: 'bold' }}
           />
           <Box sx={{ textAlign: 'right' }}>
-            <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#aaaaaa' }}>
+            <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
               {displayDate}
             </Typography>
             <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
@@ -83,21 +80,18 @@ function AppointmentCard({
           {appointment.serviceName}
         </Typography>
 
-        <Typography variant="body1" sx={{ color: '#aaaaaa', mb: 0.5 }}>
+        <Typography variant="body1" sx={{ mb: 0.5 }}>
           {userRole === 'PATIENT'
             ? `${t('doctor')}: Dr. ${appointment.doctorName}`
             : `${t('patient')}: ${appointment.patientName}`}
         </Typography>
 
-        <Typography variant="body2" sx={{ color: '#777777', mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Typography variant="body2" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
           {appointment.serviceDurationMinutes} {t('minutes')}
-          <Box component="span" sx={{ color: '#444' }}>
-            •
-          </Box>
+          <Box component="span">•</Box>
           <Box
             component="span"
             sx={{
-              color: isInactive ? '#555' : '#81c784',
               fontWeight: 'bold',
               textDecoration: isInactive ? 'line-through' : 'none',
             }}
@@ -107,8 +101,8 @@ function AppointmentCard({
         </Typography>
 
         {appointment.notes && (
-          <Box sx={{ bgcolor: '#2c2c2c', p: 1.5, borderRadius: 1, mb: 2 }}>
-            <Typography variant="caption" sx={{ color: '#aaa', display: 'block', mb: 0.5, fontWeight: 'bold' }}>
+          <Box sx={{ p: 1.5, borderRadius: 1, mb: 2 }}>
+            <Typography variant="caption" sx={{ display: 'block', mb: 0.5, fontWeight: 'bold' }}>
               {appointment.status === 'CANCELLED' ? t('cancelReason') : t('notes')}:
             </Typography>
             <Typography variant="body2" sx={{ fontStyle: 'italic' }}>
@@ -151,21 +145,16 @@ function AppointmentCard({
             mt: 'auto',
             flexWrap: 'wrap',
             pt: 2,
-            borderTop: '1px solid #333',
           }}
         >
           {(appointment.status === 'PENDING' || appointment.status === 'CONFIRMED') && onCancel && (
             <Button
               variant="contained"
+              color="error"
               size="small"
               onClick={() => onCancel(appointment.id)}
               sx={{
-                color: 'white',
                 fontWeight: 'bold',
-                backgroundColor: '#d82215',
-                '&:hover': {
-                  backgroundColor: 'darkred',
-                },
                 '&:focus': {
                   outline: 'none',
                 },

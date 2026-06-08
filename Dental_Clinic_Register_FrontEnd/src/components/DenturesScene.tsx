@@ -242,7 +242,7 @@ function DenturesScene({ treatmentPlanId = 1, readOnly = false }: DenturesSceneP
 
       <Canvas
         camera={{ position: [0, 0, 45], fov: 45 }}
-        style={{ width: '800px', height: '600px', borderRadius: '8px', background: '#2c2c2c' }}
+        style={{ width: '800px', height: '600px', borderRadius: '8px' }}
       >
         <Suspense fallback={null}>
           <ambientLight intensity={1.0} />

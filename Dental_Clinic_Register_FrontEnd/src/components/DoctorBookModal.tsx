@@ -106,40 +106,9 @@ function DoctorBookModal({ open, onClose, doctorId }: DoctorBookModalProps) {
     bookMutation.mutate(payload);
   };
 
-  const darkFieldStyles = {
-    bgcolor: '#2c2c2c',
-    borderRadius: 1,
-    '& .MuiOutlinedInput-notchedOutline': { borderColor: '#444' },
-    '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#888' },
-    '& .MuiInputLabel-root': { color: '#aaa' },
-    '& .MuiInputLabel-root.Mui-focused': { color: '#1976d2' },
-    '& .MuiInputBase-input': { color: 'white' },
-    textarea: { color: 'white' },
-    '& .MuiSelect-select': { color: 'white' },
-    '& .MuiSelect-select .MuiTypography-root': { color: 'white' },
-    '& .MuiSvgIcon-root': { color: '#aaa' },
-  };
-
-  const darkMenuProps = {
-    PaperProps: {
-      sx: {
-        bgcolor: '#2c2c2c',
-        color: 'white',
-        '& .MuiMenuItem-root:hover': { bgcolor: '#444' },
-        '& .Mui-selected': { bgcolor: '#1976d2 !important' },
-      },
-    },
-  };
-
   return (
-    <Dialog
-      open={open}
-      onClose={onClose}
-      maxWidth="sm"
-      fullWidth
-      slotProps={{ paper: { sx: { bgcolor: '#1e1e1e', color: 'white' } } }}
-    >
-      <DialogTitle sx={{ fontWeight: 'bold', borderBottom: '1px solid #333' }}>{t('bookForPatient')}</DialogTitle>
+    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+      <DialogTitle sx={{ fontWeight: 'bold' }}>{t('bookForPatient')}</DialogTitle>
 
       <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 3, pt: '24px !important' }}>
         {errorMessage && (
@@ -175,22 +144,11 @@ function DoctorBookModal({ open, onClose, doctorId }: DoctorBookModalProps) {
                   ),
                 },
               }}
-              sx={darkFieldStyles}
             />
           )}
-          slotProps={{
-            paper: {
-              sx: {
-                bgcolor: '#2c2c2c',
-                color: 'white',
-                '& .MuiAutocomplete-noOptions': { color: '#aaa' },
-                '& .MuiAutocomplete-option[aria-selected="true"]': { bgcolor: '#444 !important' },
-              },
-            },
-          }}
         />
 
-        <FormControl fullWidth variant="outlined" sx={darkFieldStyles}>
+        <FormControl fullWidth variant="outlined">
           <InputLabel shrink>{t('selectService')}</InputLabel>
           <Select
             value={serviceId}
@@ -200,7 +158,6 @@ function DoctorBookModal({ open, onClose, doctorId }: DoctorBookModalProps) {
             }}
             label={t('selectService')}
             notched
-            MenuProps={darkMenuProps}
           >
             {isLoadingServices ? (
               <MenuItem disabled>
@@ -213,7 +170,7 @@ function DoctorBookModal({ open, onClose, doctorId }: DoctorBookModalProps) {
                     <Typography variant="body2">
                       {s.name} ({s.durationMinutes} min)
                     </Typography>
-                    <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#81c784 !important', ml: 2 }}>
+                    <Typography variant="body2" sx={{ fontWeight: 'bold', ml: 2 }}>
                       {s.price} {t('currency')}
                     </Typography>
                   </Box>
@@ -236,7 +193,6 @@ function DoctorBookModal({ open, onClose, doctorId }: DoctorBookModalProps) {
             setDatetime(e.target.value);
             setErrorMessage('');
           }}
-          sx={darkFieldStyles}
         />
 
         <TextField
@@ -248,7 +204,6 @@ function DoctorBookModal({ open, onClose, doctorId }: DoctorBookModalProps) {
           slotProps={{ inputLabel: { shrink: true } }}
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
-          sx={darkFieldStyles}
         />
 
         <TextField
@@ -258,20 +213,14 @@ function DoctorBookModal({ open, onClose, doctorId }: DoctorBookModalProps) {
           slotProps={{ inputLabel: { shrink: true } }}
           value={resourceLink}
           onChange={(e) => setResourceLink(e.target.value)}
-          sx={darkFieldStyles}
         />
       </DialogContent>
 
-      <DialogActions sx={{ p: 3, borderTop: '1px solid #333' }}>
+      <DialogActions sx={{ p: 3 }}>
         <Button
           onClick={onClose}
           sx={{
-            color: 'white',
             fontWeight: 'bold',
-            backgroundColor: '#d82215',
-            '&:hover': {
-              backgroundColor: 'darkred',
-            },
             '&:focus': {
               outline: 'none',
             },

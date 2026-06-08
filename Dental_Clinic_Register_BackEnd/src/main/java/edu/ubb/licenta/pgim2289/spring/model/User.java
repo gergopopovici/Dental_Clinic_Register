@@ -38,9 +38,6 @@ public class User extends BaseEntity implements Serializable {
     @Column(name = "first_name", nullable = false)
     private String firstName;
 
-    @Column(name = "middle_name")
-    private String middleName;
-
     @Column(name = "last_name", nullable = false)
     private String lastName;
 
@@ -88,9 +85,13 @@ public class User extends BaseEntity implements Serializable {
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private VerificationToken verificationToken;
+
+    @Column(name = "account_non_locked", nullable = false)
+    private Boolean accountNonLocked = true;
+
     @Transient
     public String getFullName() {
-        return Stream.of(firstName, middleName, lastName)
+        return Stream.of(firstName, lastName)
                 .filter(Objects::nonNull)
                 .filter(name -> !name.trim().isEmpty())
                 .collect(Collectors.joining(" "));

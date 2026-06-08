@@ -27,7 +27,7 @@ function PatientTreatmentPlansView({ patientId }: PatientViewProps) {
   const renderPlanCard = (plan: TreatmentPlanDTO) => {
     const isBracesPlan = plan.planName.toLowerCase().match(/(brace|aparat|ortho|orto|fogszab)/i);
     return (
-      <Card key={plan.id} sx={{ bgcolor: '#1e1e1e', color: 'white', border: '1px solid #333', mb: 2 }}>
+      <Card key={plan.id} sx={{ mb: 2 }}>
         <CardContent>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
             <Typography variant="h6">{plan.planName}</Typography>
@@ -49,7 +49,7 @@ function PatientTreatmentPlansView({ patientId }: PatientViewProps) {
               />
             </Box>
           </Box>
-          <Typography variant="body2" color="#aaa" gutterBottom>
+          <Typography variant="body2" gutterBottom>
             {t('startDate')}: {plan.startDate} | {t('endDate')}: {plan.endDate || t('ongoing')}
           </Typography>
           <Typography variant="body1" sx={{ mt: 2 }}>
@@ -67,20 +67,20 @@ function PatientTreatmentPlansView({ patientId }: PatientViewProps) {
           {t('activePlans', 'Active Plans')}
         </Typography>
         {activePlans.length === 0 ? (
-          <Typography color="white">{t('noActivePlans', 'No active plans.')}</Typography>
+          <Typography>{t('noActivePlans', 'No active plans.')}</Typography>
         ) : (
           activePlans.map(renderPlanCard)
         )}
       </Box>
 
-      <Divider sx={{ borderColor: '#333' }} />
+      <Divider />
 
       <Box>
         <Typography variant="h6" gutterBottom color="primary.light">
           {t('pastPlans', 'Past Plans')}
         </Typography>
         {pastPlans.length === 0 ? (
-          <Typography color="white">{t('noPastPlans', 'No past plans.')}</Typography>
+          <Typography>{t('noPastPlans', 'No past plans.')}</Typography>
         ) : (
           pastPlans.map(renderPlanCard)
         )}

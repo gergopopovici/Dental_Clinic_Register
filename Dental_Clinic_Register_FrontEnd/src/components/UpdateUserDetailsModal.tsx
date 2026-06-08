@@ -28,7 +28,6 @@ export enum Gender {
 
 export interface UpdateProfileDTO {
   firstName: string;
-  middleName: string;
   lastName: string;
   phoneNumber: string;
   gender: Gender;
@@ -58,7 +57,6 @@ function UpdateUserModal({
 
   const [formData, setFormData] = useState<UpdateProfileDTO>({
     firstName: '',
-    middleName: '',
     lastName: '',
     phoneNumber: '',
     gender: Gender.OTHER,
@@ -68,7 +66,6 @@ function UpdateUserModal({
     if (user) {
       setFormData({
         firstName: user.firstName || '',
-        middleName: user.middleName || '',
         lastName: user.lastName || '',
         phoneNumber: user.phoneNumber || '',
         gender: user.gender || Gender.OTHER,
@@ -98,23 +95,8 @@ function UpdateUserModal({
     onSubmit(formData);
   };
 
-  const darkFieldStyles = {
-    mb: 2,
-    '& .MuiOutlinedInput-notchedOutline': { borderColor: '#444' },
-    '& .MuiInputLabel-root': { color: '#aaa' },
-    input: { color: 'white' },
-    '& .MuiSelect-select': { color: 'white' },
-    '& .MuiSvgIcon-root': { color: '#aaa' },
-  };
-
   return (
-    <Dialog
-      open={open}
-      onClose={onClose}
-      maxWidth="sm"
-      fullWidth
-      slotProps={{ paper: { sx: { bgcolor: '#2c2c2c', color: '#ffffff' } } }}
-    >
+    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle>{t('updateUserDetails')}</DialogTitle>
       <DialogContent dividers>
         <TextField
@@ -126,19 +108,7 @@ function UpdateUserModal({
           variant="outlined"
           value={formData.firstName}
           onChange={handleChange}
-          sx={darkFieldStyles}
-        />
-        <TextField
-          margin="dense"
-          name="middleName"
-          label={t('middleName')}
-          type="text"
-          fullWidth
-          variant="outlined"
-          value={formData.middleName}
-          onChange={handleChange}
-          placeholder={user?.middleName ? '' : '-'}
-          sx={darkFieldStyles}
+          sx={{ mb: 2 }}
         />
         <TextField
           margin="dense"
@@ -149,7 +119,7 @@ function UpdateUserModal({
           variant="outlined"
           value={formData.lastName}
           onChange={handleChange}
-          sx={darkFieldStyles}
+          sx={{ mb: 2 }}
         />
         <TextField
           margin="dense"
@@ -160,9 +130,9 @@ function UpdateUserModal({
           variant="outlined"
           value={formData.phoneNumber}
           onChange={handleChange}
-          sx={darkFieldStyles}
+          sx={{ mb: 2 }}
         />
-        <FormControl fullWidth margin="dense" sx={darkFieldStyles}>
+        <FormControl fullWidth margin="dense" sx={{ mb: 2 }}>
           <InputLabel id="gender-label">{t('gender')}</InputLabel>
           <Select
             labelId="gender-label"

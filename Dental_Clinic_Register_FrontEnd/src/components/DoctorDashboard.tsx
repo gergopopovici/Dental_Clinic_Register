@@ -35,11 +35,9 @@ function DoctorDashboard() {
 
   const userId = user?.id;
 
-  // State for filtering and UI
   const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
 
-  // State for Action Modals (Confirm/Reschedule)
   const [isActionModalOpen, setIsActionModalOpen] = useState(false);
   const [actionType, setActionType] = useState<'CONFIRM' | 'RESCHEDULE'>('CONFIRM');
   const [selectedApptId, setSelectedApptId] = useState<number | null>(null);
@@ -47,13 +45,11 @@ function DoctorDashboard() {
   const [modalInitialNotes, setModalInitialNotes] = useState<string>('');
   const [modalInitialResourceLink, setModalInitialResourceLink] = useState<string>('');
 
-  // State for Booking and Cancelling
   const [isBookModalOpen, setIsBookModalOpen] = useState(false);
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [appointmentToCancel, setAppointmentToCancel] = useState<number | null>(null);
   const [cancelReason, setCancelReason] = useState('');
 
-  // 1. Fetch Daily Appointments
   const {
     data: appointments,
     isLoading,
@@ -64,7 +60,6 @@ function DoctorDashboard() {
     enabled: !!userId,
   });
 
-  // 2. Mutations for Status Updates
   const cancelMutation = useMutation({
     mutationFn: ({ id, reason }: { id: number; reason: string }) => cancelAppointmentByDoctor(userId!, id, reason),
     onSuccess: async () => await handleSuccess('appointmentCancelled'),
@@ -83,7 +78,6 @@ function DoctorDashboard() {
     onError: handleError,
   });
 
-  // Helpers
   async function handleSuccess(msgKey: string) {
     setSnackbar({ open: true, message: t(msgKey), severity: 'success' });
     await queryClient.invalidateQueries({ queryKey: ['doctorAppointments', userId] });
@@ -110,7 +104,6 @@ function DoctorDashboard() {
     setIsActionModalOpen(true);
   };
 
-  // Sort and Filter Logic
   const statusPriority: Record<string, number> = {
     CONFIRMED: 1,
     COMPLETED: 2,
@@ -136,9 +129,7 @@ function DoctorDashboard() {
       sx={{
         width: '100%',
         minHeight: '100vh',
-        bgcolor: 'black',
         boxSizing: 'border-box',
-        color: 'white',
         py: 4,
       }}
     >
@@ -149,7 +140,6 @@ function DoctorDashboard() {
           px: { xs: 2, md: 4 },
         }}
       >
-        {/* Header & Controls */}
         <Box
           sx={{
             display: 'flex',
@@ -171,7 +161,6 @@ function DoctorDashboard() {
               variant="h4"
               sx={{
                 fontWeight: 'bold',
-                color: 'white',
                 mb: 1,
               }}
             >
@@ -181,7 +170,6 @@ function DoctorDashboard() {
             <Typography
               variant="body1"
               sx={{
-                color: '#aaa',
                 maxWidth: '700px',
                 lineHeight: 1.7,
               }}
@@ -220,19 +208,12 @@ function DoctorDashboard() {
               slotProps={{
                 inputLabel: {
                   shrink: true,
-                  sx: { color: '#aaa' },
                 },
               }}
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
               sx={{
                 minWidth: '180px',
-                bgcolor: '#2c2c2c',
-                borderRadius: 1,
-                input: { color: 'white' },
-                '& .MuiOutlinedInput-notchedOutline': {
-                  borderColor: '#444',
-                },
               }}
             />
           </Box>
@@ -241,7 +222,6 @@ function DoctorDashboard() {
         {isLoading && (
           <CircularProgress
             sx={{
-              color: 'white',
               display: 'block',
               mx: 'auto',
               mt: 6,
@@ -251,12 +231,10 @@ function DoctorDashboard() {
 
         {isError && <Typography color="error">{t('failedToFetchAppointments')}</Typography>}
 
-        {/* PENDING REQUESTS SECTION */}
         <Box sx={{ mb: 8 }}>
           <Typography
             variant="h5"
             sx={{
-              color: '#ffb74d',
               mb: 3,
               fontWeight: 'bold',
             }}
@@ -267,7 +245,6 @@ function DoctorDashboard() {
           {pendingAppointments.length === 0 && !isLoading && (
             <Typography
               sx={{
-                color: '#aaa',
                 fontStyle: 'italic',
               }}
             >
@@ -309,17 +286,14 @@ function DoctorDashboard() {
 
         <Divider
           sx={{
-            borderColor: '#333',
             my: 6,
           }}
         />
 
-        {/* SCHEDULED APPOINTMENTS SECTION */}
         <Box>
           <Typography
             variant="h5"
             sx={{
-              color: '#81c784',
               mb: 3,
               fontWeight: 'bold',
             }}
@@ -330,7 +304,6 @@ function DoctorDashboard() {
           {confirmedAppointments.length === 0 && !isLoading && (
             <Typography
               sx={{
-                color: '#aaa',
                 fontStyle: 'italic',
               }}
             >
@@ -379,7 +352,6 @@ function DoctorDashboard() {
           </Grid>
         </Box>
 
-        {/* Modals */}
         <DoctorActionModal
           open={isActionModalOpen}
           onClose={() => setIsActionModalOpen(false)}
@@ -393,34 +365,14 @@ function DoctorDashboard() {
 
         <DoctorBookModal open={isBookModalOpen} onClose={() => setIsBookModalOpen(false)} doctorId={userId!} />
 
-        {/* Cancellation Dialog */}
-        <Dialog
-          open={cancelDialogOpen}
-          onClose={() => setCancelDialogOpen(false)}
-          slotProps={{
-            paper: {
-              sx: {
-                bgcolor: '#1e1e1e',
-                color: 'white',
-                minWidth: '400px',
-              },
-            },
-          }}
-        >
-          <DialogTitle
-            sx={{
-              borderBottom: '1px solid #333',
-            }}
-          >
-            {t('cancelAppointment')}
-          </DialogTitle>
+        <Dialog open={cancelDialogOpen} onClose={() => setCancelDialogOpen(false)}>
+          <DialogTitle>{t('cancelAppointment')}</DialogTitle>
 
           <DialogContent sx={{ pt: '24px !important' }}>
             <Typography
               variant="body2"
               sx={{
                 mb: 2,
-                color: '#aaa',
               }}
             >
               {t('pleaseProvideReason')}
@@ -434,31 +386,15 @@ function DoctorDashboard() {
               label={t('reason')}
               value={cancelReason}
               onChange={(e) => setCancelReason(e.target.value)}
-              sx={{
-                bgcolor: '#2c2c2c',
-                borderRadius: 1,
-                '& .MuiOutlinedInput-notchedOutline': {
-                  borderColor: '#444',
-                },
-                '& .MuiInputLabel-root': {
-                  color: '#aaa',
-                },
-                textarea: {
-                  color: 'white',
-                },
-              }}
             />
           </DialogContent>
 
           <DialogActions
             sx={{
-              borderTop: '1px solid #333',
               p: 2,
             }}
           >
-            <Button onClick={() => setCancelDialogOpen(false)} sx={{ color: '#aaa' }}>
-              {t('back')}
-            </Button>
+            <Button onClick={() => setCancelDialogOpen(false)}>{t('back')}</Button>
 
             <Button
               variant="contained"

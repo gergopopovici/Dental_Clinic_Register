@@ -3,7 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import Cookies from 'js-cookie';
 import { useUserQuery } from '../hooks/useUserQuery';
 
-enum Gender {
+export enum Gender {
   // eslint-disable-next-line no-unused-vars
   MALE = 'MALE',
   // eslint-disable-next-line no-unused-vars
@@ -13,16 +13,17 @@ enum Gender {
 }
 
 export interface UserDetails {
-  profilePictureUrl: string;
-  id?: number;
-  username: string;
+  id: number;
+  userName: string;
   email: string;
   phoneNumber: string;
   firstName: string;
-  middleName: string;
   lastName: string;
-  enabled?: boolean;
+  enabled: boolean;
+  accountNonLocked: boolean;
   gender: Gender;
+  localDate: string;
+  profilePictureUrl?: string;
   roles: string[];
   licenseNumber?: string;
   specialisation?: string;
@@ -41,7 +42,7 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const queryClient = useQueryClient();
-  const { data: user, isLoading } = useUserQuery(); // Use data directly here
+  const { data: user, isLoading } = useUserQuery();
 
   const login = (userData: UserDetails) => {
     queryClient.setQueryData(['user'], userData);

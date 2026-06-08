@@ -15,4 +15,6 @@ public interface UserRegistrationService {
     ResponseEntity<MessageResponse> registerDoctor(RequestDoctorDTO dto);
 
     ResponseEntity<MessageResponse>registerAdmin(RequestUserDTO dto);
+
+    ResponseEntity<MessageResponse>resendActivationEmail(String email);
 }

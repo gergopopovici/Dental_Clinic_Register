@@ -19,16 +19,12 @@ function BracesModalPage() {
   const isReadOnly = isPatient && !isDoctor;
 
   if (!planId) {
-    return (
-      <Typography color="error" sx={{ p: 4 }}>
-        {}
-      </Typography>
-    );
+    return <Typography color="error" sx={{ p: 4 }}></Typography>;
   }
 
   return (
-    <Box sx={{ p: 4, color: 'white', flexGrow: 1 }}>
-      <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/treatment-plans')} sx={{ mb: 3, color: 'white' }}>
+    <Box sx={{ p: 4, flexGrow: 1 }}>
+      <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/treatment-plans')} sx={{ mb: 3 }}>
         {t('back', 'Back')}
       </Button>
       <Typography variant="h4" gutterBottom fontWeight="bold">

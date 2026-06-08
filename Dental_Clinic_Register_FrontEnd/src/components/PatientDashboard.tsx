@@ -73,31 +73,29 @@ function PatientDashboard() {
 
   return (
     <Box sx={{ p: 2 }}>
-      <Typography variant="h4" fontWeight="bold" gutterBottom sx={{ color: 'white' }}>
+      <Typography variant="h4" fontWeight="bold" gutterBottom>
         {t('welcomeBack')}, {user?.firstName || t('patient')}!
       </Typography>
-      <Typography variant="body1" sx={{ color: '#aaa', mb: 4 }}>
+      <Typography variant="body1" sx={{ mb: 4 }}>
         {t('dashboardSubtitle')}
       </Typography>
 
       <Grid container spacing={4}>
         <Grid size={{ xs: 12, md: 6 }}>
-          <Card sx={{ bgcolor: '#1e1e1e', border: '1px solid #333', borderRadius: 2, mb: 4 }}>
+          <Card sx={{ borderRadius: 2, mb: 4 }}>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
                 <CalendarMonthIcon color="primary" />
-                <Typography variant="h6" sx={{ color: 'white' }}>
-                  {t('nextAppointment')}
-                </Typography>
+                <Typography variant="h6">{t('nextAppointment')}</Typography>
               </Box>
-              <Divider sx={{ borderColor: '#333', mb: 2 }} />
+              <Divider sx={{ mb: 2 }} />
 
               {nextAppointment ? (
                 <Box>
-                  <Typography variant="h5" sx={{ color: '#4fc3f7', fontWeight: 'bold', mb: 1 }}>
+                  <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 1 }}>
                     {new Date(nextAppointment.startTime || nextAppointment.requestedDate).toLocaleString()}
                   </Typography>
-                  <Typography variant="body1" sx={{ color: 'white' }}>
+                  <Typography variant="body1">
                     {t('doctor')}: {nextAppointment.doctorName || t('pending')}
                   </Typography>
                   <Chip
@@ -108,9 +106,7 @@ function PatientDashboard() {
                   />
                 </Box>
               ) : (
-                <Typography variant="body1" sx={{ color: '#aaa' }}>
-                  {t('noUpcomingAppointments')}
-                </Typography>
+                <Typography variant="body1">{t('noUpcomingAppointments')}</Typography>
               )}
 
               <Button
@@ -124,45 +120,39 @@ function PatientDashboard() {
             </CardContent>
           </Card>
 
-          <Typography variant="h6" sx={{ color: 'white', mb: 2 }}>
+          <Typography variant="h6" sx={{ mb: 2 }}>
             {t('quickActions')}
           </Typography>
           <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
             <Button variant="contained" color="primary" onClick={() => navigate('/appointments')}>
               {t('requestNewAppointment')}
             </Button>
-            <Button
-              variant="outlined"
-              sx={{ color: 'white', borderColor: '#444' }}
-              onClick={() => navigate('/profile')}
-            >
+            <Button variant="outlined" onClick={() => navigate('/profile')}>
               {t('updateProfile')}
             </Button>
           </Box>
         </Grid>
 
         <Grid size={{ xs: 12, md: 6 }}>
-          <Card sx={{ bgcolor: '#1e1e1e', border: '1px solid #333', borderRadius: 2, height: '100%' }}>
+          <Card sx={{ borderRadius: 2, height: '100%' }}>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
                 <MedicalServicesIcon color="success" />
-                <Typography variant="h6" sx={{ color: 'white' }}>
-                  {t('activePlans')}
-                </Typography>
+                <Typography variant="h6">{t('activePlans')}</Typography>
               </Box>
-              <Divider sx={{ borderColor: '#333', mb: 2 }} />
+              <Divider sx={{ mb: 2 }} />
 
               {activePlans.length > 0 ? (
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                   {activePlans.map((plan) => (
-                    <Box key={plan.id} sx={{ p: 2, bgcolor: '#2c2c2c', borderRadius: 1 }}>
+                    <Box key={plan.id} sx={{ p: 2, borderRadius: 1 }}>
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                        <Typography variant="subtitle1" fontWeight="bold" sx={{ color: 'white' }}>
+                        <Typography variant="subtitle1" fontWeight="bold">
                           {plan.planName}
                         </Typography>
                         <Chip label={t(plan.status)} color="success" size="small" variant="outlined" />
                       </Box>
-                      <Typography variant="body2" sx={{ color: '#aaa' }}>
+                      <Typography variant="body2">
                         {t('startDate')}: {plan.startDate}
                       </Typography>
                       {plan.planName.toLowerCase().match(/(brace|aparat|ortho|orto|fogszab)/i) && (
@@ -180,9 +170,7 @@ function PatientDashboard() {
                   ))}
                 </Box>
               ) : (
-                <Typography variant="body1" sx={{ color: '#aaa' }}>
-                  {t('noActivePlans')}
-                </Typography>
+                <Typography variant="body1">{t('noActivePlans')}</Typography>
               )}
 
               <Button

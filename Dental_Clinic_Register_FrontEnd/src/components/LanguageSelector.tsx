@@ -24,16 +24,6 @@ function LanguageSelector() {
       size="small"
       sx={{
         minWidth: 120,
-        color: 'white',
-        '.MuiOutlinedInput-notchedOutline': {
-          borderColor: 'rgba(255, 255, 255, 0.3)',
-        },
-        '&:hover .MuiOutlinedInput-notchedOutline': {
-          borderColor: 'white',
-        },
-        '.MuiSvgIcon-root': {
-          color: 'white',
-        },
       }}
     >
       <MenuItem value="en">
