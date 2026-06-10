@@ -21,6 +21,7 @@ import Appointments from './pages/Appointments/Appointments';
 import TreatmentPlansPage from './pages/TreatmentPlansPage';
 import BracesModalPage from './pages/BracesModalPage';
 import Dashboard from './pages/Dashboard';
+import Schedules from './pages/Schedules/Schedules';
 
 const queryClient = new QueryClient();
 
@@ -54,6 +55,7 @@ function App() {
                 <Route path="/admin" element={<AdminDashboard />} />
                 <Route path="/treatment-plans" element={<TreatmentPlansPage />} />
                 <Route path="/treatment-plans/:id/braces" element={<BracesModalPage />} />
+                <Route path="/schedules" element={<Schedules />} />
               </Route>
             </Route>
 

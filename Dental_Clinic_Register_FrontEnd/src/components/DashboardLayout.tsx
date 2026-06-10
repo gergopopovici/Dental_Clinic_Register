@@ -26,6 +26,7 @@ import { getAvatar } from '../services/UserService';
 import LanguageSelector from './LanguageSelector';
 import { useTranslation } from 'react-i18next';
 import { ThemeToggleButton } from './ThemeToggleButton';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 
 const drawerWidth = 240;
 
@@ -68,11 +69,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       showForDoctor: true,
     },
     {
-      label: t('myProfile'),
-      path: '/profile',
-      icon: <PersonIcon />,
+      label: t('schedules'),
+      path: '/schedules',
+      icon: <CalendarMonthIcon />,
       showForAdmin: true,
-      showForPatient: true,
+      showForPatient: false,
       showForDoctor: true,
     },
     {
@@ -82,6 +83,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       showForAdmin: true,
       showForPatient: false,
       showForDoctor: false,
+    },
+    {
+      label: t('myProfile'),
+      path: '/profile',
+      icon: <PersonIcon />,
+      showForAdmin: true,
+      showForPatient: true,
+      showForDoctor: true,
     },
     {
       label: t('logout'),
