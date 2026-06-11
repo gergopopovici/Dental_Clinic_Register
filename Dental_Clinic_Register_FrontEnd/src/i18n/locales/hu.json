@@ -370,5 +370,7 @@
   "defaultEndTime": "Alapértelmezett zárási idő",
   "saveSettings": "Beállítások mentése",
   "clinicSettingsDescription": "Állítsa be az alapértelmezett munkaidőt azon orvosok számára, akik még nem konfigurálták a beosztásukat.",
-  "schedules": "Menetrendek"
+  "schedules": "Menetrendek",
+  "selectTime": "Időpont kiválasztása",
+  "noAvailableSlots": "Nincs elérhető időpont"
 }

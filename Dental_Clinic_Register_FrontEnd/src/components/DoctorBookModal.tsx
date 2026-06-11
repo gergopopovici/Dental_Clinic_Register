@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -14,12 +14,14 @@ import {
   Typography,
   Autocomplete,
   Box,
+  Grid,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getAllServices } from '../services/ProvidedServiceService';
-import { createAppointmentByDoctor } from '../services/AppointmentService';
+import { createAppointmentByDoctor, getBookedSlotsForDoctor } from '../services/AppointmentService';
 import { getAllPatientsForDropdown } from '../services/PatientService';
+import { getDoctorSchedule, getDoctorTimeOffs, getGlobalHolidays } from '../services/ScheduleService';
 import { PatientDropDownDTO } from '../models/Appointment';
 
 interface DoctorBookModalProps {
@@ -34,23 +36,29 @@ function DoctorBookModal({ open, onClose, doctorId }: DoctorBookModalProps) {
 
   const [patientId, setPatientId] = useState<number | ''>('');
   const [serviceId, setServiceId] = useState<number | ''>('');
-  const [datetime, setDatetime] = useState<string>('');
+  const [date, setDate] = useState<string>('');
+  const [selectedTime, setSelectedTime] = useState<string>('');
   const [notes, setNotes] = useState<string>('');
   const [resourceLink, setResourceLink] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState('');
+
+  const APPOINTMENT_BUFFER_MINUTES = 5;
 
   useEffect(() => {
     if (!open) {
       setPatientId('');
       setServiceId('');
-      setDatetime('');
+      setDate('');
+      setSelectedTime('');
       setNotes('');
       setResourceLink('');
       setErrorMessage('');
-    } else {
-      setErrorMessage('');
     }
   }, [open]);
+
+  useEffect(() => {
+    setSelectedTime('');
+  }, [date, doctorId, serviceId]);
 
   const { data: patients, isLoading: isLoadingPatients } = useQuery({
     queryKey: ['patients'],
@@ -64,16 +72,86 @@ function DoctorBookModal({ open, onClose, doctorId }: DoctorBookModalProps) {
     enabled: open,
   });
 
-  const activeAndSortedPatients = React.useMemo(() => {
+  const { data: bookedSlots, isLoading: isLoadingSlots } = useQuery({
+    queryKey: ['bookedSlots', doctorId, date],
+    queryFn: () => getBookedSlotsForDoctor(doctorId, date),
+    enabled: !!doctorId && !!date && open,
+    retry: 1,
+  });
+
+  const { data: weeklySchedule, isLoading: isLoadingSchedule } = useQuery({
+    queryKey: ['doctorSchedule', doctorId],
+    queryFn: () => getDoctorSchedule(doctorId),
+    enabled: !!doctorId && open,
+    retry: 1,
+  });
+
+  const { data: timeOffs, isLoading: isLoadingTimeOffs } = useQuery({
+    queryKey: ['doctorTimeOffs', doctorId],
+    queryFn: () => getDoctorTimeOffs(doctorId),
+    enabled: !!doctorId && open,
+    retry: 1,
+  });
+
+  const { data: globalHolidays, isLoading: isLoadingGlobal } = useQuery({
+    queryKey: ['globalHolidays'],
+    queryFn: getGlobalHolidays,
+    enabled: open,
+    retry: 1,
+  });
+
+  const activeAndSortedPatients = useMemo(() => {
     if (!patients) return [];
     return patients
       .filter((p: PatientDropDownDTO) => !p.email.includes('@anonymised.com'))
-      .sort((a: PatientDropDownDTO, b: PatientDropDownDTO) => {
-        const nameA = (a.fullName || '').toLowerCase();
-        const nameB = (b.fullName || '').toLowerCase();
-        return nameA.localeCompare(nameB);
-      });
+      .sort((a, b) => (a.fullName || '').toLowerCase().localeCompare((b.fullName || '').toLowerCase()));
   }, [patients]);
+
+  const selectedService = useMemo(() => services?.find((s) => s.id === serviceId), [services, serviceId]);
+
+  const availableSlots = useMemo(() => {
+    if (!date || !doctorId || !selectedService || !weeklySchedule) return [];
+
+    const allTimeOffs = [...(timeOffs || []), ...(globalHolidays || [])];
+    if (allTimeOffs.some((off) => date >= off.startDate && date <= off.endDate)) return [];
+
+    const dateObj = new Date(date);
+    const daysOfWeek = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
+    const daySchedule = weeklySchedule.find((s) => s.dayOfWeek === daysOfWeek[dateObj.getDay()]);
+
+    if (!daySchedule || !daySchedule.isWorking) return [];
+
+    const duration = selectedService.durationMinutes;
+    const [year, month, day] = date.split('-').map(Number);
+    const [startH, startM] = daySchedule.startTime.split(':').map(Number);
+    const [endH, endM] = daySchedule.endTime.split(':').map(Number);
+
+    let current = new Date(year, month - 1, day, startH, startM, 0);
+    const endOfDay = new Date(year, month - 1, day, endH, endM, 0);
+    const now = new Date();
+
+    const slots: string[] = [];
+    let iterations = 0;
+
+    while (current < endOfDay && iterations < 50) {
+      iterations++;
+      const slotEnd = new Date(current.getTime() + duration * 60000);
+      if (slotEnd > endOfDay) break;
+
+      const isOverlapping = (bookedSlots || []).some(
+        (b) => current < new Date(b.endTime) && slotEnd > new Date(b.startTime),
+      );
+
+      if (!isOverlapping && current > now) {
+        slots.push(
+          `${current.getHours().toString().padStart(2, '0')}:${current.getMinutes().toString().padStart(2, '0')}`,
+        );
+      }
+
+      current = new Date(current.getTime() + (duration + APPOINTMENT_BUFFER_MINUTES) * 60000);
+    }
+    return slots;
+  }, [date, doctorId, selectedService, bookedSlots, weeklySchedule, timeOffs, globalHolidays]);
 
   const bookMutation = useMutation({
     mutationFn: (payload: any) => createAppointmentByDoctor(doctorId, payload),
@@ -81,38 +159,31 @@ function DoctorBookModal({ open, onClose, doctorId }: DoctorBookModalProps) {
       queryClient.invalidateQueries({ queryKey: ['doctorAppointments'] });
       onClose();
     },
-    onError: (error: any) => {
-      const backendErrorKey = error.response?.data?.message || 'error.unknown';
-      setErrorMessage(t(backendErrorKey));
-    },
+    onError: (error: any) => setErrorMessage(t(error.response?.data?.message || 'error.unknown')),
   });
 
   const handleSubmit = () => {
-    setErrorMessage('');
-
-    if (!patientId || !serviceId || !datetime) {
+    if (!patientId || !serviceId || !date || !selectedTime) {
       setErrorMessage(t('pleaseFillAllFields'));
       return;
     }
-
-    const payload = {
-      patientId: patientId as number,
-      serviceId: serviceId as number,
-      startTime: datetime,
+    bookMutation.mutate({
+      patientId,
+      serviceId,
+      startTime: `${date}T${selectedTime}:00`,
       notes,
       resourceLink,
-    };
-
-    bookMutation.mutate(payload);
+    });
   };
+
+  const isScheduleLoading = isLoadingSlots || isLoadingSchedule || isLoadingTimeOffs || isLoadingGlobal;
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle sx={{ fontWeight: 'bold' }}>{t('bookForPatient')}</DialogTitle>
-
       <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 3, pt: '24px !important' }}>
         {errorMessage && (
-          <Typography color="error" variant="body2" sx={{ textAlign: 'center', mb: 1 }}>
+          <Typography color="error" variant="body2" sx={{ textAlign: 'center' }}>
             {errorMessage}
           </Typography>
         )}
@@ -120,124 +191,83 @@ function DoctorBookModal({ open, onClose, doctorId }: DoctorBookModalProps) {
         <Autocomplete
           options={activeAndSortedPatients}
           loading={isLoadingPatients}
-          getOptionLabel={(option: PatientDropDownDTO) => `${option.fullName} (${option.email})`}
-          value={activeAndSortedPatients.find((p) => p.userId === patientId || null)}
-          onChange={(_, newValue: any) => {
-            setPatientId(newValue ? newValue.userId || newValue.id : '');
-            setErrorMessage('');
-          }}
-          noOptionsText={t('noPatientsFound', 'No patients found')}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              label={t('selectPatient')}
-              placeholder={t('searchPatientByName')}
-              slotProps={{
-                inputLabel: { shrink: true },
-                input: {
-                  ...params.InputProps,
-                  endAdornment: (
-                    <>
-                      {isLoadingPatients ? <CircularProgress color="inherit" size={20} /> : null}
-                      {params.InputProps.endAdornment}
-                    </>
-                  ),
-                },
-              }}
-            />
-          )}
+          getOptionLabel={(p) => `${p.fullName} (${p.email})`}
+          value={activeAndSortedPatients.find((p) => p.userId === patientId) || null}
+          onChange={(_, v) => setPatientId(v ? v.userId : '')}
+          renderInput={(params) => <TextField {...params} label={t('selectPatient')} />}
         />
 
-        <FormControl fullWidth variant="outlined">
+        <FormControl fullWidth>
           <InputLabel shrink>{t('selectService')}</InputLabel>
           <Select
             value={serviceId}
-            onChange={(e) => {
-              setServiceId(e.target.value as number);
-              setErrorMessage('');
-            }}
+            onChange={(e) => setServiceId(e.target.value as number)}
             label={t('selectService')}
             notched
           >
-            {isLoadingServices ? (
-              <MenuItem disabled>
-                <CircularProgress size={20} sx={{ mr: 2 }} /> {t('loading')}
+            {services?.map((s: any) => (
+              <MenuItem key={s.id} value={s.id}>
+                {s.name} ({s.durationMinutes} min)
               </MenuItem>
-            ) : (
-              services?.map((s: any) => (
-                <MenuItem key={s.id} value={s.id}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
-                    <Typography variant="body2">
-                      {s.name} ({s.durationMinutes} min)
-                    </Typography>
-                    <Typography variant="body2" sx={{ fontWeight: 'bold', ml: 2 }}>
-                      {s.price} {t('currency')}
-                    </Typography>
-                  </Box>
-                </MenuItem>
-              ))
-            )}
+            ))}
           </Select>
         </FormControl>
 
         <TextField
-          type="datetime-local"
-          label={t('exactStartTime')}
+          type="date"
+          label={t('date')}
           fullWidth
-          slotProps={{
-            inputLabel: { shrink: true },
-            htmlInput: { min: new Date().toISOString().slice(0, 16) },
-          }}
-          value={datetime}
-          onChange={(e) => {
-            setDatetime(e.target.value);
-            setErrorMessage('');
-          }}
+          value={date}
+          onChange={(e) => setDate(e.target.value)}
+          slotProps={{ inputLabel: { shrink: true } }}
         />
+
+        {date && doctorId && selectedService && (
+          <Box>
+            <Typography variant="body2" sx={{ mb: 1, fontWeight: 'bold' }}>
+              {t('selectTime')}
+            </Typography>
+            {isScheduleLoading ? (
+              <CircularProgress size={24} />
+            ) : availableSlots.length === 0 ? (
+              <Typography>{t('noAvailableSlots')}</Typography>
+            ) : (
+              <Grid container spacing={1}>
+                {availableSlots.map((time) => (
+                  <Grid size={{ xs: 3 }} key={time}>
+                    <Button
+                      variant={selectedTime === time ? 'contained' : 'outlined'}
+                      onClick={() => setSelectedTime(time)}
+                      fullWidth
+                    >
+                      {time}
+                    </Button>
+                  </Grid>
+                ))}
+              </Grid>
+            )}
+          </Box>
+        )}
 
         <TextField
           label={t('notesOptions')}
           multiline
-          rows={3}
+          rows={2}
           fullWidth
-          placeholder={t('addAnyInstructionsForPatient')}
-          slotProps={{ inputLabel: { shrink: true } }}
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
         />
-
         <TextField
           label={t('resourceLinkOptional')}
           fullWidth
-          placeholder={t('addAnyResources')}
-          slotProps={{ inputLabel: { shrink: true } }}
           value={resourceLink}
           onChange={(e) => setResourceLink(e.target.value)}
         />
       </DialogContent>
-
       <DialogActions sx={{ p: 3 }}>
-        <Button
-          onClick={onClose}
-          sx={{
-            fontWeight: 'bold',
-            '&:focus': {
-              outline: 'none',
-            },
-          }}
-        >
-          {t('cancel')}
-        </Button>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleSubmit}
-          disabled={bookMutation.isPending}
-          sx={{
-            fontWeight: 'bold',
-          }}
-        >
-          {bookMutation.isPending ? <CircularProgress size={24} color="inherit" /> : t('save')}
+        <Button onClick={onClose}>{t('cancel')}</Button>
+        <Button variant="contained" onClick={handleSubmit} disabled={bookMutation.isPending || !selectedTime}>
+          {t('save')}
         </Button>
       </DialogActions>
     </Dialog>

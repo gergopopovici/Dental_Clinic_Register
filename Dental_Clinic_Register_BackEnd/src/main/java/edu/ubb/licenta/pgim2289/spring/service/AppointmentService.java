@@ -6,9 +6,9 @@ import java.time.LocalDate;
 import java.util.List;
 
 public interface AppointmentService {
-    ResponseAppointmentDTO requestAppointment(Long userId, RequestPatientAppointmentDTO request);
+    List<BookedSlotDTO> getBookedSlotsForDoctor(Long doctorId, LocalDate date);
 
-    ResponseAppointmentDTO confirmAppointment(Long appointmentId, Long userId, DoctorConfirmDTO request);
+    ResponseAppointmentDTO requestAppointment(Long userId, RequestPatientAppointmentDTO request);
 
     ResponseAppointmentDTO createAppointmentByDoctor(Long userId, DoctorCreateAppointmentDTO request);
 

@@ -370,5 +370,7 @@
   "defaultEndTime": "Ora de închidere implicită",
   "saveSettings": "Salvează setările",
   "clinicSettingsDescription": "Setați orele de lucru implicite pentru medicii care nu și-au configurat încă programul.",
-  "schedules": "Programe"
+  "schedules": "Programe",
+  "selectTime": "Selectează ora",
+  "noAvailableSlots": "Nu există locuri disponibile"
 }

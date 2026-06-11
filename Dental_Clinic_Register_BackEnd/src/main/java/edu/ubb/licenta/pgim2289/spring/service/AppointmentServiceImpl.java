@@ -32,6 +32,21 @@ public class AppointmentServiceImpl implements AppointmentService {
         this.userService = userService;
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<BookedSlotDTO> getBookedSlotsForDoctor(Long userId, LocalDate date) {
+        Doctor doctor = doctorService.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("doctor.not.found"));
+
+        LocalDateTime startOfDay = date.atStartOfDay();
+        LocalDateTime endOfDay = date.atTime(LocalTime.MAX);
+
+        return appointmentRepository.findByDoctor_IdAndStartTimeBetween(doctor.getId(), startOfDay, endOfDay)
+                .stream()
+                .filter(appt -> appt.getStatus() == Appointment.AppointmentStatus.CONFIRMED)
+                .map(appt -> new BookedSlotDTO(appt.getStartTime(), appt.getEndTime()))
+                .toList();
+    }
 
     @Override
     @Transactional
@@ -39,48 +54,27 @@ public class AppointmentServiceImpl implements AppointmentService {
         User user = userService.findById(userId).orElseThrow(() -> new IllegalArgumentException("error.user.not.found"));
         Patient patient = user.getPatientDetails();
 
-        Doctor doctor = doctorService.findById(request.getDoctorId()).orElseThrow(() -> new IllegalArgumentException("error.doctor.not.found"));
+        Doctor doctor = doctorService.findByUserId(request.getDoctorId()).orElseThrow(() -> new IllegalArgumentException("error.doctor.not.found"));
         ServiceProvided service = serviceProvidedService.findById(request.getServiceId()).orElseThrow(() -> new IllegalArgumentException("error.service.not.found"));
+
+        LocalDateTime exactStartTime = request.getStartTime();
+        LocalDateTime exactEndTime = exactStartTime.plusMinutes(service.getDurationMinutes());
+
+        long overlapping = appointmentRepository.countOverlappingAppointments(doctor.getId(), exactStartTime, exactEndTime);
+        if (overlapping > 0) {
+            throw new IllegalArgumentException("error.doctor.already.booked");
+        }
 
         Appointment appointment = new Appointment();
         appointment.setPatient(patient);
         appointment.setDoctor(doctor);
         appointment.setService(service);
-        appointment.setRequestedDate(request.getRequestedDate());
-        appointment.setTimePreference(request.getTimePreference());
-        appointment.setStatus(Appointment.AppointmentStatus.PENDING);
-
-        Appointment savedAppointment = appointmentRepository.save(appointment);
-        emailService.sendNewRequestEmailToDoctor(doctor.getUser().getEmail(), doctor.getUser().getFullName(), patient.getUser().getFullName(), request.getRequestedDate());
-        return appointmentMapper.toDto(savedAppointment);
-    }
-
-    @Override
-    @Transactional
-    public ResponseAppointmentDTO confirmAppointment(Long appointmentId, Long userId, DoctorConfirmDTO request) {
-        Appointment appointment = appointmentRepository.findById(appointmentId).orElseThrow(() -> new IllegalArgumentException("error.appointment.not.found"));
-
-        if (!appointment.getDoctor().getUser().getId().equals(userId)) {
-            throw new SecurityException("error.unauthorised.action");
-        }
-
-        LocalDateTime exactStartTime = request.getExactStartTime();
-        Integer duration = appointment.getService().getDurationMinutes();
-        LocalDateTime exactEndTime = exactStartTime.plusMinutes(duration);
-
-        long overlapping = appointmentRepository.countOverlappingAppointments(appointment.getDoctor().getId(), exactStartTime, exactEndTime);
-        if (overlapping > 0) {
-            throw new IllegalArgumentException("error.doctor.already.booked");
-        }
-
         appointment.setStartTime(exactStartTime);
         appointment.setEndTime(exactEndTime);
-        appointment.setNotes(request.getNotes());
-        appointment.setResourceLink(request.getResourceLink());
         appointment.setStatus(Appointment.AppointmentStatus.CONFIRMED);
 
         Appointment savedAppointment = appointmentRepository.save(appointment);
-        emailService.sendConfirmationEmailToPatient(appointment.getPatient().getUser().getEmail(), appointment.getPatient().getUser().getFullName(), exactStartTime, appointment.getDoctor().getUser().getFullName());
+        emailService.sendConfirmationEmailToPatient(patient.getUser().getEmail(), patient.getUser().getFullName(), exactStartTime, doctor.getUser().getFullName());
         return appointmentMapper.toDto(savedAppointment);
     }
 
@@ -105,7 +99,6 @@ public class AppointmentServiceImpl implements AppointmentService {
         appointment.setDoctor(doctor);
         appointment.setPatient(patient);
         appointment.setService(service);
-        appointment.setRequestedDate(exactStartTime.toLocalDate());
         appointment.setStartTime(exactStartTime);
         appointment.setEndTime(exactEndTime);
         appointment.setNotes(request.getNotes());
@@ -159,10 +152,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         }
 
         appointment.setStatus(Appointment.AppointmentStatus.CANCELLED);
-
-        String dateInfo = appointment.getStartTime() != null
-                ? appointment.getStartTime().toString().replace("T", " ")
-                : appointment.getRequestedDate().toString();
+        String dateInfo = appointment.getStartTime().toString().replace("T", " ");
 
         emailService.sendAppointmentCancelledByPatientEmailToDoctor(
                 appointment.getDoctor().getUser().getEmail(),
@@ -189,9 +179,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                 ? appointment.getNotes() + " | Cancel reason: " + reason
                 : "Cancel reason: " + reason);
 
-        String dateInfo = appointment.getStartTime() != null
-                ? appointment.getStartTime().toString().replace("T", " ")
-                : appointment.getRequestedDate().toString();
+        String dateInfo = appointment.getStartTime().toString().replace("T", " ");
 
         emailService.sendAppointmentCancelledByDoctorEmailToPatient(
                 appointment.getPatient().getUser().getEmail(),

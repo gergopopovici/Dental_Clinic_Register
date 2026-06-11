@@ -47,18 +47,15 @@ function PatientDashboard() {
     enabled: !!userId,
   });
 
-  const nextAppointment = useMemo(() => {
-    if (!appointments) return null;
-    const now = new Date().getTime();
-    const upcoming = appointments.filter((apt) => {
-      const aptTime = new Date(apt.startTime || apt.requestedDate).getTime();
-      return aptTime > now && (apt.status === 'CONFIRMED' || apt.status === 'PENDING');
-    });
-    upcoming.sort(
-      (a, b) => new Date(a.startTime || a.requestedDate).getTime() - new Date(b.startTime || b.requestedDate).getTime(),
-    );
-    return upcoming.length > 0 ? upcoming[0] : null;
+  const sortedAppointments = useMemo(() => {
+    if (!appointments) return [];
+    return [...appointments].sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
   }, [appointments]);
+
+  const nextAppointment = useMemo(() => {
+    const now = new Date().getTime();
+    return sortedAppointments.find((apt) => new Date(apt.startTime).getTime() > now && apt.status === 'CONFIRMED');
+  }, [sortedAppointments]);
 
   const activePlans = useMemo(() => {
     if (!plans) return [];
@@ -93,17 +90,12 @@ function PatientDashboard() {
               {nextAppointment ? (
                 <Box>
                   <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 1 }}>
-                    {new Date(nextAppointment.startTime || nextAppointment.requestedDate).toLocaleString()}
+                    {new Date(nextAppointment.startTime).toLocaleString()}
                   </Typography>
                   <Typography variant="body1">
-                    {t('doctor')}: {nextAppointment.doctorName || t('pending')}
+                    {t('doctor')}: Dr. {nextAppointment.doctorName}
                   </Typography>
-                  <Chip
-                    label={t(nextAppointment.status)}
-                    color={nextAppointment.status === 'CONFIRMED' ? 'success' : 'warning'}
-                    size="small"
-                    sx={{ mt: 2 }}
-                  />
+                  <Chip label={t(nextAppointment.status)} color="success" size="small" sx={{ mt: 2 }} />
                 </Box>
               ) : (
                 <Typography variant="body1">{t('noUpcomingAppointments')}</Typography>

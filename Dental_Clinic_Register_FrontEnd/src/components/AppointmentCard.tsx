@@ -7,27 +7,16 @@ interface AppointmentCardProps {
   appointment: ResponseAppointmentDTO;
   userRole: 'PATIENT' | 'DOCTOR';
   onCancel?: (id: number) => void;
-  onConfirm?: (id: number) => void;
   onUpdate?: (id: number) => void;
   onComplete?: (id: number) => void;
   onNoShow?: (id: number) => void;
 }
 
-function AppointmentCard({
-  appointment,
-  userRole,
-  onCancel,
-  onConfirm,
-  onUpdate,
-  onComplete,
-  onNoShow,
-}: AppointmentCardProps) {
+function AppointmentCard({ appointment, userRole, onCancel, onUpdate, onComplete, onNoShow }: AppointmentCardProps) {
   const { t } = useTranslation();
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'PENDING':
-        return 'warning';
       case 'CONFIRMED':
         return 'success';
       case 'COMPLETED':
@@ -41,10 +30,8 @@ function AppointmentCard({
     }
   };
 
-  const displayDate = appointment.requestedDate || appointment.startTime?.split('T')[0];
-  const displayTime = appointment.startTime
-    ? appointment.startTime.split('T')[1].substring(0, 5)
-    : t(appointment.timePreference?.toLowerCase() || '');
+  const displayDate = appointment.startTime?.split('T')[0];
+  const displayTime = appointment.startTime?.split('T')[1].substring(0, 5);
 
   const isInactive = ['CANCELLED', 'NO_SHOW'].includes(appointment.status);
 
@@ -147,7 +134,7 @@ function AppointmentCard({
             pt: 2,
           }}
         >
-          {(appointment.status === 'PENDING' || appointment.status === 'CONFIRMED') && onCancel && (
+          {appointment.status === 'CONFIRMED' && onCancel && (
             <Button
               variant="contained"
               color="error"
@@ -166,17 +153,6 @@ function AppointmentCard({
 
           {userRole === 'DOCTOR' && (
             <>
-              {appointment.status === 'PENDING' && onConfirm && (
-                <Button
-                  variant="contained"
-                  color="success"
-                  size="small"
-                  onClick={() => onConfirm(appointment.id)}
-                  sx={{ fontWeight: 'bold', '&:focus': { outline: 'none' } }}
-                >
-                  {t('confirm')}
-                </Button>
-              )}
               {appointment.status === 'CONFIRMED' && onUpdate && (
                 <Button
                   variant="outlined"

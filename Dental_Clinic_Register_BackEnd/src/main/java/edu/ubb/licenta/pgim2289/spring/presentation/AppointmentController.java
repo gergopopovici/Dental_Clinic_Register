@@ -2,7 +2,6 @@ package edu.ubb.licenta.pgim2289.spring.presentation;
 
 import edu.ubb.licenta.pgim2289.spring.dto.*;
 import edu.ubb.licenta.pgim2289.spring.service.AppointmentService;
-import jakarta.validation.Valid;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -14,84 +13,65 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/appointments")
 public class AppointmentController {
+
     private final AppointmentService appointmentService;
 
     public AppointmentController(AppointmentService appointmentService) {
         this.appointmentService = appointmentService;
     }
 
-    @GetMapping("/patient/{userId}")
-    @PreAuthorize("hasRole('PATIENT')")
-    public ResponseEntity<List<ResponseAppointmentDTO>> getPatientAppointments(
-            @PathVariable Long userId) {
-        return ResponseEntity.ok(appointmentService.getAppointmentsByPatient(userId));
-    }
-
-    @GetMapping("/doctor/{userId}/daily")
-    @PreAuthorize("hasRole('DOCTOR')")
-    public ResponseEntity<List<ResponseAppointmentDTO>> getDoctorDailyAppointments(@PathVariable Long userId,
-                                                                                   @RequestParam(required = false)
-                                                                                   @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-                                                                                   LocalDate date) {
-        LocalDate queryDate = (date != null) ? date : LocalDate.now();
-        return ResponseEntity.ok(appointmentService.getDailyAppointmentsForDoctor(userId, queryDate));
+    @GetMapping("/doctor/{doctorId}/booked-slots")
+    @PreAuthorize("hasAnyRole('PATIENT','DOCTOR','ADMIN')")
+    public ResponseEntity<List<BookedSlotDTO>> getBookedSlots(
+            @PathVariable Long doctorId,
+            @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        return ResponseEntity.ok(appointmentService.getBookedSlotsForDoctor(doctorId, date));
     }
 
     @PostMapping("/patient/{userId}/request")
-    @PreAuthorize("hasRole('PATIENT')")
+    @PreAuthorize("hasAnyRole('PATIENT','ADMIN')")
     public ResponseEntity<ResponseAppointmentDTO> requestAppointment(
             @PathVariable Long userId,
-            @Valid @RequestBody RequestPatientAppointmentDTO requestPatientAppointmentDTO) {
+            @RequestBody RequestPatientAppointmentDTO request) {
+        return ResponseEntity.ok(appointmentService.requestAppointment(userId, request));
+    }
 
-        return ResponseEntity.ok(appointmentService.requestAppointment(userId, requestPatientAppointmentDTO));
+    @PostMapping("/doctor/{userId}/create")
+    @PreAuthorize("hasAnyRole('DOCTOR','ADMIN')")
+    public ResponseEntity<ResponseAppointmentDTO> createAppointmentByDoctor(
+            @PathVariable Long userId,
+            @RequestBody DoctorCreateAppointmentDTO request) {
+        return ResponseEntity.ok(appointmentService.createAppointmentByDoctor(userId, request));
+    }
+
+    @PutMapping("/doctor/{userId}/update/{appointmentId}")
+    @PreAuthorize("hasAnyRole('DOCTOR','ADMIN')")
+    public ResponseEntity<ResponseAppointmentDTO> updateAppointment(
+            @PathVariable Long userId,
+            @PathVariable Long appointmentId,
+            @RequestBody DoctorUpdateAppointmentDTO request) {
+        return ResponseEntity.ok(appointmentService.updateAppointment(appointmentId, userId, request));
     }
 
     @PutMapping("/patient/{userId}/cancel/{appointmentId}")
-    @PreAuthorize("hasRole('PATIENT')")
+    @PreAuthorize("hasAnyRole('PATIENT','ADMIN')")
     public ResponseEntity<ResponseAppointmentDTO> cancelAppointmentByPatient(
             @PathVariable Long userId,
             @PathVariable Long appointmentId) {
         return ResponseEntity.ok(appointmentService.cancelAppointmentByPatient(appointmentId, userId));
     }
 
-    @PostMapping("/doctor/{userId}/create")
-    @PreAuthorize("hasRole('DOCTOR')")
-    public ResponseEntity<ResponseAppointmentDTO> createAppointmentByDoctor(
-            @PathVariable Long userId,
-            @Valid @RequestBody DoctorCreateAppointmentDTO request) {
-        return ResponseEntity.ok(appointmentService.createAppointmentByDoctor(userId, request));
-    }
-
-    @PostMapping("/doctor/{userId}/confirm/{appointmentId}")
-    @PreAuthorize("hasRole('DOCTOR')")
-    public ResponseEntity<ResponseAppointmentDTO> confirmAppointment(
-            @PathVariable Long userId,
-            @PathVariable Long appointmentId,
-            @Valid @RequestBody DoctorConfirmDTO request) {
-        return ResponseEntity.ok(appointmentService.confirmAppointment(appointmentId, userId, request));
-    }
-
-    @PutMapping("/doctor/{userId}/update/{appointmentId}")
-    @PreAuthorize("hasRole('DOCTOR')")
-    public ResponseEntity<ResponseAppointmentDTO> updateAppointment(
-            @PathVariable Long userId,
-            @PathVariable Long appointmentId,
-            @Valid @RequestBody DoctorUpdateAppointmentDTO request) {
-        return ResponseEntity.ok(appointmentService.updateAppointment(appointmentId, userId, request));
-    }
-
     @PutMapping("/doctor/{userId}/cancel/{appointmentId}")
-    @PreAuthorize("hasRole('DOCTOR')")
+    @PreAuthorize("hasAnyRole('DOCTOR','ADMIN')")
     public ResponseEntity<ResponseAppointmentDTO> cancelAppointmentByDoctor(
             @PathVariable Long userId,
             @PathVariable Long appointmentId,
-            @RequestParam String reason) {
-
+            @RequestParam("reason") String reason) {
         return ResponseEntity.ok(appointmentService.cancelAppointmentByDoctor(appointmentId, userId, reason));
     }
 
     @PutMapping("/doctor/{userId}/no-show/{appointmentId}")
-    @PreAuthorize("hasRole('DOCTOR')")
+    @PreAuthorize("hasAnyRole('DOCTOR','ADMIN')")
     public ResponseEntity<ResponseAppointmentDTO> markAsNoShow(
             @PathVariable Long userId,
             @PathVariable Long appointmentId) {
@@ -99,11 +79,25 @@ public class AppointmentController {
     }
 
     @PutMapping("/doctor/{userId}/complete/{appointmentId}")
-    @PreAuthorize("hasRole('DOCTOR')")
+    @PreAuthorize("hasAnyRole('DOCTOR','ADMIN')")
     public ResponseEntity<ResponseAppointmentDTO> markAsCompleted(
             @PathVariable Long userId,
             @PathVariable Long appointmentId) {
         return ResponseEntity.ok(appointmentService.markAsCompleted(appointmentId, userId));
     }
 
+    @GetMapping("/patient/{userId}")
+    @PreAuthorize("hasAnyRole('PATIENT','ADMIN')")
+    public ResponseEntity<List<ResponseAppointmentDTO>> getAppointmentsByPatient(@PathVariable Long userId) {
+        return ResponseEntity.ok(appointmentService.getAppointmentsByPatient(userId));
+    }
+
+    @GetMapping("/doctor/{userId}/daily")
+    @PreAuthorize("hasAnyRole('DOCTOR','ADMIN')")
+    public ResponseEntity<List<ResponseAppointmentDTO>> getDailyAppointmentsForDoctor(
+            @PathVariable Long userId,
+            @RequestParam(value = "date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        LocalDate targetDate = date != null ? date : LocalDate.now();
+        return ResponseEntity.ok(appointmentService.getDailyAppointmentsForDoctor(userId, targetDate));
+    }
 }

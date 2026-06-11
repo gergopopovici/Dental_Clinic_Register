@@ -24,10 +24,11 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
 
     List<Appointment> findByPatient_User_IdOrderByStartTimeDesc(Long userId);
 
+    List<Appointment> findByDoctor_IdAndStartTimeBetween(Long doctorId, LocalDateTime startOfDay, LocalDateTime endOfDay);
+
     @Query("SELECT a FROM Appointment a WHERE a.doctor.user.id = :userId AND " +
-            "((a.startTime >= :startOfDay AND a.startTime <= :endOfDay) OR " +
-            "a.status = 'PENDING') " +
-            "ORDER BY a.requestedDate ASC, a.startTime ASC")
+            "a.startTime >= :startOfDay AND a.startTime <= :endOfDay " +
+            "ORDER BY a.startTime ASC")
     List<Appointment> findDoctorDailyAppointments(
             @Param("userId") Long userId,
             @Param("startOfDay") LocalDateTime startOfDay,

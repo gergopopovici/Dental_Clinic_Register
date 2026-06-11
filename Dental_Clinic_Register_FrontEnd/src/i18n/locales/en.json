@@ -371,5 +371,7 @@
   "defaultEndTime": "Default Closing Time",
   "saveSettings": "Save Settings",
   "clinicSettingsDescription": "Set the default working hours for doctors who have not yet configured their schedule.",
-  "schedules": "Schedules"
+  "schedules": "Schedules",
+  "selectTime": "Select time",
+  "noAvailableSlots": "No available slots"
 }

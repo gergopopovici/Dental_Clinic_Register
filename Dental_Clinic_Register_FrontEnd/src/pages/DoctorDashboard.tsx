@@ -11,16 +11,6 @@ interface DoctorDashboardProps {
   userId: number;
 }
 
-const getSortString = (apt: ResponseAppointmentDTO) => {
-  if (apt.startTime) return apt.startTime;
-  if (apt.requestedDate) {
-    const hour =
-      apt.timePreference === 'MORNING' ? '09:00:00' : apt.timePreference === 'EVENING' ? '18:00:00' : '14:00:00';
-    return `${apt.requestedDate}T${hour}`;
-  }
-  return '0000-00-00T00:00:00';
-};
-
 function DoctorDashboard({ userId }: DoctorDashboardProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -36,19 +26,16 @@ function DoctorDashboard({ userId }: DoctorDashboardProps) {
     queryFn: () => getDoctorDailyAppointments(userId, today),
   });
 
-  const { pending, nextAppointments, totalToday } = useMemo(() => {
-    if (!appointments) return { pending: [], nextAppointments: [], totalToday: 0 };
+  const { nextAppointments, totalToday } = useMemo(() => {
+    if (!appointments) return { nextAppointments: [], totalToday: 0 };
 
     const now = new Date().getTime();
 
-    const pendingList = appointments.filter((a) => a.status === 'PENDING');
-
     const confirmedList = appointments
-      .filter((a) => a.status === 'CONFIRMED' && new Date(getSortString(a)).getTime() > now)
-      .sort((a, b) => getSortString(a).localeCompare(getSortString(b)));
+      .filter((a) => a.status === 'CONFIRMED' && new Date(a.startTime).getTime() > now)
+      .sort((a, b) => a.startTime.localeCompare(b.startTime));
 
     return {
-      pending: pendingList,
       nextAppointments: confirmedList.slice(0, 2),
       totalToday: appointments.filter((a) => a.status === 'CONFIRMED' || a.status === 'COMPLETED').length,
     };
@@ -81,25 +68,6 @@ function DoctorDashboard({ userId }: DoctorDashboardProps) {
                 </Typography>
               </CardContent>
             </Card>
-
-            {pending.length > 0 && (
-              <Card>
-                <CardContent>
-                  <Typography variant="h6" sx={{ mb: 1, fontWeight: 'bold' }}>
-                    {t('pendingRequests')}
-                  </Typography>
-                  <Typography sx={{ mb: 2 }}>{t('pendingRequestsCount', { count: pending.length })}</Typography>
-                  <Button
-                    variant="contained"
-                    color="warning"
-                    onClick={() => navigate('/appointments')}
-                    sx={{ '&:focus': { outline: 'none' } }}
-                  >
-                    {t('viewAll')}
-                  </Button>
-                </CardContent>
-              </Card>
-            )}
           </Grid>
 
           <Grid size={{ xs: 12, md: 6 }}>

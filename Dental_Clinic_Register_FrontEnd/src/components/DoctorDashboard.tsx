@@ -6,7 +6,6 @@ import {
   Snackbar,
   Alert,
   TextField,
-  Divider,
   Button,
   Dialog,
   DialogTitle,
@@ -27,6 +26,7 @@ import AppointmentCard from '../components/AppointmentCard';
 import DoctorActionModal from '../components/DoctorActionModal';
 import DoctorBookModal from '../components/DoctorBookModal';
 import { useUser } from '../context/UserContext';
+import { ResponseAppointmentDTO } from '../models/Appointment';
 
 function DoctorDashboard() {
   const { t } = useTranslation();
@@ -39,7 +39,6 @@ function DoctorDashboard() {
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
 
   const [isActionModalOpen, setIsActionModalOpen] = useState(false);
-  const [actionType, setActionType] = useState<'CONFIRM' | 'RESCHEDULE'>('CONFIRM');
   const [selectedApptId, setSelectedApptId] = useState<number | null>(null);
   const [modalInitialDateTime, setModalInitialDateTime] = useState<string>('');
   const [modalInitialNotes, setModalInitialNotes] = useState<string>('');
@@ -54,7 +53,7 @@ function DoctorDashboard() {
     data: appointments,
     isLoading,
     isError,
-  } = useQuery({
+  } = useQuery<ResponseAppointmentDTO[]>({
     queryKey: ['doctorAppointments', userId, selectedDate],
     queryFn: () => getDoctorDailyAppointments(userId!, selectedDate),
     enabled: !!userId,
@@ -83,22 +82,15 @@ function DoctorDashboard() {
     await queryClient.invalidateQueries({ queryKey: ['doctorAppointments', userId] });
   }
 
-  function handleError(error: any) {
-    const backendErrorKey = error.response?.data?.message || 'error.unknown';
+  function handleError(error: unknown) {
+    const err = error as { response?: { data?: { message?: string } } };
+    const backendErrorKey = err.response?.data?.message || 'error.unknown';
     setSnackbar({ open: true, message: t(backendErrorKey), severity: 'error' });
   }
 
-  const openModal = (apt: any, type: 'CONFIRM' | 'RESCHEDULE') => {
+  const openRescheduleModal = (apt: ResponseAppointmentDTO) => {
     setSelectedApptId(apt.id);
-    setActionType(type);
-
-    let dt = apt.startTime || '';
-    if (!dt && apt.requestedDate) {
-      const hr = apt.timePreference === 'MORNING' ? '09:00' : apt.timePreference === 'EVENING' ? '18:00' : '14:00';
-      dt = `${apt.requestedDate}T${hr}`;
-    }
-
-    setModalInitialDateTime(dt ? dt.substring(0, 16) : '');
+    setModalInitialDateTime(apt.startTime ? apt.startTime.substring(0, 16) : '');
     setModalInitialNotes(apt.notes || '');
     setModalInitialResourceLink(apt.resourceLink || '');
     setIsActionModalOpen(true);
@@ -107,97 +99,48 @@ function DoctorDashboard() {
   const statusPriority: Record<string, number> = {
     CONFIRMED: 1,
     COMPLETED: 2,
-    PENDING: 3,
-    NO_SHOW: 4,
-    CANCELLED: 5,
+    NO_SHOW: 3,
+    CANCELLED: 4,
   };
 
   const sortedAppointments = appointments
     ? [...appointments].sort((a, b) => {
-        const timeA = new Date(a.startTime || a.requestedDate).getTime();
-        const timeB = new Date(b.startTime || b.requestedDate).getTime();
+        const timeA = new Date(a.startTime).getTime();
+        const timeB = new Date(b.startTime).getTime();
         if (timeA !== timeB) return timeA - timeB;
         return (statusPriority[a.status] || 9) - (statusPriority[b.status] || 9);
       })
     : [];
 
-  const pendingAppointments = sortedAppointments.filter((a) => a.status === 'PENDING');
-  const confirmedAppointments = sortedAppointments.filter((a) => a.status !== 'PENDING');
-
   return (
-    <Box
-      sx={{
-        width: '100%',
-        minHeight: '100vh',
-        boxSizing: 'border-box',
-        py: 4,
-      }}
-    >
-      <Box
-        sx={{
-          maxWidth: '1200px',
-          margin: '0 auto',
-          px: { xs: 2, md: 4 },
-        }}
-      >
+    <Box sx={{ width: '100%', minHeight: '100vh', boxSizing: 'border-box', py: 4 }}>
+      <Box sx={{ maxWidth: '1200px', margin: '0 auto', px: { xs: 2, md: 4 } }}>
         <Box
           sx={{
             display: 'flex',
             justifyContent: 'space-between',
-            alignItems: {
-              xs: 'stretch',
-              md: 'flex-start',
-            },
-            flexDirection: {
-              xs: 'column',
-              md: 'row',
-            },
+            alignItems: { xs: 'stretch', md: 'flex-start' },
+            flexDirection: { xs: 'column', md: 'row' },
             gap: 4,
             mb: 6,
           }}
         >
           <Box>
-            <Typography
-              variant="h4"
-              sx={{
-                fontWeight: 'bold',
-                mb: 1,
-              }}
-            >
+            <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 1 }}>
               {t('appointments', 'Appointments')}
             </Typography>
 
-            <Typography
-              variant="body1"
-              sx={{
-                maxWidth: '700px',
-                lineHeight: 1.7,
-              }}
-            >
-              {t(
-                'doctorAppointmentsSubtitle',
-                'Manage your daily schedule, review pending requests, and update appointments.',
-              )}
+            <Typography variant="body1" sx={{ maxWidth: '700px', lineHeight: 1.7 }}>
+              {t('doctorAppointmentsSubtitle', 'Manage your daily schedule and update appointments.')}
             </Typography>
           </Box>
 
-          <Box
-            sx={{
-              display: 'flex',
-              gap: 2,
-              alignItems: 'center',
-              flexWrap: 'wrap',
-            }}
-          >
+          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
             <Button
               variant="contained"
               color="primary"
               onClick={() => setIsBookModalOpen(true)}
-              sx={{
-                height: '56px',
-                px: 3,
-                fontWeight: 600,
-              }}
+              sx={{ height: '56px', px: 3, fontWeight: 600 }}
             >
               + {t('bookForPatient', 'Book for Patient')}
             </Button>
@@ -205,114 +148,29 @@ function DoctorDashboard() {
             <TextField
               type="date"
               label={t('selectDate', 'Select Date')}
-              slotProps={{
-                inputLabel: {
-                  shrink: true,
-                },
-              }}
+              slotProps={{ inputLabel: { shrink: true } }}
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
-              sx={{
-                minWidth: '180px',
-              }}
+              sx={{ minWidth: '180px' }}
             />
           </Box>
         </Box>
 
-        {isLoading && (
-          <CircularProgress
-            sx={{
-              display: 'block',
-              mx: 'auto',
-              mt: 6,
-            }}
-          />
-        )}
+        {isLoading && <CircularProgress sx={{ display: 'block', mx: 'auto', mt: 6 }} />}
 
         {isError && <Typography color="error">{t('failedToFetchAppointments')}</Typography>}
 
-        <Box sx={{ mb: 8 }}>
-          <Typography
-            variant="h5"
-            sx={{
-              mb: 3,
-              fontWeight: 'bold',
-            }}
-          >
-            {t('pendingRequests', 'Pending Requests')}
-          </Typography>
-
-          {pendingAppointments.length === 0 && !isLoading && (
-            <Typography
-              sx={{
-                fontStyle: 'italic',
-              }}
-            >
-              {t('noPendingRequestsForThisDate')}
-            </Typography>
-          )}
-
-          <Grid container spacing={4}>
-            {pendingAppointments.map((apt) => {
-              const isDeleted = apt.patientName?.toLowerCase().includes('deleted');
-
-              return (
-                <Grid size={{ xs: 12, sm: 6, md: 4 }} key={apt.id}>
-                  <Box
-                    sx={{
-                      opacity: isDeleted ? 0.5 : 1,
-                      transition: 'opacity 0.3s',
-                    }}
-                  >
-                    <AppointmentCard
-                      appointment={apt}
-                      userRole="DOCTOR"
-                      onCancel={
-                        !isDeleted
-                          ? (id) => {
-                              setAppointmentToCancel(id);
-                              setCancelDialogOpen(true);
-                            }
-                          : undefined
-                      }
-                      onConfirm={!isDeleted ? () => openModal(apt, 'CONFIRM') : undefined}
-                    />
-                  </Box>
-                </Grid>
-              );
-            })}
-          </Grid>
-        </Box>
-
-        <Divider
-          sx={{
-            my: 6,
-          }}
-        />
-
         <Box>
-          <Typography
-            variant="h5"
-            sx={{
-              mb: 3,
-              fontWeight: 'bold',
-            }}
-          >
+          <Typography variant="h5" sx={{ mb: 3, fontWeight: 'bold' }}>
             {t('scheduledAppointments', 'Scheduled Appointments')}
           </Typography>
 
-          {confirmedAppointments.length === 0 && !isLoading && (
-            <Typography
-              sx={{
-                fontStyle: 'italic',
-              }}
-            >
-              {t('noScheduledAppointments')}
-            </Typography>
+          {sortedAppointments.length === 0 && !isLoading && (
+            <Typography sx={{ fontStyle: 'italic' }}>{t('noScheduledAppointments')}</Typography>
           )}
 
           <Grid container spacing={4}>
-            {confirmedAppointments.map((apt) => {
+            {sortedAppointments.map((apt: ResponseAppointmentDTO) => {
               const isDeleted = apt.patientName?.toLowerCase().includes('deleted');
 
               return (
@@ -329,20 +187,20 @@ function DoctorDashboard() {
                       userRole="DOCTOR"
                       onCancel={
                         !isDeleted && apt.status === 'CONFIRMED'
-                          ? (id) => {
+                          ? (id: number) => {
                               setAppointmentToCancel(id);
                               setCancelDialogOpen(true);
                             }
                           : undefined
                       }
-                      onUpdate={
-                        !isDeleted && apt.status === 'CONFIRMED' ? () => openModal(apt, 'RESCHEDULE') : undefined
-                      }
+                      onUpdate={!isDeleted && apt.status === 'CONFIRMED' ? () => openRescheduleModal(apt) : undefined}
                       onComplete={
-                        !isDeleted && apt.status === 'CONFIRMED' ? (id) => completeMutation.mutate(id) : undefined
+                        !isDeleted && apt.status === 'CONFIRMED'
+                          ? (id: number) => completeMutation.mutate(id)
+                          : undefined
                       }
                       onNoShow={
-                        !isDeleted && apt.status === 'CONFIRMED' ? (id) => noShowMutation.mutate(id) : undefined
+                        !isDeleted && apt.status === 'CONFIRMED' ? (id: number) => noShowMutation.mutate(id) : undefined
                       }
                     />
                   </Box>
@@ -357,8 +215,6 @@ function DoctorDashboard() {
           onClose={() => setIsActionModalOpen(false)}
           userId={userId!}
           appointmentId={selectedApptId}
-          actionType={actionType}
-          initialDateTime={modalInitialDateTime}
           initialNotes={modalInitialNotes}
           initialResourceLink={modalInitialResourceLink}
         />
@@ -369,12 +225,7 @@ function DoctorDashboard() {
           <DialogTitle>{t('cancelAppointment')}</DialogTitle>
 
           <DialogContent sx={{ pt: '24px !important' }}>
-            <Typography
-              variant="body2"
-              sx={{
-                mb: 2,
-              }}
-            >
+            <Typography variant="body2" sx={{ mb: 2 }}>
               {t('pleaseProvideReason')}
             </Typography>
 
@@ -389,11 +240,7 @@ function DoctorDashboard() {
             />
           </DialogContent>
 
-          <DialogActions
-            sx={{
-              p: 2,
-            }}
-          >
+          <DialogActions sx={{ p: 2 }}>
             <Button onClick={() => setCancelDialogOpen(false)}>{t('back')}</Button>
 
             <Button
@@ -407,7 +254,6 @@ function DoctorDashboard() {
                     reason: cancelReason,
                   });
                 }
-
                 setCancelDialogOpen(false);
                 setCancelReason('');
               }}
@@ -420,22 +266,9 @@ function DoctorDashboard() {
         <Snackbar
           open={snackbar.open}
           autoHideDuration={6000}
-          onClose={() =>
-            setSnackbar({
-              ...snackbar,
-              open: false,
-            })
-          }
+          onClose={() => setSnackbar({ ...snackbar, open: false })}
         >
-          <Alert
-            onClose={() =>
-              setSnackbar({
-                ...snackbar,
-                open: false,
-              })
-            }
-            severity={snackbar.severity}
-          >
+          <Alert onClose={() => setSnackbar({ ...snackbar, open: false })} severity={snackbar.severity}>
             {snackbar.message}
           </Alert>
         </Snackbar>

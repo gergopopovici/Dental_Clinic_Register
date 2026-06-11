@@ -11,10 +11,7 @@ import edu.ubb.licenta.pgim2289.spring.repository.ServiceRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 public class DoctorServiceImpl implements DoctorService {
@@ -51,7 +48,7 @@ public class DoctorServiceImpl implements DoctorService {
         return doctorRepository.findByServices_Id(serviceId).stream()
                 .map(doctor -> {
                     DoctorDropDownDTO dto = new DoctorDropDownDTO();
-                    dto.setId(doctor.getId());
+                    dto.setUserId(doctor.getUser().getId());
                     dto.setFullName(doctor.getUser().getFullName());
                     dto.setSpecialization(doctor.getSpecialization());
                     return dto;
@@ -62,5 +59,10 @@ public class DoctorServiceImpl implements DoctorService {
     @Override
     public Optional<Doctor> findById(Long id) {
         return doctorRepository.findById(id);
+    }
+
+    @Override
+    public Optional<Doctor> findByUserId(Long id) {
+        return doctorRepository.findByUser_Id(id);
     }
 }

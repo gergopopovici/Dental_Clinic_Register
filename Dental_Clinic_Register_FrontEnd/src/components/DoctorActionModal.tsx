@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -8,19 +8,20 @@ import {
   TextField,
   CircularProgress,
   Typography,
+  Box,
+  Grid,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { confirmAppointment, updateAppointment } from '../services/AppointmentService';
-import { DoctorConfirmDTO, DoctorUpdateAppointmentDTO } from '../models/Appointment';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { updateAppointment, getBookedSlotsForDoctor } from '../services/AppointmentService';
+import { getDoctorSchedule, getDoctorTimeOffs, getGlobalHolidays } from '../services/ScheduleService';
+import { DoctorUpdateAppointmentDTO } from '../models/Appointment';
 
 interface DoctorActionModalProps {
   open: boolean;
   onClose: () => void;
   userId: number;
   appointmentId: number | null;
-  actionType: 'CONFIRM' | 'RESCHEDULE';
-  initialDateTime?: string;
   initialNotes?: string;
   initialResourceLink?: string;
 }
@@ -30,130 +31,209 @@ function DoctorActionModal({
   onClose,
   userId,
   appointmentId,
-  actionType,
-  initialDateTime,
   initialNotes,
   initialResourceLink,
 }: DoctorActionModalProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
-  const [dateTime, setDateTime] = useState<string>('');
+  const [date, setDate] = useState<string>('');
+  const [selectedTime, setSelectedTime] = useState<string>('');
   const [notes, setNotes] = useState<string>('');
   const [resourceLink, setResourceLink] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState('');
 
+  const APPOINTMENT_BUFFER_MINUTES = 5;
+
   useEffect(() => {
     if (open) {
-      setDateTime(initialDateTime || '');
       setNotes(initialNotes || '');
       setResourceLink(initialResourceLink || '');
     } else {
-      setDateTime('');
+      setDate('');
+      setSelectedTime('');
       setNotes('');
       setResourceLink('');
       setErrorMessage('');
     }
-  }, [open, initialDateTime, initialNotes, initialResourceLink]);
+  }, [open, initialNotes, initialResourceLink]);
+
+  const { data: bookedSlots, isLoading: isLoadingSlots } = useQuery({
+    queryKey: ['bookedSlots', userId, date],
+    queryFn: () => getBookedSlotsForDoctor(userId, date),
+    enabled: !!userId && !!date && open,
+    retry: 1,
+  });
+
+  const { data: weeklySchedule, isLoading: isLoadingSchedule } = useQuery({
+    queryKey: ['doctorSchedule', userId],
+    queryFn: () => getDoctorSchedule(userId),
+    enabled: !!userId && open,
+    retry: 1,
+  });
+
+  const { data: timeOffs, isLoading: isLoadingTimeOffs } = useQuery({
+    queryKey: ['doctorTimeOffs', userId],
+    queryFn: () => getDoctorTimeOffs(userId),
+    enabled: !!userId && open,
+    retry: 1,
+  });
+
+  const { data: globalHolidays, isLoading: isLoadingGlobal } = useQuery({
+    queryKey: ['globalHolidays'],
+    queryFn: getGlobalHolidays,
+    enabled: open,
+    retry: 1,
+  });
+
+  const availableSlots = useMemo(() => {
+    if (!date || !userId || !weeklySchedule) return [];
+
+    const allTimeOffs = [...(timeOffs || []), ...(globalHolidays || [])];
+    if (allTimeOffs.some((off) => date >= off.startDate && date <= off.endDate)) return [];
+
+    const dateObj = new Date(date);
+    const daysOfWeek = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
+    const daySchedule = weeklySchedule.find((s) => s.dayOfWeek === daysOfWeek[dateObj.getDay()]);
+
+    if (!daySchedule || !daySchedule.isWorking) return [];
+
+    const duration = 30; // Alapértelmezett, ha nincs serviceID, vagy állítsd be fixre
+    const [startH, startM] = daySchedule.startTime.split(':').map(Number);
+    const [endH, endM] = daySchedule.endTime.split(':').map(Number);
+
+    let current = new Date(date);
+    current.setHours(startH, startM, 0, 0);
+    const endOfDay = new Date(date);
+    endOfDay.setHours(endH, endM, 0, 0);
+
+    const now = new Date();
+    const slots: string[] = [];
+
+    while (new Date(current.getTime() + duration * 60000) <= endOfDay) {
+      const slotStart = new Date(current);
+      const slotEnd = new Date(current.getTime() + duration * 60000);
+
+      const isOverlapping = (bookedSlots || []).some((b) => {
+        const bStart = new Date(b.startTime);
+        const bEnd = new Date(b.endTime);
+        return slotStart < bEnd && slotEnd > bStart;
+      });
+
+      if (!isOverlapping && slotStart > now) {
+        slots.push(
+          `${slotStart.getHours().toString().padStart(2, '0')}:${slotStart.getMinutes().toString().padStart(2, '0')}`,
+        );
+      }
+      current = new Date(slotEnd.getTime() + APPOINTMENT_BUFFER_MINUTES * 60000);
+    }
+    return slots;
+  }, [date, userId, bookedSlots, weeklySchedule, timeOffs, globalHolidays]);
 
   const actionMutation = useMutation({
-    mutationFn: (payload: DoctorConfirmDTO | DoctorUpdateAppointmentDTO) => {
+    mutationFn: (payload: DoctorUpdateAppointmentDTO) => {
       if (!appointmentId) throw new Error(t('no.appointment.id'));
-
-      if (actionType === 'CONFIRM') {
-        return confirmAppointment(userId, appointmentId, payload as DoctorConfirmDTO);
-      } else {
-        return updateAppointment(userId, appointmentId, payload as DoctorUpdateAppointmentDTO);
-      }
+      return updateAppointment(userId, appointmentId, payload);
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['doctorAppointments', userId] });
       onClose();
     },
-    onError: (error: any) => {
-      const backendErrorKey = error.response?.data?.message || 'error.unknown';
-      setErrorMessage(t(backendErrorKey));
-    },
+    onError: (error: any) => setErrorMessage(t(error.response?.data?.message || 'error.unknown')),
   });
 
   const handleSubmit = () => {
-    if (!dateTime) {
+    if (!date || !selectedTime) {
       setErrorMessage(t('pleaseSelectDateTime'));
       return;
     }
-    const payload =
-      actionType === 'CONFIRM'
-        ? ({ exactStartTime: dateTime, notes, resourceLink } as DoctorConfirmDTO)
-        : ({ newStartTime: dateTime, notes, resourceLink } as DoctorUpdateAppointmentDTO);
-    actionMutation.mutate(payload);
+    actionMutation.mutate({
+      newStartTime: `${date}T${selectedTime}:00`,
+      notes,
+      resourceLink,
+    });
   };
+
+  const isScheduleLoading = isLoadingSlots || isLoadingSchedule || isLoadingTimeOffs || isLoadingGlobal;
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle sx={{ fontWeight: 'bold' }}>
-        {actionType === 'CONFIRM' ? t('confirmAppointmentTime') : t('rescheduleAppointment')}
-      </DialogTitle>
+      <DialogTitle sx={{ fontWeight: 'bold' }}>{t('rescheduleAppointment')}</DialogTitle>
 
       <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 3, pt: '24px !important' }}>
         {errorMessage && (
-          <Typography color="error" variant="body2" sx={{ textAlign: 'center', mb: 1 }}>
+          <Typography color="error" variant="body2" sx={{ textAlign: 'center' }}>
             {errorMessage}
           </Typography>
         )}
 
         <TextField
-          type="datetime-local"
-          label={t('exactStartTime')}
+          type="date"
+          label={t('date')}
           fullWidth
-          slotProps={{
-            inputLabel: { shrink: true },
-            htmlInput: { min: new Date().toISOString().slice(0, 16) },
-          }}
-          value={dateTime}
-          onChange={(e) => setDateTime(e.target.value)}
+          value={date}
+          onChange={(e) => setDate(e.target.value)}
+          slotProps={{ inputLabel: { shrink: true } }}
         />
+
+        {date && (
+          <Box>
+            <Typography variant="body2" sx={{ mb: 1.5, fontWeight: 'bold' }}>
+              {t('selectTime')}
+            </Typography>
+            {isScheduleLoading ? (
+              <CircularProgress size={24} />
+            ) : availableSlots.length === 0 ? (
+              <Typography>{t('noAvailableSlots')}</Typography>
+            ) : (
+              <Grid container spacing={1}>
+                {availableSlots.map((time) => (
+                  <Grid size={{ xs: 3 }} key={time}>
+                    <Button
+                      variant={selectedTime === time ? 'contained' : 'outlined'}
+                      color="primary"
+                      onClick={() => setSelectedTime(time)}
+                      fullWidth
+                      sx={{ fontWeight: 'bold' }}
+                    >
+                      {time}
+                    </Button>
+                  </Grid>
+                ))}
+              </Grid>
+            )}
+          </Box>
+        )}
 
         <TextField
           label={t('notesOptions')}
           multiline
           rows={3}
           fullWidth
-          placeholder={t('addAnyInstructionsForPatient')}
-          slotProps={{ inputLabel: { shrink: true } }}
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
+          slotProps={{ inputLabel: { shrink: true } }}
         />
 
         <TextField
           label={t('resourceLinkOptional')}
           fullWidth
-          placeholder={t('addAnyResources')}
-          slotProps={{ inputLabel: { shrink: true } }}
           value={resourceLink}
           onChange={(e) => setResourceLink(e.target.value)}
+          slotProps={{ inputLabel: { shrink: true } }}
         />
       </DialogContent>
 
       <DialogActions sx={{ p: 3 }}>
-        <Button
-          onClick={onClose}
-          sx={{
-            fontWeight: 'bold',
-            '&:focus': {
-              outline: 'none',
-            },
-          }}
-        >
+        <Button onClick={onClose} sx={{ fontWeight: 'bold' }}>
           {t('cancel')}
         </Button>
         <Button
           variant="contained"
-          color={actionType === 'CONFIRM' ? 'success' : 'primary'}
+          color="primary"
           onClick={handleSubmit}
-          disabled={actionMutation.isPending}
-          sx={{
-            fontWeight: 'bold',
-          }}
+          disabled={actionMutation.isPending || !selectedTime}
+          sx={{ fontWeight: 'bold' }}
         >
           {actionMutation.isPending ? <CircularProgress size={24} color="inherit" /> : t('save')}
         </Button>

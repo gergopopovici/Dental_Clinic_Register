@@ -1,15 +1,13 @@
 export type Gender = 'MALE' | 'FEMALE' | 'OTHER';
-export type TimePreference = 'MORNING'|'AFTERNOON'|'EVENING'
-export type AppointmentStatus = 'PENDING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED' | 'NO_SHOW';
+export type AppointmentStatus = 'CONFIRMED' | 'COMPLETED' | 'CANCELLED' | 'NO_SHOW';
 
-export interface DoctorConfirmDTO{
-    exactStartTime: string;
-    notes?: string;
-    resourceLink?: string;
+export interface BookedSlotDTO {
+  startTime: string;
+  endTime: string;
 }
 
 export interface DoctorDropDownDTO {
-  id: number;
+  userId: number;
   fullName: string;
   specialization: string;
 }
@@ -23,8 +21,7 @@ export interface PatientDropDownDTO {
 export interface RequestPatientAppointmentDTO {
   doctorId: number;
   serviceId: number;
-  requestedDate: string;
-  timePreference: TimePreference;
+  startTime: string;
 }
 
 export interface DoctorCreateAppointmentDTO {
@@ -35,19 +32,12 @@ export interface DoctorCreateAppointmentDTO {
   resourceLink?: string;
 }
 
-export interface DoctorConfirmDTO {
-  exactStartTime: string;
-  notes?: string;
-  resourceLink?: string;
-}
-
 export interface DoctorUpdateAppointmentDTO {
   newStartTime: string;
   notes?: string;
   resourceLink?: string;
 }
 
-// --- USER & DOCTOR REGISTRATION ---
 export interface RequestUserDTO {
   username: string;
   email: string;
@@ -78,12 +68,10 @@ export interface ResponseAppointmentDTO {
   serviceId: number;
   serviceName: string;
   serviceDurationMinutes: number;
-  requestedDate: string;
-  timePreference: TimePreference;
   status: AppointmentStatus;
-  startTime?: string;
-  endTime?: string;
+  startTime: string;
+  endTime: string;
   notes?: string;
   resourceLink?: string;
-  price:number;
+  price: number;
 }

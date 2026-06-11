@@ -14,13 +14,15 @@ import {
   Typography,
   Autocomplete,
   Box,
+  Grid,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getAllServices } from '../services/ProvidedServiceService';
 import { getDoctorsByService } from '../services/DoctorService';
-import { requestAppointment } from '../services/AppointmentService';
-import { RequestPatientAppointmentDTO, TimePreference } from '../models/Appointment';
+import { requestAppointment, getBookedSlotsForDoctor } from '../services/AppointmentService';
+import { getDoctorSchedule, getDoctorTimeOffs, getGlobalHolidays } from '../services/ScheduleService';
+import { RequestPatientAppointmentDTO } from '../models/Appointment';
 
 interface PatientBookModalProps {
   open: boolean;
@@ -35,18 +37,24 @@ function PatientBookModal({ open, onClose, userId }: PatientBookModalProps) {
   const [serviceId, setServiceId] = useState<number | ''>('');
   const [doctorId, setDoctorId] = useState<number | ''>('');
   const [date, setDate] = useState<string>('');
-  const [timePreference, setTimePreference] = useState<TimePreference | ''>('');
+  const [selectedTime, setSelectedTime] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState('');
+
+  const APPOINTMENT_BUFFER_MINUTES = 5;
 
   useEffect(() => {
     if (!open) {
       setServiceId('');
       setDoctorId('');
       setDate('');
-      setTimePreference('');
+      setSelectedTime('');
       setErrorMessage('');
     }
   }, [open]);
+
+  useEffect(() => {
+    setSelectedTime('');
+  }, [date, doctorId, serviceId]);
 
   const { data: services, isLoading: isLoadingServices } = useQuery({
     queryKey: ['services'],
@@ -60,6 +68,50 @@ function PatientBookModal({ open, onClose, userId }: PatientBookModalProps) {
     enabled: !!serviceId && open,
   });
 
+  const {
+    data: bookedSlots,
+    isLoading: isLoadingSlots,
+    isError: isErrorSlots,
+  } = useQuery({
+    queryKey: ['bookedSlots', doctorId, date],
+    queryFn: () => getBookedSlotsForDoctor(doctorId as number, date),
+    enabled: !!doctorId && !!date && open,
+    retry: 1,
+  });
+
+  const {
+    data: weeklySchedule,
+    isLoading: isLoadingSchedule,
+    isError: isErrorSchedule,
+  } = useQuery({
+    queryKey: ['doctorSchedule', doctorId],
+    queryFn: () => getDoctorSchedule(doctorId as number),
+    enabled: !!doctorId && open,
+    retry: 1,
+  });
+
+  const {
+    data: timeOffs,
+    isLoading: isLoadingTimeOffs,
+    isError: isErrorTimeOffs,
+  } = useQuery({
+    queryKey: ['doctorTimeOffs', doctorId],
+    queryFn: () => getDoctorTimeOffs(doctorId as number),
+    enabled: !!doctorId && open,
+    retry: 1,
+  });
+
+  const {
+    data: globalHolidays,
+    isLoading: isLoadingGlobal,
+    isError: isErrorGlobal,
+  } = useQuery({
+    queryKey: ['globalHolidays'],
+    queryFn: getGlobalHolidays,
+    enabled: open,
+    retry: 1,
+  });
+
   const sortedServices = useMemo(
     () => (services ? [...services].sort((a, b) => a.name.localeCompare(b.name)) : []),
     [services],
@@ -69,6 +121,77 @@ function PatientBookModal({ open, onClose, userId }: PatientBookModalProps) {
     () => (doctors ? [...doctors].sort((a, b) => a.fullName.localeCompare(b.fullName)) : []),
     [doctors],
   );
+
+  const selectedService = useMemo(() => sortedServices.find((s) => s.id === serviceId), [sortedServices, serviceId]);
+
+  const availableSlots = useMemo(() => {
+    if (!date || !doctorId || !selectedService || !weeklySchedule) return [];
+
+    const allTimeOffs = [...(timeOffs || []), ...(globalHolidays || [])];
+    const isTimeOff = allTimeOffs.some((off) => date >= off.startDate && date <= off.endDate);
+
+    if (isTimeOff) return [];
+
+    const dateObj = new Date(date);
+    const daysOfWeek = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
+    const dayOfWeekStr = daysOfWeek[dateObj.getDay()];
+
+    const daySchedule = weeklySchedule.find((s) => s.dayOfWeek === dayOfWeekStr);
+
+    if (!daySchedule || !daySchedule.isWorking) return [];
+
+    const duration = selectedService.durationMinutes;
+    const [year, month, day] = date.split('-').map(Number);
+    const [startH, startM] = daySchedule.startTime.split(':').map(Number);
+    const [endH, endM] = daySchedule.endTime.split(':').map(Number);
+
+    let current = new Date(year, month - 1, day, startH, startM, 0);
+    const endOfDay = new Date(year, month - 1, day, endH, endM, 0);
+    const now = new Date();
+
+    const slots: string[] = [];
+
+    let iterations = 0;
+    const MAX_ITERATIONS = 50;
+
+    while (current < endOfDay && iterations < MAX_ITERATIONS) {
+      iterations++;
+
+      const slotEnd = new Date(current.getTime() + duration * 60000);
+
+      if (slotEnd > endOfDay) break;
+
+      let isOverlapping = false;
+      let nextAvailableStart = null;
+
+      if (bookedSlots && bookedSlots.length > 0) {
+        for (const b of bookedSlots) {
+          const bStart = new Date(b.startTime);
+          const bEnd = new Date(b.endTime);
+
+          if (current < bEnd && slotEnd > bStart) {
+            isOverlapping = true;
+            nextAvailableStart = bEnd;
+            break;
+          }
+        }
+      }
+
+      if (isOverlapping && nextAvailableStart) {
+        current = new Date(nextAvailableStart.getTime() + APPOINTMENT_BUFFER_MINUTES * 60000);
+        continue;
+      }
+
+      if (current > now) {
+        const h = current.getHours().toString().padStart(2, '0');
+        const m = current.getMinutes().toString().padStart(2, '0');
+        slots.push(`${h}:${m}`);
+      }
+
+      current = new Date(current.getTime() + (duration + APPOINTMENT_BUFFER_MINUTES) * 60000);
+    }
+    return slots;
+  }, [date, doctorId, selectedService, bookedSlots, weeklySchedule, timeOffs, globalHolidays]);
 
   const bookMutation = useMutation({
     mutationFn: (request: RequestPatientAppointmentDTO) => requestAppointment(userId, request),
@@ -83,17 +206,19 @@ function PatientBookModal({ open, onClose, userId }: PatientBookModalProps) {
   });
 
   const handleSubmit = () => {
-    if (!serviceId || !doctorId || !date || !timePreference) {
+    if (!serviceId || !doctorId || !date || !selectedTime) {
       setErrorMessage(t('pleaseFillAllFields'));
       return;
     }
     bookMutation.mutate({
       serviceId: serviceId as number,
       doctorId: doctorId as number,
-      requestedDate: date,
-      timePreference: timePreference as TimePreference,
+      startTime: `${date}T${selectedTime}:00`,
     });
   };
+
+  const isScheduleLoading = isLoadingSlots || isLoadingSchedule || isLoadingTimeOffs || isLoadingGlobal;
+  const isScheduleError = isErrorSlots || isErrorSchedule || isErrorTimeOffs || isErrorGlobal;
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth disableRestoreFocus>
@@ -144,8 +269,8 @@ function PatientBookModal({ open, onClose, userId }: PatientBookModalProps) {
           options={sortedDoctors}
           loading={isLoadingDoctors}
           getOptionLabel={(option) => option.fullName || ''}
-          value={sortedDoctors.find((d) => d.id === doctorId) || null}
-          onChange={(_, newValue) => setDoctorId(newValue ? newValue.id : '')}
+          value={sortedDoctors.find((d) => d.userId === doctorId) || null}
+          onChange={(_, newValue) => setDoctorId(newValue ? newValue.userId : '')}
           noOptionsText={serviceId ? t('noDoctorsFoundForService') : t('selectServiceFirst')}
           renderInput={(params) => (
             <TextField
@@ -169,19 +294,40 @@ function PatientBookModal({ open, onClose, userId }: PatientBookModalProps) {
           onChange={(e) => setDate(e.target.value)}
         />
 
-        <FormControl fullWidth variant="outlined">
-          <InputLabel shrink>{t('timePreference')}</InputLabel>
-          <Select
-            value={timePreference}
-            onChange={(e) => setTimePreference(e.target.value as TimePreference)}
-            label={t('timePreference')}
-            notched
-          >
-            <MenuItem value="MORNING">{t('morning')}</MenuItem>
-            <MenuItem value="AFTERNOON">{t('afternoon')}</MenuItem>
-            <MenuItem value="EVENING">{t('evening')}</MenuItem>
-          </Select>
-        </FormControl>
+        {date && doctorId && selectedService && (
+          <Box>
+            <Typography variant="body2" sx={{ mb: 1.5, fontWeight: 'bold' }}>
+              {t('selectTime')}
+            </Typography>
+            {isScheduleLoading ? (
+              <CircularProgress size={24} />
+            ) : isScheduleError ? (
+              <Typography variant="body2" color="error">
+                {t('errorLoadingSchedule', 'Hiba történt a menetrend betöltésekor.')}
+              </Typography>
+            ) : availableSlots.length === 0 ? (
+              <Typography variant="body2" color="textSecondary">
+                {t('noAvailableSlots')}
+              </Typography>
+            ) : (
+              <Grid container spacing={1}>
+                {availableSlots.map((time) => (
+                  <Grid size={{ xs: 3 }} key={time}>
+                    <Button
+                      variant={selectedTime === time ? 'contained' : 'outlined'}
+                      color="primary"
+                      onClick={() => setSelectedTime(time)}
+                      fullWidth
+                      sx={{ fontWeight: 'bold', '&:focus': { outline: 'none' } }}
+                    >
+                      {time}
+                    </Button>
+                  </Grid>
+                ))}
+              </Grid>
+            )}
+          </Box>
+        )}
       </DialogContent>
 
       <DialogActions sx={{ p: 3 }}>
@@ -189,9 +335,7 @@ function PatientBookModal({ open, onClose, userId }: PatientBookModalProps) {
           onClick={onClose}
           sx={{
             fontWeight: 'bold',
-            '&:focus': {
-              outline: 'none',
-            },
+            '&:focus': { outline: 'none' },
           }}
         >
           {t('cancel')}
@@ -200,7 +344,7 @@ function PatientBookModal({ open, onClose, userId }: PatientBookModalProps) {
           variant="contained"
           color="primary"
           onClick={handleSubmit}
-          disabled={bookMutation.isPending}
+          disabled={bookMutation.isPending || !selectedTime}
           sx={{
             fontWeight: 'bold',
           }}

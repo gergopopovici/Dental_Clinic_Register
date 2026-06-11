@@ -38,10 +38,8 @@ function DoctorAppointments({ userId }: DoctorAppointmentsProps) {
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
 
   const [isActionModalOpen, setIsActionModalOpen] = useState(false);
-  const [actionType, setActionType] = useState<'CONFIRM' | 'RESCHEDULE'>('CONFIRM');
   const [selectedApptId, setSelectedApptId] = useState<number | null>(null);
-
-  const [modalInitialDateTime, setModalInitialDateTime] = useState<string>('');
+  const [, setModalInitialDateTime] = useState<string>('');
   const [modalInitialNotes, setModalInitialNotes] = useState<string>('');
   const [modalInitialResourceLink, setModalInitialResourceLink] = useState<string>('');
 
@@ -94,17 +92,9 @@ function DoctorAppointments({ userId }: DoctorAppointmentsProps) {
     setSnackbar({ open: true, message: t(backendErrorKey), severity: 'error' });
   }
 
-  const openModal = (apt: any, type: 'CONFIRM' | 'RESCHEDULE') => {
+  const openRescheduleModal = (apt: any) => {
     setSelectedApptId(apt.id);
-    setActionType(type);
-
-    let dt = apt.startTime || '';
-    if (!dt && apt.requestedDate) {
-      const hr = apt.timePreference === 'MORNING' ? '09:00' : apt.timePreference === 'EVENING' ? '18:00' : '14:00';
-      dt = `${apt.requestedDate}T${hr}`;
-    }
-
-    setModalInitialDateTime(dt ? dt.substring(0, 16) : '');
+    setModalInitialDateTime(apt.startTime ? apt.startTime.substring(0, 16) : '');
     setModalInitialNotes(apt.notes || '');
     setModalInitialResourceLink(apt.resourceLink || '');
     setIsActionModalOpen(true);
@@ -113,24 +103,19 @@ function DoctorAppointments({ userId }: DoctorAppointmentsProps) {
   const statusPriority: Record<string, number> = {
     CONFIRMED: 1,
     COMPLETED: 2,
-    PENDING: 3,
-    NO_SHOW: 4,
-    CANCELLED: 5,
+    NO_SHOW: 3,
+    CANCELLED: 4,
   };
 
   const sortedAppointments = appointments
     ? [...appointments].sort((a, b) => {
-        const timeA = new Date(a.startTime || a.requestedDate).getTime();
-        const timeB = new Date(b.startTime || b.requestedDate).getTime();
+        const timeA = new Date(a.startTime).getTime();
+        const timeB = new Date(b.startTime).getTime();
 
         if (timeA !== timeB) return timeA - timeB;
-
         return (statusPriority[a.status] || 9) - (statusPriority[b.status] || 9);
       })
     : [];
-
-  const pendingAppointments = sortedAppointments.filter((a) => a.status === 'PENDING');
-  const confirmedAppointments = sortedAppointments.filter((a) => a.status !== 'PENDING');
 
   return (
     <Box>
@@ -158,50 +143,15 @@ function DoctorAppointments({ userId }: DoctorAppointmentsProps) {
       {isLoading && <CircularProgress sx={{ display: 'block', mx: 'auto', mt: 4 }} />}
       {isError && <Typography color="error">{t('failedToFetchAppointments')}</Typography>}
 
-      <Box sx={{ mb: 5 }}>
-        <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
-          {t('pendingRequests')}
-        </Typography>
-        {pendingAppointments.length === 0 && !isLoading && (
-          <Typography sx={{ fontStyle: 'italic' }}>{t('noPendingRequestsForThisDate')}</Typography>
-        )}
-        <Grid container spacing={3}>
-          {pendingAppointments.map((apt) => {
-            const isDeleted = apt.patientName?.toLowerCase().includes('deleted');
-            return (
-              <Grid size={{ xs: 12, sm: 6, md: 4 }} key={apt.id}>
-                <Box sx={{ opacity: isDeleted ? 0.5 : 1, transition: 'opacity 0.3s' }}>
-                  <AppointmentCard
-                    appointment={apt}
-                    userRole="DOCTOR"
-                    onCancel={
-                      !isDeleted
-                        ? (id) => {
-                            setAppointmentToCancel(id);
-                            setCancelDialogOpen(true);
-                          }
-                        : undefined
-                    }
-                    onConfirm={!isDeleted ? () => openModal(apt, 'CONFIRM') : undefined}
-                  />
-                </Box>
-              </Grid>
-            );
-          })}
-        </Grid>
-      </Box>
-
-      <Divider sx={{ mb: 4 }} />
-
       <Box>
         <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
           {t('scheduledAppointments')}
         </Typography>
-        {confirmedAppointments.length === 0 && !isLoading && (
+        {sortedAppointments.length === 0 && !isLoading && (
           <Typography sx={{ fontStyle: 'italic' }}>{t('noScheduledAppointments')}</Typography>
         )}
         <Grid container spacing={3}>
-          {confirmedAppointments.map((apt) => {
+          {sortedAppointments.map((apt) => {
             const isDeleted = apt.patientName?.toLowerCase().includes('deleted');
             return (
               <Grid size={{ xs: 12, sm: 6, md: 4 }} key={apt.id}>
@@ -223,7 +173,7 @@ function DoctorAppointments({ userId }: DoctorAppointmentsProps) {
                           }
                         : undefined
                     }
-                    onUpdate={!isDeleted && apt.status === 'CONFIRMED' ? () => openModal(apt, 'RESCHEDULE') : undefined}
+                    onUpdate={!isDeleted && apt.status === 'CONFIRMED' ? () => openRescheduleModal(apt) : undefined}
                     onComplete={
                       !isDeleted && apt.status === 'CONFIRMED' ? (id) => completeMutation.mutate(id) : undefined
                     }
@@ -241,8 +191,6 @@ function DoctorAppointments({ userId }: DoctorAppointmentsProps) {
         onClose={() => setIsActionModalOpen(false)}
         userId={userId}
         appointmentId={selectedApptId}
-        actionType={actionType}
-        initialDateTime={modalInitialDateTime}
         initialNotes={modalInitialNotes}
         initialResourceLink={modalInitialResourceLink}
       />

@@ -1,78 +1,70 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useState, useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
-import { cancelAppointmentByPatient, getPatientAppointments } from '../../services/AppointmentService';
+import React, { useState, useMemo } from 'react';
 import {
-  Alert,
   Box,
-  Button,
-  CircularProgress,
-  Snackbar,
   Typography,
+  CircularProgress,
+  Button,
+  Grid,
+  Snackbar,
+  Alert,
   Tabs,
   Tab,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
-  Grid,
 } from '@mui/material';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
+import { cancelAppointmentByPatient, getPatientAppointments } from '../../services/AppointmentService';
 import PatientBookModal from '../../components/PatientBookModal';
 import AppointmentCard from '../../components/AppointmentCard';
+import { ResponseAppointmentDTO } from '../../models/Appointment';
 
 interface PatientAppointmentsProps {
   userId: number;
 }
 
-const getSortString = (apt: any) => {
-  if (apt.startTime) return apt.startTime;
-  if (apt.requestedDate) {
-    const hour =
-      apt.timePreference === 'MORNING' ? '09:00:00' : apt.timePreference === 'EVENING' ? '18:00:00' : '14:00:00';
-    return `${apt.requestedDate}T${hour}`;
-  }
-  return '0000-00-00T00:00:00';
-};
+interface SnackbarState {
+  open: boolean;
+  message: string;
+  severity: 'success' | 'error';
+}
 
 function PatientAppointments({ userId }: PatientAppointmentsProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [tabValue, setTabValue] = useState(0);
-  const [isBookModalOpen, setIsBookModalOpen] = useState(false);
-  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
-
-  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [tabValue, setTabValue] = useState<number>(0);
+  const [isBookModalOpen, setIsBookModalOpen] = useState<boolean>(false);
+  const [snackbar, setSnackbar] = useState<SnackbarState>({ open: false, message: '', severity: 'success' });
+  const [cancelDialogOpen, setCancelDialogOpen] = useState<boolean>(false);
   const [appointmentToCancel, setAppointmentToCancel] = useState<number | null>(null);
 
   const {
     data: appointments,
     isLoading,
     isError,
-  } = useQuery({
+  } = useQuery<ResponseAppointmentDTO[]>({
     queryKey: ['patientAppointments', userId],
     queryFn: () => getPatientAppointments(userId),
   });
 
   const processedLists = useMemo(() => {
-    if (!appointments) return { upcoming: [], history: [] };
+    if (!appointments) return { upcoming: [] as ResponseAppointmentDTO[], history: [] as ResponseAppointmentDTO[] };
 
     const now = new Date().getTime();
 
-    const upcoming = appointments
-      .filter((a) => {
-        if (a.status === 'PENDING') return true;
-        if (a.status === 'CONFIRMED' && new Date(getSortString(a)).getTime() > now) return true;
-        return false;
-      })
-      .sort((a, b) => getSortString(a).localeCompare(getSortString(b)));
+    const upcoming = [...appointments]
+      .filter((a) => a.status === 'CONFIRMED' && new Date(a.startTime).getTime() > now)
+      .sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
 
-    const history = appointments
+    const history = [...appointments]
       .filter((a) => {
         if (['COMPLETED', 'CANCELLED', 'NO_SHOW'].includes(a.status)) return true;
-        if (a.status === 'CONFIRMED' && new Date(getSortString(a)).getTime() <= now) return true;
+        if (a.status === 'CONFIRMED' && new Date(a.startTime).getTime() <= now) return true;
         return false;
       })
-      .sort((a, b) => getSortString(a).localeCompare(getSortString(b)));
+      .sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime());
 
     return { upcoming, history };
   }, [appointments]);
@@ -83,8 +75,9 @@ function PatientAppointments({ userId }: PatientAppointmentsProps) {
       setSnackbar({ open: true, message: t('appointmentCancelled'), severity: 'success' });
       await queryClient.invalidateQueries({ queryKey: ['patientAppointments', userId] });
     },
-    onError: (error: any) => {
-      const backendErrorKey = error.response?.data?.message || 'error.unknown';
+    onError: (error: unknown) => {
+      const err = error as { response?: { data?: { message?: string } } };
+      const backendErrorKey = err.response?.data?.message || 'error.unknown';
       setSnackbar({ open: true, message: t(backendErrorKey), severity: 'error' });
     },
   });
@@ -107,7 +100,7 @@ function PatientAppointments({ userId }: PatientAppointmentsProps) {
       <Box sx={{ mb: 4 }}>
         <Tabs
           value={tabValue}
-          onChange={(_, newValue) => setTabValue(newValue)}
+          onChange={(_, newValue: number) => setTabValue(newValue)}
           textColor="primary"
           indicatorColor="primary"
         >
@@ -126,14 +119,14 @@ function PatientAppointments({ userId }: PatientAppointmentsProps) {
       )}
 
       <Grid container spacing={3}>
-        {currentDisplayList.map((apt) => (
-          <Grid size={{ xs: 12, sm: 6, md: 4 }} key={apt.id}>
+        {currentDisplayList.map((apt: ResponseAppointmentDTO) => (
+          <Grid key={apt.id} size={{ xs: 12, sm: 6, md: 4 }}>
             <AppointmentCard
               appointment={apt}
               userRole="PATIENT"
               onCancel={
-                (apt.status === 'PENDING' || apt.status === 'CONFIRMED') && tabValue === 0
-                  ? (id) => {
+                apt.status === 'CONFIRMED' && tabValue === 0
+                  ? (id: number) => {
                       setAppointmentToCancel(id);
                       setCancelDialogOpen(true);
                     }

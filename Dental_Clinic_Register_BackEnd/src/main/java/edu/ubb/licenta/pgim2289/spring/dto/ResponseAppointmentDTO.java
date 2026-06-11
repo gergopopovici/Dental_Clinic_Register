@@ -21,8 +21,6 @@ public class ResponseAppointmentDTO {
     private Integer serviceDurationMinutes;
     private Integer price;
 
-    private LocalDate requestedDate;
-    private Appointment.TimePreference timePreference;
     private Appointment.AppointmentStatus status;
     private LocalDateTime startTime;
     private LocalDateTime endTime;

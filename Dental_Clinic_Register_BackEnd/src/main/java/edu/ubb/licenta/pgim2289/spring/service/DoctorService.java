@@ -14,4 +14,5 @@ public interface DoctorService {
     Doctor getDoctor(User user);
     List<DoctorDropDownDTO> getDoctorsByServiceId(Long serviceId);
     Optional<Doctor> findById(Long id);
+    Optional<Doctor> findByUserId(Long id);
 }

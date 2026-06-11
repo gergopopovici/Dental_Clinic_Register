@@ -27,16 +27,6 @@ interface PatientDashboardProps {
   userId: number;
 }
 
-const getSortString = (apt: ResponseAppointmentDTO) => {
-  if (apt.startTime) return apt.startTime;
-  if (apt.requestedDate) {
-    const hour =
-      apt.timePreference === 'MORNING' ? '09:00:00' : apt.timePreference === 'EVENING' ? '18:00:00' : '14:00:00';
-    return `${apt.requestedDate}T${hour}`;
-  }
-  return '0000-00-00T00:00:00';
-};
-
 function PatientDashboard({ userId }: PatientDashboardProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -64,12 +54,8 @@ function PatientDashboard({ userId }: PatientDashboardProps) {
     if (!appointments) return null;
     const now = new Date().getTime();
     const upcoming = appointments
-      .filter((a) => {
-        if (a.status === 'PENDING') return true;
-        if (a.status === 'CONFIRMED' && new Date(getSortString(a)).getTime() > now) return true;
-        return false;
-      })
-      .sort((a, b) => getSortString(a).localeCompare(getSortString(b)));
+      .filter((a) => a.status === 'CONFIRMED' && new Date(a.startTime).getTime() > now)
+      .sort((a, b) => a.startTime.localeCompare(b.startTime));
 
     return upcoming.length > 0 ? upcoming[0] : null;
   }, [appointments]);
