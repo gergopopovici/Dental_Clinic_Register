@@ -13,7 +13,7 @@ import Archwire from './Archwire';
 import { BraceComponentDTO } from '../models/BraceComponentDTO';
 import { getBraceComponents, syncBraceComponents } from '../services/BraceComponentService';
 
-type PlacementMode = 'none' | 'brace' | 'rubberBand' | 'delete';
+type PlacementMode = 'none' | 'rubberBand' | 'delete';
 
 const DUMMY_TOOTH_CENTERS = [
   { x: -1.208, y: 2.718, z: 13.259 },
@@ -113,19 +113,10 @@ function DenturesScene({ treatmentPlanId = 1, readOnly = false }: DenturesSceneP
   );
 
   const handleModelClick = (point: THREE.Vector3) => {
-    if (readOnly) return;
-
-    if (placementMode === 'brace') {
-      const newBrace: BraceComponentDTO = {
-        treatmentPlanId,
-        type: 'BRACE',
-        positionX: point.x,
-        positionY: point.y,
-        positionZ: point.z,
-        colour: '#C0C0C0',
-      };
-      setComponents((prev) => [...prev, newBrace]);
-    } else if (placementMode === 'rubberBand') {
+    if (readOnly) {
+      return;
+    }
+    if (placementMode === 'rubberBand') {
       if (!rubberBandStartPoint) {
         setRubberBandStartPoint(point);
       } else {
@@ -194,8 +185,8 @@ function DenturesScene({ treatmentPlanId = 1, readOnly = false }: DenturesSceneP
       {!readOnly && (
         <>
           <Box sx={{ display: 'flex', gap: 2, mb: 2, justifyContent: 'center' }}>
-            <Button variant={placementMode === 'brace' ? 'contained' : 'outlined'} onClick={() => toggleMode('brace')}>
-              {t('placeBrace')}
+            <Button variant="contained" color="primary" onClick={handleAutoPlace}>
+              {t('autoPlace')}
             </Button>
             <Button
               variant={placementMode === 'rubberBand' ? 'contained' : 'outlined'}
@@ -208,9 +199,6 @@ function DenturesScene({ treatmentPlanId = 1, readOnly = false }: DenturesSceneP
               onClick={() => toggleMode('delete')}
             >
               {t('delete')}
-            </Button>
-            <Button variant="contained" color="primary" onClick={handleAutoPlace}>
-              {t('autoPlace')}
             </Button>
             <Button variant="contained" color="error" onClick={() => setComponents([])}>
               {t('clearAll')}

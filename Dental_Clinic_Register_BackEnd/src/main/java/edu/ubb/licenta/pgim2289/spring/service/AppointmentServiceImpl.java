@@ -6,6 +6,7 @@ import edu.ubb.licenta.pgim2289.spring.model.*;
 import edu.ubb.licenta.pgim2289.spring.repository.AppointmentRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -21,8 +22,16 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final AppointmentMapper appointmentMapper;
     private final EmailService emailService;
     private final UserService userService;
+    private final FileStorageService fileStorageService;
+    private final TreatmentPlanService treatmentPlanService;
 
-    public AppointmentServiceImpl(AppointmentRepository appointmentRepository, PatientService patientService, DoctorService doctorService, ServiceProvidedService serviceProvidedService, AppointmentMapper appointmentMapper, EmailService emailService, UserService userService) {
+    public AppointmentServiceImpl(AppointmentRepository appointmentRepository,
+                                  PatientService patientService,
+                                  DoctorService doctorService,
+                                  ServiceProvidedService serviceProvidedService,
+                                  AppointmentMapper appointmentMapper,
+                                  EmailService emailService, UserService userService,
+                                  FileStorageService fileStorageService, TreatmentPlanService treatmentPlanService) {
         this.appointmentRepository = appointmentRepository;
         this.patientService = patientService;
         this.doctorService = doctorService;
@@ -30,6 +39,8 @@ public class AppointmentServiceImpl implements AppointmentService {
         this.appointmentMapper = appointmentMapper;
         this.emailService = emailService;
         this.userService = userService;
+        this.fileStorageService = fileStorageService;
+        this.treatmentPlanService = treatmentPlanService;
     }
 
     @Override
@@ -43,7 +54,9 @@ public class AppointmentServiceImpl implements AppointmentService {
 
         return appointmentRepository.findByDoctor_IdAndStartTimeBetween(doctor.getId(), startOfDay, endOfDay)
                 .stream()
-                .filter(appt -> appt.getStatus() == Appointment.AppointmentStatus.CONFIRMED)
+                .filter(appt -> appt.getStatus() == Appointment.AppointmentStatus.CONFIRMED
+                        || appt.getStatus() == Appointment.AppointmentStatus.COMPLETED
+                        || appt.getStatus() == Appointment.AppointmentStatus.NO_SHOW)
                 .map(appt -> new BookedSlotDTO(appt.getStartTime(), appt.getEndTime()))
                 .toList();
     }
@@ -64,7 +77,6 @@ public class AppointmentServiceImpl implements AppointmentService {
         if (overlapping > 0) {
             throw new IllegalArgumentException("error.doctor.already.booked");
         }
-
         Appointment appointment = new Appointment();
         appointment.setPatient(patient);
         appointment.setDoctor(doctor);
@@ -95,6 +107,7 @@ public class AppointmentServiceImpl implements AppointmentService {
             throw new IllegalArgumentException("error.doctor.already.booked");
         }
 
+
         Appointment appointment = new Appointment();
         appointment.setDoctor(doctor);
         appointment.setPatient(patient);
@@ -104,6 +117,11 @@ public class AppointmentServiceImpl implements AppointmentService {
         appointment.setNotes(request.getNotes());
         appointment.setResourceLink(request.getResourceLink());
         appointment.setStatus(Appointment.AppointmentStatus.CONFIRMED);
+
+        if (request.getTreatmentPlanId() != null) {
+            appointment.setTreatmentPlan(treatmentPlanService.getTreatmentPlanEntityById
+                    (request.getTreatmentPlanId()));
+        }
 
         Appointment savedAppointment = appointmentRepository.save(appointment);
         emailService.sendNewAppointmentCreatedEmailToPatient(patient.getUser().getEmail(), patient.getUser().getFullName(), exactStartTime, doctor.getUser().getFullName());
@@ -214,8 +232,12 @@ public class AppointmentServiceImpl implements AppointmentService {
             throw new SecurityException("error.unauthorised.action");
         }
 
-        appointment.setStatus(Appointment.AppointmentStatus.COMPLETED);
-        emailService.sendPostVisitThankYouEmail(appointment.getPatient().getUser().getEmail(), appointment.getPatient().getUser().getFullName(), appointment.getDoctor().getUser().getFullName());
+        if (appointment.getStatus() != Appointment.AppointmentStatus.COMPLETED) {
+            appointment.setStatus(Appointment.AppointmentStatus.COMPLETED);
+            emailService.sendPostVisitThankYouEmail(appointment.getPatient().getUser().getEmail()
+                    , appointment.getPatient().getUser().getFullName()
+                    , appointment.getDoctor().getUser().getFullName());
+        }
         return appointmentMapper.toDto(appointmentRepository.save(appointment));
     }
 
@@ -236,5 +258,48 @@ public class AppointmentServiceImpl implements AppointmentService {
         return appointmentRepository.findDoctorDailyAppointments(userId, startOfDay, endOfDay)
                 .stream().map(appointmentMapper::toDto)
                 .toList();
+    }
+
+    @Override
+    @Transactional
+    public AppointmentSummaryDTO addSummaryToAppointment(Long appointmentId, Long doctorUserId, String notes,
+                                                         MultipartFile audio, MultipartFile image,
+                                                         MultipartFile document) {
+        Appointment appointment = appointmentRepository.findById(appointmentId).orElseThrow(() -> new IllegalArgumentException("error.appointment.not.found"));
+        if (!appointment.getDoctor().getUser().getId().equals(doctorUserId)) {
+            throw new SecurityException("error.unathorised.action");
+        }
+
+        AppointmentSummary summary = appointment.getSummary();
+        if (summary == null) {
+            summary = new AppointmentSummary();
+            summary.setAppointment(appointment);
+        }
+
+        if (notes != null) {
+            summary.setNotes(notes);
+        }
+
+        if (audio != null && !audio.isEmpty()) {
+            summary.setAudioUrl(fileStorageService.storeFile(audio));
+        }
+        if (image != null && !image.isEmpty()) {
+            summary.setImageUrl(fileStorageService.storeFile(image));
+        }
+
+        if (document != null && !document.isEmpty()) {
+            summary.setDocumentUrl(fileStorageService.storeFile(document));
+        }
+
+        appointment.setSummary(summary);
+        appointmentRepository.save(appointment);
+
+        AppointmentSummaryDTO dto = new AppointmentSummaryDTO();
+        dto.setId(summary.getId());
+        dto.setNotes(summary.getNotes());
+        dto.setAudioUrl(summary.getAudioUrl());
+        dto.setImageUrl(summary.getImageUrl());
+        dto.setDocumentUrl(summary.getDocumentUrl());
+        return dto;
     }
 }

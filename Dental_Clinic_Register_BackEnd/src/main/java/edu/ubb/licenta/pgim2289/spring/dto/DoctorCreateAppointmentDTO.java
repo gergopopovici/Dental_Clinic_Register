@@ -20,4 +20,6 @@ public class DoctorCreateAppointmentDTO {
 
     private String notes;
     private String resourceLink;
+    private Long treatmentPlanId;
+
 }

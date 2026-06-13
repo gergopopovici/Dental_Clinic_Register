@@ -27,4 +27,8 @@ public class ResponseAppointmentDTO {
 
     private String notes;
     private String resourceLink;
+    private AppointmentSummaryDTO summary;
+
+    private Long treatmentPlanId;
+    private String treatmentPlanName;
 }

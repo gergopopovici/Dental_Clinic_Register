@@ -133,7 +133,7 @@ public class UserController {
         return userService.updateEmail(userId, request.getEmail());
     }
 
-    @PreAuthorize("hasAnyRole('PATIENT','ADMIN')")
+    @PreAuthorize("hasAnyRole('PATIENT','ADMIN','DOCTOR')")
     @DeleteMapping("/delete")
     public ResponseEntity<MessageResponse> delete() {
         Long userId = SecurityUtil.getCurrentUserId();
@@ -141,8 +141,14 @@ public class UserController {
         if (userOptional.isEmpty()) {
             return ResponseEntity.badRequest().body(new MessageResponse("error.user.not_found"));
         }
-        emailService.sendDeletionConfirmationEmail(userOptional.get().getEmail(), userOptional.get().getUserName());
-        return userService.deleteUser(userId);
+        User user = userOptional.get();
+        String originalEmail = user.getEmail();
+        String originalUsername = user.getUserName();
+        ResponseEntity<MessageResponse> response = userService.deleteUser(userId);
+        if (response.getStatusCode().is2xxSuccessful()) {
+            emailService.sendDeletionConfirmationEmail(userOptional.get().getEmail(), userOptional.get().getUserName());
+        }
+        return response;
     }
 
     @PreAuthorize("hasAnyRole('DOCTOR', 'PATIENT','ADMIN')")

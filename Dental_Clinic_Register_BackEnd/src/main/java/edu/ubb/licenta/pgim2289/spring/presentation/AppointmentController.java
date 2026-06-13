@@ -6,6 +6,8 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.MediaType;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -99,5 +101,17 @@ public class AppointmentController {
             @RequestParam(value = "date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         LocalDate targetDate = date != null ? date : LocalDate.now();
         return ResponseEntity.ok(appointmentService.getDailyAppointmentsForDoctor(userId, targetDate));
+    }
+
+    @PostMapping(value = "/doctor/{userId}/summary/{appointmentId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasAnyRole('DOCTOR', 'ADMIN')")
+    public ResponseEntity<AppointmentSummaryDTO> addSummaryToAppointment(
+            @PathVariable Long userId,
+            @PathVariable Long appointmentId,
+            @RequestParam(value = "notes", required = false) String notes,
+            @RequestParam(value = "audio", required = false) MultipartFile audio,
+            @RequestParam(value = "image", required = false) MultipartFile image,
+            @RequestParam(value = "document", required = false) MultipartFile document) {
+        return ResponseEntity.ok(appointmentService.addSummaryToAppointment(appointmentId, userId, notes, audio, image, document));
     }
 }

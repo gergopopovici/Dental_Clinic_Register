@@ -10,37 +10,70 @@ import {
   Typography,
   Box,
   Grid,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  SelectChangeEvent,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { updateAppointment, getBookedSlotsForDoctor } from '../services/AppointmentService';
+import {
+  updateAppointment,
+  getBookedSlotsForDoctor,
+  markAsCompleted,
+  addSummaryToAppointment,
+} from '../services/AppointmentService';
 import { getDoctorSchedule, getDoctorTimeOffs, getGlobalHolidays } from '../services/ScheduleService';
-import { DoctorUpdateAppointmentDTO } from '../models/Appointment';
+import { DoctorUpdateAppointmentDTO, BookedSlotDTO } from '../models/Appointment';
+import { AppointmentSummaryDTO, TreatmentPlanDTO } from '../models/TreatmentPlan';
+import { getPlansByPatientId } from '../services/TreatmentPlanService';
+import { DoctorScheduleDTO, TimeOffDTO } from '../models/Schedule';
 
 interface DoctorActionModalProps {
   open: boolean;
   onClose: () => void;
+  onSuccess?: () => void;
   userId: number;
   appointmentId: number | null;
   initialNotes?: string;
+  patientId?: number;
+  initialTreatmentPlanId?: number | null;
+  initialStartTime?: string;
   initialResourceLink?: string;
+  existingSummary?: AppointmentSummaryDTO;
+  mode?: 'RESCHEDULE' | 'COMPLETE';
+}
+
+interface ApiError {
+  response?: { data?: { message?: string } };
 }
 
 function DoctorActionModal({
   open,
   onClose,
+  onSuccess,
   userId,
   appointmentId,
+  patientId,
+  initialTreatmentPlanId,
+  initialStartTime,
   initialNotes,
   initialResourceLink,
+  existingSummary,
+  mode = 'RESCHEDULE',
 }: DoctorActionModalProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
-  const [date, setDate] = useState<string>('');
-  const [selectedTime, setSelectedTime] = useState<string>('');
-  const [notes, setNotes] = useState<string>('');
-  const [resourceLink, setResourceLink] = useState<string>('');
+  const [date, setDate] = useState('');
+  const [selectedTime, setSelectedTime] = useState('');
+  const [treatmentPlanId, setTreatmentPlanId] = useState<number | ''>('');
+  const [notes, setNotes] = useState('');
+  const [resourceLink, setResourceLink] = useState('');
+  const [audioFile, setAudioFile] = useState<File | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [documentFile, setDocumentFile] = useState<File | null>(null);
   const [errorMessage, setErrorMessage] = useState('');
 
   const APPOINTMENT_BUFFER_MINUTES = 5;
@@ -49,193 +82,220 @@ function DoctorActionModal({
     if (open) {
       setNotes(initialNotes || '');
       setResourceLink(initialResourceLink || '');
-    } else {
-      setDate('');
-      setSelectedTime('');
-      setNotes('');
-      setResourceLink('');
-      setErrorMessage('');
-    }
-  }, [open, initialNotes, initialResourceLink]);
+      setTreatmentPlanId(initialTreatmentPlanId || '');
+      setAudioFile(null);
+      setImageFile(null);
+      setDocumentFile(null);
 
-  const { data: bookedSlots, isLoading: isLoadingSlots } = useQuery({
+      if (initialStartTime && mode === 'RESCHEDULE') {
+        const [dPart, tPart] = initialStartTime.split('T');
+        setDate(dPart);
+        const [h, m] = tPart.split(':');
+        setSelectedTime(`${h}:${m}`);
+      }
+    }
+  }, [open, initialNotes, initialResourceLink, initialTreatmentPlanId, initialStartTime, mode]);
+
+  const { data: patientPlans, isLoading: isLoadingPlans } = useQuery<TreatmentPlanDTO[]>({
+    queryKey: ['treatmentPlans', patientId],
+    queryFn: () => getPlansByPatientId(Number(patientId)),
+    enabled: !!patientId && open && mode === 'RESCHEDULE',
+  });
+
+  const { data: bookedSlots } = useQuery<BookedSlotDTO[]>({
     queryKey: ['bookedSlots', userId, date],
     queryFn: () => getBookedSlotsForDoctor(userId, date),
-    enabled: !!userId && !!date && open,
-    retry: 1,
+    enabled: !!userId && !!date && open && mode === 'RESCHEDULE',
   });
 
-  const { data: weeklySchedule, isLoading: isLoadingSchedule } = useQuery({
+  const { data: weeklySchedule } = useQuery<DoctorScheduleDTO[]>({
     queryKey: ['doctorSchedule', userId],
     queryFn: () => getDoctorSchedule(userId),
-    enabled: !!userId && open,
-    retry: 1,
+    enabled: !!userId && open && mode === 'RESCHEDULE',
   });
 
-  const { data: timeOffs, isLoading: isLoadingTimeOffs } = useQuery({
+  const { data: timeOffs } = useQuery<TimeOffDTO[]>({
     queryKey: ['doctorTimeOffs', userId],
     queryFn: () => getDoctorTimeOffs(userId),
-    enabled: !!userId && open,
-    retry: 1,
-  });
-
-  const { data: globalHolidays, isLoading: isLoadingGlobal } = useQuery({
-    queryKey: ['globalHolidays'],
-    queryFn: getGlobalHolidays,
-    enabled: open,
-    retry: 1,
+    enabled: !!userId && open && mode === 'RESCHEDULE',
   });
 
   const availableSlots = useMemo(() => {
-    if (!date || !userId || !weeklySchedule) return [];
-
-    const allTimeOffs = [...(timeOffs || []), ...(globalHolidays || [])];
-    if (allTimeOffs.some((off) => date >= off.startDate && date <= off.endDate)) return [];
+    if (mode !== 'RESCHEDULE' || !date || !userId || !weeklySchedule) return [];
+    if (timeOffs?.some((off) => date >= off.startDate && date <= off.endDate)) return [];
 
     const dateObj = new Date(date);
-    const daysOfWeek = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
-    const daySchedule = weeklySchedule.find((s) => s.dayOfWeek === daysOfWeek[dateObj.getDay()]);
+    const dayName = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'][dateObj.getDay()];
+    const daySchedule = weeklySchedule.find((s) => s.dayOfWeek === dayName);
 
     if (!daySchedule || !daySchedule.isWorking) return [];
 
-    const duration = 30; // Alapértelmezett, ha nincs serviceID, vagy állítsd be fixre
+    const duration = 30;
     const [startH, startM] = daySchedule.startTime.split(':').map(Number);
     const [endH, endM] = daySchedule.endTime.split(':').map(Number);
 
-    let current = new Date(date);
-    current.setHours(startH, startM, 0, 0);
-    const endOfDay = new Date(date);
-    endOfDay.setHours(endH, endM, 0, 0);
-
+    let current = new Date(dateObj.setHours(startH, startM, 0));
+    const endOfDay = new Date(dateObj.setHours(endH, endM, 0));
     const now = new Date();
-    const slots: string[] = [];
 
-    while (new Date(current.getTime() + duration * 60000) <= endOfDay) {
-      const slotStart = new Date(current);
+    const slots: string[] = [];
+    while (current.getTime() < endOfDay.getTime()) {
       const slotEnd = new Date(current.getTime() + duration * 60000);
+      if (slotEnd.getTime() > endOfDay.getTime()) break;
 
       const isOverlapping = (bookedSlots || []).some((b) => {
-        const bStart = new Date(b.startTime);
-        const bEnd = new Date(b.endTime);
-        return slotStart < bEnd && slotEnd > bStart;
+        if (initialStartTime && new Date(b.startTime).getTime() === new Date(initialStartTime).getTime()) return false;
+        return current.getTime() < new Date(b.endTime).getTime() && slotEnd.getTime() > new Date(b.startTime).getTime();
       });
 
-      if (!isOverlapping && slotStart > now) {
+      if (!isOverlapping && current.getTime() > now.getTime()) {
         slots.push(
-          `${slotStart.getHours().toString().padStart(2, '0')}:${slotStart.getMinutes().toString().padStart(2, '0')}`,
+          `${current.getHours().toString().padStart(2, '0')}:${current.getMinutes().toString().padStart(2, '0')}`,
         );
       }
-      current = new Date(slotEnd.getTime() + APPOINTMENT_BUFFER_MINUTES * 60000);
+      current = new Date(current.getTime() + (duration + APPOINTMENT_BUFFER_MINUTES) * 60000);
     }
     return slots;
-  }, [date, userId, bookedSlots, weeklySchedule, timeOffs, globalHolidays]);
+  }, [date, userId, bookedSlots, weeklySchedule, timeOffs, mode, initialStartTime]);
 
-  const actionMutation = useMutation({
-    mutationFn: (payload: DoctorUpdateAppointmentDTO) => {
+  const mutation = useMutation({
+    mutationFn: async () => {
       if (!appointmentId) throw new Error(t('no.appointment.id'));
-      return updateAppointment(userId, appointmentId, payload);
+      if (mode === 'RESCHEDULE') {
+        return updateAppointment(userId, appointmentId, {
+          newStartTime: `${date}T${selectedTime}:00`,
+          treatmentPlanId: treatmentPlanId === '' ? null : (treatmentPlanId as number),
+          notes,
+          resourceLink,
+        });
+      } else {
+        await markAsCompleted(userId, appointmentId);
+        return addSummaryToAppointment(userId, appointmentId, notes, audioFile, imageFile, documentFile);
+      }
     },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['doctorAppointments', userId] });
+    onSuccess: () => {
+      if (onSuccess) onSuccess();
       onClose();
     },
-    onError: (error: any) => setErrorMessage(t(error.response?.data?.message || 'error.unknown')),
+    onError: (error: unknown) => {
+      const err = error as ApiError;
+      setErrorMessage(t(err.response?.data?.message || 'error.unknown'));
+    },
   });
 
-  const handleSubmit = () => {
-    if (!date || !selectedTime) {
-      setErrorMessage(t('pleaseSelectDateTime'));
-      return;
-    }
-    actionMutation.mutate({
-      newStartTime: `${date}T${selectedTime}:00`,
-      notes,
-      resourceLink,
-    });
+  const handleTreatmentPlanChange = (e: SelectChangeEvent<number | ''>) => {
+    setTreatmentPlanId(e.target.value === '' ? '' : Number(e.target.value));
   };
-
-  const isScheduleLoading = isLoadingSlots || isLoadingSchedule || isLoadingTimeOffs || isLoadingGlobal;
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle sx={{ fontWeight: 'bold' }}>{t('rescheduleAppointment')}</DialogTitle>
-
+      <DialogTitle sx={{ fontWeight: 'bold' }}>
+        {mode === 'RESCHEDULE' ? t('rescheduleAppointment') : t('addSummary')}
+      </DialogTitle>
       <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 3, pt: '24px !important' }}>
-        {errorMessage && (
-          <Typography color="error" variant="body2" sx={{ textAlign: 'center' }}>
-            {errorMessage}
-          </Typography>
-        )}
+        {errorMessage && <Typography color="error">{errorMessage}</Typography>}
 
-        <TextField
-          type="date"
-          label={t('date')}
-          fullWidth
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-          slotProps={{ inputLabel: { shrink: true } }}
-        />
-
-        {date && (
-          <Box>
-            <Typography variant="body2" sx={{ mb: 1.5, fontWeight: 'bold' }}>
-              {t('selectTime')}
-            </Typography>
-            {isScheduleLoading ? (
-              <CircularProgress size={24} />
-            ) : availableSlots.length === 0 ? (
-              <Typography>{t('noAvailableSlots')}</Typography>
-            ) : (
-              <Grid container spacing={1}>
-                {availableSlots.map((time) => (
-                  <Grid size={{ xs: 3 }} key={time}>
-                    <Button
-                      variant={selectedTime === time ? 'contained' : 'outlined'}
-                      color="primary"
-                      onClick={() => setSelectedTime(time)}
-                      fullWidth
-                      sx={{ fontWeight: 'bold' }}
-                    >
-                      {time}
-                    </Button>
+        {mode === 'RESCHEDULE' ? (
+          <>
+            <TextField
+              type="date"
+              label={t('date')}
+              fullWidth
+              value={date}
+              onChange={(e) => {
+                setDate(e.target.value);
+                setSelectedTime('');
+              }}
+              slotProps={{ inputLabel: { shrink: true } }}
+            />
+            {date && (
+              <Box>
+                <Typography variant="body2" sx={{ mb: 1.5, fontWeight: 'bold' }}>
+                  {t('selectTime')}
+                </Typography>
+                {availableSlots.length === 0 ? (
+                  <Typography>{t('noAvailableSlots')}</Typography>
+                ) : (
+                  <Grid container spacing={1}>
+                    {availableSlots.map((time) => (
+                      <Grid size={{ xs: 3 }} key={time}>
+                        <Button
+                          variant={selectedTime === time ? 'contained' : 'outlined'}
+                          onClick={() => setSelectedTime(time)}
+                          fullWidth
+                        >
+                          {time}
+                        </Button>
+                      </Grid>
+                    ))}
                   </Grid>
-                ))}
-              </Grid>
+                )}
+              </Box>
             )}
-          </Box>
+            {patientId && (
+              <FormControl fullWidth>
+                <InputLabel shrink>{t('selectTreatmentPlan')}</InputLabel>
+                <Select
+                  value={treatmentPlanId}
+                  onChange={handleTreatmentPlanChange}
+                  notched
+                  label={t('selectTreatmentPlan')}
+                >
+                  <MenuItem value="">{t('none')}</MenuItem>
+                  {patientPlans
+                    ?.filter((p) => p.status === 'ACTIVE')
+                    .map((plan) => (
+                      <MenuItem key={plan.id} value={plan.id as number}>
+                        {plan.primaryServiceName}
+                      </MenuItem>
+                    ))}
+                </Select>
+              </FormControl>
+            )}
+            <TextField
+              label={t('notesOptions')}
+              multiline
+              rows={3}
+              fullWidth
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+            />
+            <TextField
+              label={t('resourceLinkOptional')}
+              fullWidth
+              value={resourceLink}
+              onChange={(e) => setResourceLink(e.target.value)}
+            />
+          </>
+        ) : (
+          <>
+            <TextField
+              label={t('summaryNotes')}
+              multiline
+              rows={4}
+              fullWidth
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+            />
+            <Box>
+              <Typography variant="body2">{t('uploadAudio')}</Typography>
+              <input type="file" accept="audio/*" onChange={(e) => setAudioFile(e.target.files?.[0] || null)} />
+            </Box>
+            <Box>
+              <Typography variant="body2">{t('uploadImage')}</Typography>
+              <input type="file" accept="image/*" onChange={(e) => setImageFile(e.target.files?.[0] || null)} />
+            </Box>
+            <Box>
+              <Typography variant="body2">{t('uploadDocument')}</Typography>
+              <input type="file" accept=".pdf" onChange={(e) => setDocumentFile(e.target.files?.[0] || null)} />
+            </Box>
+          </>
         )}
-
-        <TextField
-          label={t('notesOptions')}
-          multiline
-          rows={3}
-          fullWidth
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-          slotProps={{ inputLabel: { shrink: true } }}
-        />
-
-        <TextField
-          label={t('resourceLinkOptional')}
-          fullWidth
-          value={resourceLink}
-          onChange={(e) => setResourceLink(e.target.value)}
-          slotProps={{ inputLabel: { shrink: true } }}
-        />
       </DialogContent>
-
       <DialogActions sx={{ p: 3 }}>
-        <Button onClick={onClose} sx={{ fontWeight: 'bold' }}>
-          {t('cancel')}
-        </Button>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleSubmit}
-          disabled={actionMutation.isPending || !selectedTime}
-          sx={{ fontWeight: 'bold' }}
-        >
-          {actionMutation.isPending ? <CircularProgress size={24} color="inherit" /> : t('save')}
+        <Button onClick={onClose}>{t('cancel')}</Button>
+        <Button variant="contained" onClick={() => mutation.mutate()} disabled={mutation.isPending}>
+          {mutation.isPending ? <CircularProgress size={24} /> : t('save')}
         </Button>
       </DialogActions>
     </Dialog>

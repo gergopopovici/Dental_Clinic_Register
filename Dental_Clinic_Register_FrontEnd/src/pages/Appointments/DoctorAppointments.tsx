@@ -6,7 +6,6 @@ import {
   Snackbar,
   Alert,
   TextField,
-  Divider,
   Button,
   Dialog,
   DialogTitle,
@@ -16,15 +15,11 @@ import {
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import {
-  getDoctorDailyAppointments,
-  cancelAppointmentByDoctor,
-  markAsCompleted,
-  markAsNoShow,
-} from '../../services/AppointmentService';
+import { getDoctorDailyAppointments, cancelAppointmentByDoctor, markAsNoShow } from '../../services/AppointmentService';
 import AppointmentCard from '../../components/AppointmentCard';
 import DoctorActionModal from '../../components/DoctorActionModal';
 import DoctorBookModal from '../../components/DoctorBookModal';
+import { ResponseAppointmentDTO } from '../../models/Appointment';
 
 interface DoctorAppointmentsProps {
   userId: number;
@@ -42,6 +37,12 @@ function DoctorAppointments({ userId }: DoctorAppointmentsProps) {
   const [, setModalInitialDateTime] = useState<string>('');
   const [modalInitialNotes, setModalInitialNotes] = useState<string>('');
   const [modalInitialResourceLink, setModalInitialResourceLink] = useState<string>('');
+
+  const [selectedAppointment, setSelectedAppointment] = useState<ResponseAppointmentDTO | null>(null);
+  const [isSummaryModalOpen, setIsSummaryModalOpen] = useState(false);
+  const [summaryApptId, setSummaryApptId] = useState<number | null>(null);
+  const [summaryExistingNotes, setSummaryExistingNotes] = useState('');
+  const [summaryExistingData, setSummaryExistingData] = useState<any>(undefined);
 
   const [isBookModalOpen, setIsBookModalOpen] = useState(false);
 
@@ -66,14 +67,6 @@ function DoctorAppointments({ userId }: DoctorAppointmentsProps) {
     onError: handleError,
   });
 
-  const completeMutation = useMutation({
-    mutationFn: (id: number) => markAsCompleted(userId, id),
-    onSuccess: async () => {
-      await handleSuccess('appointmentCompleted');
-    },
-    onError: handleError,
-  });
-
   const noShowMutation = useMutation({
     mutationFn: (id: number) => markAsNoShow(userId, id),
     onSuccess: async () => {
@@ -92,8 +85,9 @@ function DoctorAppointments({ userId }: DoctorAppointmentsProps) {
     setSnackbar({ open: true, message: t(backendErrorKey), severity: 'error' });
   }
 
-  const openRescheduleModal = (apt: any) => {
+  const openRescheduleModal = (apt: ResponseAppointmentDTO) => {
     setSelectedApptId(apt.id);
+    setSelectedAppointment(apt);
     setModalInitialDateTime(apt.startTime ? apt.startTime.substring(0, 16) : '');
     setModalInitialNotes(apt.notes || '');
     setModalInitialResourceLink(apt.resourceLink || '');
@@ -174,10 +168,28 @@ function DoctorAppointments({ userId }: DoctorAppointmentsProps) {
                         : undefined
                     }
                     onUpdate={!isDeleted && apt.status === 'CONFIRMED' ? () => openRescheduleModal(apt) : undefined}
-                    onComplete={
-                      !isDeleted && apt.status === 'CONFIRMED' ? (id) => completeMutation.mutate(id) : undefined
-                    }
                     onNoShow={!isDeleted && apt.status === 'CONFIRMED' ? (id) => noShowMutation.mutate(id) : undefined}
+                    // GOMB: Befejezés (Ha még aktív, de a doktor le akarja zárni az összefoglalóval)
+                    onComplete={
+                      !isDeleted && apt.status === 'CONFIRMED'
+                        ? (id) => {
+                            setSummaryApptId(id);
+                            setSummaryExistingNotes(apt.summary?.notes || '');
+                            setSummaryExistingData(apt.summary);
+                            setIsSummaryModalOpen(true);
+                          }
+                        : undefined
+                    }
+                    onAddSummary={
+                      !isDeleted && apt.status === 'COMPLETED'
+                        ? (id) => {
+                            setSummaryApptId(id);
+                            setSummaryExistingNotes(apt.summary?.notes || '');
+                            setSummaryExistingData(apt.summary);
+                            setIsSummaryModalOpen(true);
+                          }
+                        : undefined
+                    }
                   />
                 </Box>
               </Grid>
@@ -193,6 +205,20 @@ function DoctorAppointments({ userId }: DoctorAppointmentsProps) {
         appointmentId={selectedApptId}
         initialNotes={modalInitialNotes}
         initialResourceLink={modalInitialResourceLink}
+        mode="RESCHEDULE"
+        patientId={selectedAppointment?.patientId}
+        initialStartTime={selectedAppointment?.startTime}
+        initialTreatmentPlanId={selectedAppointment?.treatmentPlanId}
+      />
+
+      <DoctorActionModal
+        open={isSummaryModalOpen}
+        onClose={() => setIsSummaryModalOpen(false)}
+        userId={userId}
+        appointmentId={summaryApptId}
+        initialNotes={summaryExistingNotes}
+        existingSummary={summaryExistingData}
+        mode="COMPLETE"
       />
 
       <DoctorBookModal open={isBookModalOpen} onClose={() => setIsBookModalOpen(false)} doctorId={userId} />

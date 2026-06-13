@@ -12,7 +12,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/treatment-plans")
 public class TreatmentPlanController {
-
     private final TreatmentPlanService treatmentPlanService;
 
     public TreatmentPlanController(TreatmentPlanService treatmentPlanService) {
@@ -44,7 +43,7 @@ public class TreatmentPlanController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('DOCTOR')") // Only doctors should delete plans
+    @PreAuthorize("hasRole('DOCTOR')")
     public ResponseEntity<Void> deletePlan(@PathVariable Long id) {
         treatmentPlanService.deletePlan(id);
         return ResponseEntity.noContent().build();

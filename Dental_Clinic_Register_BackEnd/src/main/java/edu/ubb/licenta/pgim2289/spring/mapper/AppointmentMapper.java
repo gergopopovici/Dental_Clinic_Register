@@ -1,7 +1,9 @@
 package edu.ubb.licenta.pgim2289.spring.mapper;
 
+import edu.ubb.licenta.pgim2289.spring.dto.AppointmentSummaryDTO;
 import edu.ubb.licenta.pgim2289.spring.dto.ResponseAppointmentDTO;
 import edu.ubb.licenta.pgim2289.spring.model.Appointment;
+import edu.ubb.licenta.pgim2289.spring.model.AppointmentSummary;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
@@ -16,6 +18,9 @@ public interface AppointmentMapper {
     @Mapping(source = "service.name", target = "serviceName")
     @Mapping(source = "service.durationMinutes", target = "serviceDurationMinutes")
     @Mapping(source = "service.price", target = "price")
+    @Mapping(source = "treatmentPlan.id", target = "treatmentPlanId")
+    @Mapping(source = "treatmentPlan.primaryService.name", target = "treatmentPlanName")
     ResponseAppointmentDTO toDto(Appointment appointment);
 
+    AppointmentSummaryDTO toSummaryDto(AppointmentSummary summary);
 }

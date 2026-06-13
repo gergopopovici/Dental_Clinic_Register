@@ -1,3 +1,5 @@
+import { AppointmentSummaryDTO } from "./TreatmentPlan";
+
 export type Gender = 'MALE' | 'FEMALE' | 'OTHER';
 export type AppointmentStatus = 'CONFIRMED' | 'COMPLETED' | 'CANCELLED' | 'NO_SHOW';
 
@@ -30,12 +32,14 @@ export interface DoctorCreateAppointmentDTO {
   startTime: string;
   notes?: string;
   resourceLink?: string;
+  treatmentPlanId?: number | null;
 }
 
 export interface DoctorUpdateAppointmentDTO {
   newStartTime: string;
   notes?: string;
   resourceLink?: string;
+  treatmentPlanId?: number | null;
 }
 
 export interface RequestUserDTO {
@@ -74,4 +78,7 @@ export interface ResponseAppointmentDTO {
   notes?: string;
   resourceLink?: string;
   price: number;
+  summary?: AppointmentSummaryDTO;
+  treatmentPlanId?: number;
+  treatmentPlanName?: string;
 }

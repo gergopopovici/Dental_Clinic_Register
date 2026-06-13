@@ -16,12 +16,19 @@ import {
   Card,
   CardContent,
   Grid,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
 } from '@mui/material';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import AudiotrackIcon from '@mui/icons-material/Audiotrack';
+import ImageIcon from '@mui/icons-material/Image';
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import AppointmentCard from '../components/AppointmentCard';
 import { cancelAppointmentByPatient, getPatientAppointments } from '../services/AppointmentService';
 import { getPlansByPatientId } from '../services/TreatmentPlanService';
 import { ResponseAppointmentDTO } from '../models/Appointment';
-import { TreatmentPlanDTO } from '../models/TreatmentPlan';
+import { TreatmentPlanDTO, PlanAppointmentDTO } from '../models/TreatmentPlan';
 
 interface PatientDashboardProps {
   userId: number;
@@ -81,6 +88,64 @@ function PatientDashboard({ userId }: PatientDashboardProps) {
     },
   });
 
+  const getFileUrl = (url: string) => `http://localhost:8080/api/files/${url.split('/').pop()}`;
+
+  const renderAppointmentHistory = (planAppointments?: PlanAppointmentDTO[]) => {
+    if (!planAppointments || planAppointments.length === 0)
+      return <Typography variant="body2">{t('noAppointmentsYet', 'No appointments yet.')}</Typography>;
+    return [...planAppointments]
+      .sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime())
+      .map((apt) => (
+        <Box
+          key={apt.id}
+          sx={{ mb: 2, p: 2, bgcolor: 'background.paper', borderRadius: 1, border: '1px solid #e0e0e0' }}
+        >
+          <Typography variant="subtitle2" fontWeight="bold">
+            {new Date(apt.startTime).toLocaleString()} - {apt.serviceName}
+          </Typography>
+          {apt.summary ? (
+            <Box sx={{ mt: 1 }}>
+              <Typography variant="body2">{apt.summary.notes}</Typography>
+              <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
+                {apt.summary.audioUrl && (
+                  <Button
+                    size="small"
+                    startIcon={<AudiotrackIcon />}
+                    href={getFileUrl(apt.summary.audioUrl)}
+                    target="_blank"
+                  >
+                    {t('audio')}
+                  </Button>
+                )}
+                {apt.summary.imageUrl && (
+                  <Button
+                    size="small"
+                    startIcon={<ImageIcon />}
+                    href={getFileUrl(apt.summary.imageUrl)}
+                    target="_blank"
+                  >
+                    {t('image')}
+                  </Button>
+                )}
+                {apt.summary.documentUrl && (
+                  <Button
+                    size="small"
+                    startIcon={<PictureAsPdfIcon />}
+                    href={getFileUrl(apt.summary.documentUrl)}
+                    target="_blank"
+                  >
+                    {t('document')}
+                  </Button>
+                )}
+              </Box>
+            </Box>
+          ) : (
+            <Typography variant="caption">{t('noSummaryYet', 'No summary attached.')}</Typography>
+          )}
+        </Box>
+      ));
+  };
+
   return (
     <Box>
       <Box
@@ -91,7 +156,7 @@ function PatientDashboard({ userId }: PatientDashboardProps) {
         </Typography>
       </Box>
 
-      <Grid container spacing={4}>
+      <Grid container spacing={4} alignItems="flex-start">
         <Grid size={{ xs: 12, md: 6 }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
             <Typography variant="h6">{t('nextAppointment')}</Typography>
@@ -123,7 +188,6 @@ function PatientDashboard({ userId }: PatientDashboardProps) {
             />
           )}
         </Grid>
-
         <Grid size={{ xs: 12, md: 6 }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
             <Typography variant="h6">{t('activePlans')}</Typography>
@@ -145,7 +209,7 @@ function PatientDashboard({ userId }: PatientDashboardProps) {
             <Card>
               <CardContent>
                 <Typography variant="h6" sx={{ mb: 1, fontWeight: 'bold' }}>
-                  {activePlan.planName || t('planName')}
+                  {activePlan.primaryServiceName || t('planName')}
                 </Typography>
                 <Typography variant="body2" sx={{ mb: 2 }}>
                   {t('status')}: {t(activePlan.status)}
@@ -154,10 +218,19 @@ function PatientDashboard({ userId }: PatientDashboardProps) {
                   variant="contained"
                   color="primary"
                   onClick={() => navigate(`/treatment-plans/${activePlan.id}/braces`)}
-                  sx={{ textTransform: 'uppercase', '&:focus': { outline: 'none' } }}
+                  sx={{ textTransform: 'uppercase', '&:focus': { outline: 'none' }, mb: 2 }}
                 >
                   {t('view3DModel')}
                 </Button>
+
+                <Accordion variant="outlined" sx={{ bgcolor: 'background.default' }}>
+                  <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                    <Typography fontWeight="bold">
+                      {t('appointmentHistory', 'Appointment History & Summaries')}
+                    </Typography>
+                  </AccordionSummary>
+                  <AccordionDetails>{renderAppointmentHistory(activePlan.appointments)}</AccordionDetails>
+                </Accordion>
               </CardContent>
             </Card>
           )}
@@ -186,7 +259,7 @@ function PatientDashboard({ userId }: PatientDashboardProps) {
         </DialogActions>
       </Dialog>
       <Snackbar open={snackbar.open} autoHideDuration={6000} onClose={() => setSnackbar({ ...snackbar, open: false })}>
-        <Alert severity={snackbar.severity} variant="filled">
+        <Alert severity={snackbar.severity} variant="standard">
           {snackbar.message}
         </Alert>
       </Snackbar>

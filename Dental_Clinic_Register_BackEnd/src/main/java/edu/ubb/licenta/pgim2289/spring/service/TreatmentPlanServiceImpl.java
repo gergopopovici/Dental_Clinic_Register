@@ -1,12 +1,14 @@
 package edu.ubb.licenta.pgim2289.spring.service;
 
 import edu.ubb.licenta.pgim2289.spring.dto.TreatmentPlanDTO;
+import edu.ubb.licenta.pgim2289.spring.mapper.TreatmentPlanMapper;
 import edu.ubb.licenta.pgim2289.spring.model.*;
 import edu.ubb.licenta.pgim2289.spring.repository.TreatmentPlanRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -16,36 +18,24 @@ public class TreatmentPlanServiceImpl implements TreatmentPlanService {
     private final PatientService patientService;
     private final UserService userService;
     private final ServiceProvidedService serviceProvidedService;
+    private final TreatmentPlanMapper treatmentPlanMapper;
 
     public TreatmentPlanServiceImpl(TreatmentPlanRepository treatmentPlanRepository,
                                     PatientService patientService,
                                     UserService userService,
-                                    ServiceProvidedService serviceProvidedService) {
+                                    ServiceProvidedService serviceProvidedService, TreatmentPlanMapper treatmentPlanMapper) {
         this.treatmentPlanRepository = treatmentPlanRepository;
         this.patientService = patientService;
         this.userService = userService;
         this.serviceProvidedService = serviceProvidedService;
+        this.treatmentPlanMapper = treatmentPlanMapper;
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<TreatmentPlanDTO> getPlansByPatientId(Long userId) {
         return treatmentPlanRepository.findByPatient_User_Id(userId).stream()
-                .map(plan -> {
-                    TreatmentPlanDTO dto = new TreatmentPlanDTO();
-                    dto.setId(plan.getId());
-                    dto.setPatientId(plan.getPatient().getUser().getId());
-                    dto.setPlanName(plan.getPlanName());
-                    dto.setStartDate(plan.getStartDate());
-                    dto.setEndDate(plan.getEndDate());
-                    dto.setStatus(plan.getStatus());
-                    dto.setNotes(plan.getNotes());
-                    if (plan.getServices() != null) {
-                        dto.setServiceIds(plan.getServices().stream()
-                                .map(BaseEntity::getId)
-                                .collect(Collectors.toSet()));
-                    }
-                    return dto;
-                })
+                .map(treatmentPlanMapper::toDto)
                 .collect(Collectors.toList());
     }
 
@@ -54,64 +44,34 @@ public class TreatmentPlanServiceImpl implements TreatmentPlanService {
     public TreatmentPlanDTO createPlan(TreatmentPlanDTO dto) {
         User user = userService.findById(dto.getPatientId())
                 .orElseThrow(() -> new IllegalArgumentException("error.user.not_found"));
-
         Patient patient = patientService.getPatient(user);
-
+        ServiceProvided primaryService = serviceProvidedService.findById(dto.getPrimaryServiceId())
+                .orElseThrow(() -> new IllegalArgumentException("error.service.not.found"));
         TreatmentPlan plan = new TreatmentPlan();
         plan.setPatient(patient);
-        plan.setPlanName(dto.getPlanName());
+        plan.setPrimaryService(primaryService);
+        plan.setRequires3DModel(dto.isRequires3DModel());
         plan.setStartDate(dto.getStartDate());
         plan.setEndDate(dto.getEndDate());
         plan.setStatus(dto.getStatus());
-        plan.setNotes(dto.getNotes());
+        plan.setGeneralNotes(dto.getGeneralNotes());
 
-        if (dto.getServiceIds() != null && !dto.getServiceIds().isEmpty()) {
-            Set<ServiceProvided> services = dto.getServiceIds().stream()
+        if (dto.getPlannedServiceIds() != null &&
+                !dto.getPlannedServiceIds().isEmpty()) {
+            Set<ServiceProvided> services = dto.getPlannedServiceIds().stream()
                     .map(id -> serviceProvidedService.findById(id)
                             .orElseThrow(() -> new IllegalArgumentException("error.service.not.found")))
                     .collect(Collectors.toSet());
-            plan.setServices(services);
+            plan.setPlannedServices(services);
         }
-
-        TreatmentPlan savedPlan = treatmentPlanRepository.save(plan);
-
-        TreatmentPlanDTO result = new TreatmentPlanDTO();
-        result.setId(savedPlan.getId());
-        result.setPatientId(savedPlan.getPatient().getUser().getId());
-        result.setPlanName(savedPlan.getPlanName());
-        result.setStartDate(savedPlan.getStartDate());
-        result.setEndDate(savedPlan.getEndDate());
-        result.setStatus(savedPlan.getStatus());
-        result.setNotes(savedPlan.getNotes());
-
-        if (savedPlan.getServices() != null) {
-            result.setServiceIds(savedPlan.getServices().stream()
-                    .map(BaseEntity::getId)
-                    .collect(Collectors.toSet()));
-        }
-
-        return result;
+        return treatmentPlanMapper.toDto(treatmentPlanRepository.save(plan));
     }
 
     @Override
+    @Transactional(readOnly = true)
     public TreatmentPlanDTO getPlanById(Long id) {
         return treatmentPlanRepository.findById(id)
-                .map(plan -> {
-                    TreatmentPlanDTO dto = new TreatmentPlanDTO();
-                    dto.setId(plan.getId());
-                    dto.setPatientId(plan.getPatient().getUser().getId());
-                    dto.setPlanName(plan.getPlanName());
-                    dto.setStartDate(plan.getStartDate());
-                    dto.setEndDate(plan.getEndDate());
-                    dto.setStatus(plan.getStatus());
-                    dto.setNotes(plan.getNotes());
-                    if (plan.getServices() != null) {
-                        dto.setServiceIds(plan.getServices().stream()
-                                .map(BaseEntity::getId)
-                                .collect(Collectors.toSet()));
-                    }
-                    return dto;
-                })
+                .map(treatmentPlanMapper::toDto)
                 .orElseThrow(() -> new IllegalArgumentException("error.treatment_plan.not_found"));
     }
 
@@ -120,41 +80,26 @@ public class TreatmentPlanServiceImpl implements TreatmentPlanService {
     public TreatmentPlanDTO updatePlan(Long id, TreatmentPlanDTO dto) {
         TreatmentPlan plan = treatmentPlanRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("error.treatment_plan.not_found"));
+        ServiceProvided primaryService = serviceProvidedService.findById(dto.getPrimaryServiceId())
+                .orElseThrow(() -> new IllegalArgumentException("error.service.not.found"));
 
-        plan.setPlanName(dto.getPlanName());
+        plan.setPrimaryService(primaryService);
+        plan.setRequires3DModel(dto.isRequires3DModel());
         plan.setStartDate(dto.getStartDate());
         plan.setEndDate(dto.getEndDate());
         plan.setStatus(dto.getStatus());
-        plan.setNotes(dto.getNotes());
+        plan.setGeneralNotes(dto.getGeneralNotes());
 
-        if (dto.getServiceIds() != null && !dto.getServiceIds().isEmpty()) {
-            Set<ServiceProvided> services = dto.getServiceIds().stream()
+        if (dto.getPlannedServiceIds() != null && !dto.getPlannedServiceIds().isEmpty()) {
+            Set<ServiceProvided> services = dto.getPlannedServiceIds().stream()
                     .map(serviceId -> serviceProvidedService.findById(serviceId)
                             .orElseThrow(() -> new IllegalArgumentException("error.service.not.found")))
                     .collect(Collectors.toSet());
-            plan.setServices(services);
+            plan.setPlannedServices(services);
         } else {
-            plan.getServices().clear();
+            plan.getPlannedServices().clear();
         }
-
-        TreatmentPlan updatedPlan = treatmentPlanRepository.save(plan);
-
-        TreatmentPlanDTO result = new TreatmentPlanDTO();
-        result.setId(updatedPlan.getId());
-        result.setPatientId(updatedPlan.getPatient().getUser().getId());
-        result.setPlanName(updatedPlan.getPlanName());
-        result.setStartDate(updatedPlan.getStartDate());
-        result.setEndDate(updatedPlan.getEndDate());
-        result.setStatus(updatedPlan.getStatus());
-        result.setNotes(updatedPlan.getNotes());
-
-        if (updatedPlan.getServices() != null) {
-            result.setServiceIds(updatedPlan.getServices().stream()
-                    .map(BaseEntity::getId)
-                    .collect(Collectors.toSet()));
-        }
-
-        return result;
+        return treatmentPlanMapper.toDto(treatmentPlanRepository.save(plan));
     }
 
     @Override
@@ -164,5 +109,11 @@ public class TreatmentPlanServiceImpl implements TreatmentPlanService {
             throw new IllegalArgumentException("error.treatment_plan.not_found");
         }
         treatmentPlanRepository.deleteById(id);
+    }
+
+    @Override
+    public TreatmentPlan getTreatmentPlanEntityById(Long id) {
+        return treatmentPlanRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("error.treatment_plan.not_found"));
     }
 }

@@ -51,4 +51,13 @@ public class Appointment extends BaseEntity {
     public enum AppointmentStatus {
         CONFIRMED, COMPLETED, CANCELLED, NO_SHOW
     }
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "treatment_plan_id")
+    private TreatmentPlan treatmentPlan;
+
+    @OneToOne(mappedBy = "appointment", cascade = CascadeType.ALL)
+    private AppointmentSummary summary;
+
+
 }

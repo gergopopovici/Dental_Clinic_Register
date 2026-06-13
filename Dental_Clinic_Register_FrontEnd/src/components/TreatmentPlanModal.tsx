@@ -11,13 +11,15 @@ import {
   Autocomplete,
   MenuItem,
   Box,
+  FormControlLabel,
+  Checkbox,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { createPlan, updatePlan } from '../services/TreatmentPlanService';
-import { TreatmentPlanDTO, TreatmentPlanStatus } from '../models/TreatmentPlan';
+import { TreatmentPlanDTO } from '../models/TreatmentPlan';
 import { ResponseServiceDTO } from '../models/Service';
 import { getAllServices } from '../services/ProvidedServiceService';
+import { createPlan, updatePlan } from '../services/TreatmentPlanService';
 
 interface TreatmentPlanModalProps {
   open: boolean;
@@ -39,13 +41,13 @@ function TreatmentPlanModal({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
-  const [planName, setPlanName] = useState('');
+  const [primaryService, setPrimaryService] = useState<ResponseServiceDTO | null>(null);
+  const [requires3DModel, setRequires3DModel] = useState(false);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  const [status, setStatus] = useState<TreatmentPlanStatus>(TreatmentPlanStatus.ACTIVE);
-  const [notes, setNotes] = useState('');
-  const [selectedServices, setSelectedServices] = useState<ResponseServiceDTO[]>([]);
-  const [errorMessage, setErrorMessage] = useState('');
+  const [status, setStatus] = useState<'ACTIVE' | 'COMPLETED' | 'SUSPENDED' | 'CANCELLED'>('ACTIVE');
+  const [generalNotes, setGeneralNotes] = useState('');
+  const [plannedServices, setPlannedServices] = useState<ResponseServiceDTO[]>([]);
 
   const { data: availableServices, isLoading: isLoadingServices } = useQuery({
     queryKey: ['allServices'],
@@ -54,87 +56,72 @@ function TreatmentPlanModal({
 
   useEffect(() => {
     if (open && existingPlan) {
-      setPlanName(existingPlan.planName);
+      setRequires3DModel(existingPlan.requires3DModel || false);
       setStartDate(existingPlan.startDate);
       setEndDate(existingPlan.endDate || '');
       setStatus(existingPlan.status);
-      setNotes(existingPlan.notes || '');
-
-      if (availableServices && existingPlan.serviceIds) {
-        const preSelected = availableServices.filter((s) => existingPlan.serviceIds?.includes(s.id));
-        setSelectedServices(preSelected);
+      setGeneralNotes(existingPlan.generalNotes || '');
+      if (availableServices) {
+        setPrimaryService(availableServices.find((s) => s.id === existingPlan.primaryServiceId) || null);
+        setPlannedServices(availableServices.filter((s) => existingPlan.plannedServiceIds?.includes(s.id)));
       }
     } else {
-      setPlanName('');
+      setPrimaryService(null);
+      setRequires3DModel(false);
       setStartDate(new Date().toISOString().slice(0, 10));
       setEndDate('');
-      setStatus(TreatmentPlanStatus.ACTIVE);
-      setNotes('');
-      setSelectedServices([]);
-      setErrorMessage('');
+      setStatus('ACTIVE');
+      setGeneralNotes('');
+      setPlannedServices([]);
     }
   }, [open, existingPlan, availableServices]);
 
   const mutation = useMutation({
-    mutationFn: (payload: TreatmentPlanDTO) => {
-      if (existingPlan?.id) {
-        return updatePlan(existingPlan.id, payload);
-      }
-      return createPlan(payload);
-    },
+    mutationFn: (payload: TreatmentPlanDTO) =>
+      existingPlan?.id ? updatePlan(existingPlan.id, payload) : createPlan(payload),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['treatmentPlans'] });
       onSuccess();
     },
-    onError: (error: any) => {
-      const backendErrorKey = error.response?.data?.message || 'error.unknown';
-      const translatedError = t(backendErrorKey);
-
-      setErrorMessage(translatedError);
-      onErrorAction(translatedError);
-    },
+    onError: (error: any) => onErrorAction(t(error.response?.data?.message || 'error.unknown')),
   });
 
   const handleSubmit = () => {
-    if (!planName || !startDate) {
-      setErrorMessage(t('pleaseFillRequiredFields'));
-      return;
-    }
-
-    const payload: TreatmentPlanDTO = {
+    if (!primaryService || !startDate) return onErrorAction(t('pleaseFillRequiredFields'));
+    mutation.mutate({
       patientId,
-      planName,
+      primaryServiceId: primaryService.id,
+      requires3DModel,
       startDate,
       endDate: endDate || undefined,
       status,
-      notes,
-      serviceIds: selectedServices.map((s) => s.id),
-    };
-
-    mutation.mutate(payload);
+      generalNotes,
+      plannedServiceIds: plannedServices.map((s) => s.id),
+    });
   };
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle sx={{ fontWeight: 'bold' }}>
-        {existingPlan ? t('editTreatmentPlan') : t('createNewPlan')}
-      </DialogTitle>
-
+      <DialogTitle>{existingPlan ? t('editTreatmentPlan') : t('createNewPlan')}</DialogTitle>
       <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 3, pt: '24px !important' }}>
-        {errorMessage && (
-          <Typography color="error" variant="body2" sx={{ textAlign: 'center', mb: 1 }}>
-            {errorMessage}
-          </Typography>
-        )}
-
-        <TextField
-          label={t('planName')}
-          required
-          fullWidth
-          value={planName}
-          onChange={(e) => setPlanName(e.target.value)}
+        <Autocomplete
+          options={availableServices || []}
+          getOptionLabel={(opt) => opt.name}
+          loading={isLoadingServices}
+          value={primaryService}
+          onChange={(_, val) => setPrimaryService(val)}
+          renderInput={(params) => <TextField {...params} label={t('primaryServiceCategory')} required />}
         />
-
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={requires3DModel}
+              onChange={(e) => setRequires3DModel(e.target.checked)}
+              color="primary"
+            />
+          }
+          label={t('requires3DModel', 'Requires 3D Dental Braces Model')}
+        />
         <Box sx={{ display: 'flex', gap: 2 }}>
           <TextField
             type="date"
@@ -154,62 +141,41 @@ function TreatmentPlanModal({
             onChange={(e) => setEndDate(e.target.value)}
           />
         </Box>
-
         <TextField
           select
           label={t('status')}
           fullWidth
           value={status}
-          onChange={(e) => setStatus(e.target.value as TreatmentPlanStatus)}
+          onChange={(e) => setStatus(e.target.value as any)}
         >
-          {Object.values(TreatmentPlanStatus).map((s) => (
+          {['ACTIVE', 'COMPLETED', 'SUSPENDED', 'CANCELLED'].map((s) => (
             <MenuItem key={s} value={s}>
               {t(s)}
             </MenuItem>
           ))}
         </TextField>
-
         <Autocomplete
           multiple
           options={availableServices || []}
-          getOptionLabel={(option) => option.name}
+          getOptionLabel={(opt) => opt.name}
           loading={isLoadingServices}
-          value={selectedServices}
-          onChange={(event, newValue) => setSelectedServices(newValue)}
-          noOptionsText={t('noServicesFound', 'No services found')}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              label={t('selectServicesOptional')}
-              slotProps={{
-                input: {
-                  ...params.InputProps,
-                  endAdornment: (
-                    <React.Fragment>
-                      {isLoadingServices ? <CircularProgress color="inherit" size={20} /> : null}
-                      {params.InputProps.endAdornment}
-                    </React.Fragment>
-                  ),
-                },
-              }}
-            />
-          )}
+          value={plannedServices}
+          onChange={(_, val) => setPlannedServices(val)}
+          renderInput={(params) => <TextField {...params} label={t('plannedServicesOptional', 'Planned Services')} />}
         />
-
         <TextField
-          label={t('notes')}
+          label={t('generalNotes')}
           multiline
           rows={4}
           fullWidth
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
+          value={generalNotes}
+          onChange={(e) => setGeneralNotes(e.target.value)}
         />
       </DialogContent>
-
       <DialogActions sx={{ p: 3 }}>
         <Button onClick={onClose}>{t('cancel')}</Button>
-        <Button variant="contained" color="primary" onClick={handleSubmit} disabled={mutation.isPending}>
-          {mutation.isPending ? <CircularProgress size={24} color="inherit" /> : t('save')}
+        <Button variant="contained" onClick={handleSubmit} disabled={mutation.isPending}>
+          {mutation.isPending ? <CircularProgress size={24} /> : t('save')}
         </Button>
       </DialogActions>
     </Dialog>

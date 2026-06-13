@@ -160,7 +160,11 @@ function PatientAppointments({ userId }: PatientAppointmentsProps) {
       </Dialog>
 
       <Snackbar open={snackbar.open} autoHideDuration={6000} onClose={() => setSnackbar({ ...snackbar, open: false })}>
-        <Alert onClose={() => setSnackbar({ ...snackbar, open: false })} severity={snackbar.severity} variant="filled">
+        <Alert
+          onClose={() => setSnackbar({ ...snackbar, open: false })}
+          severity={snackbar.severity}
+          variant="standard"
+        >
           {snackbar.message}
         </Alert>
       </Snackbar>

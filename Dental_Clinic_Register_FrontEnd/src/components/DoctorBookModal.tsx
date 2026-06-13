@@ -15,6 +15,7 @@ import {
   Autocomplete,
   Box,
   Grid,
+  SelectChangeEvent,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -22,12 +23,40 @@ import { getAllServices } from '../services/ProvidedServiceService';
 import { createAppointmentByDoctor, getBookedSlotsForDoctor } from '../services/AppointmentService';
 import { getAllPatientsForDropdown } from '../services/PatientService';
 import { getDoctorSchedule, getDoctorTimeOffs, getGlobalHolidays } from '../services/ScheduleService';
-import { PatientDropDownDTO } from '../models/Appointment';
+import { PatientDropDownDTO, BookedSlotDTO, DoctorCreateAppointmentDTO } from '../models/Appointment';
+import { getPlansByPatientId } from '../services/TreatmentPlanService';
+import { TreatmentPlanDTO } from '../models/TreatmentPlan';
 
 interface DoctorBookModalProps {
   open: boolean;
   onClose: () => void;
   doctorId: number;
+}
+
+interface ServiceDTO {
+  id: number;
+  name: string;
+  durationMinutes: number;
+}
+
+interface ApiError {
+  response?: {
+    data?: {
+      message?: string;
+    };
+  };
+}
+
+interface ScheduleDTO {
+  dayOfWeek: string;
+  isWorking: boolean;
+  startTime: string;
+  endTime: string;
+}
+
+interface TimeOffDTO {
+  startDate: string;
+  endDate: string;
 }
 
 function DoctorBookModal({ open, onClose, doctorId }: DoctorBookModalProps) {
@@ -36,6 +65,7 @@ function DoctorBookModal({ open, onClose, doctorId }: DoctorBookModalProps) {
 
   const [patientId, setPatientId] = useState<number | ''>('');
   const [serviceId, setServiceId] = useState<number | ''>('');
+  const [treatmentPlanId, setTreatmentPlanId] = useState<number | ''>('');
   const [date, setDate] = useState<string>('');
   const [selectedTime, setSelectedTime] = useState<string>('');
   const [notes, setNotes] = useState<string>('');
@@ -48,6 +78,7 @@ function DoctorBookModal({ open, onClose, doctorId }: DoctorBookModalProps) {
     if (!open) {
       setPatientId('');
       setServiceId('');
+      setTreatmentPlanId('');
       setDate('');
       setSelectedTime('');
       setNotes('');
@@ -60,64 +91,74 @@ function DoctorBookModal({ open, onClose, doctorId }: DoctorBookModalProps) {
     setSelectedTime('');
   }, [date, doctorId, serviceId]);
 
-  const { data: patients, isLoading: isLoadingPatients } = useQuery({
+  const { data: patients, isLoading: isLoadingPatients } = useQuery<PatientDropDownDTO[]>({
     queryKey: ['patients'],
     queryFn: getAllPatientsForDropdown,
     enabled: open,
   });
 
-  const { data: services, isLoading: isLoadingServices } = useQuery({
+  const { data: services, isLoading: isLoadingServices } = useQuery<ServiceDTO[]>({
     queryKey: ['services'],
     queryFn: getAllServices,
     enabled: open,
   });
 
-  const { data: bookedSlots, isLoading: isLoadingSlots } = useQuery({
+  const { data: bookedSlots, isLoading: isLoadingSlots } = useQuery<BookedSlotDTO[]>({
     queryKey: ['bookedSlots', doctorId, date],
     queryFn: () => getBookedSlotsForDoctor(doctorId, date),
     enabled: !!doctorId && !!date && open,
     retry: 1,
   });
 
-  const { data: weeklySchedule, isLoading: isLoadingSchedule } = useQuery({
+  const { data: weeklySchedule, isLoading: isLoadingSchedule } = useQuery<ScheduleDTO[]>({
     queryKey: ['doctorSchedule', doctorId],
     queryFn: () => getDoctorSchedule(doctorId),
     enabled: !!doctorId && open,
     retry: 1,
   });
 
-  const { data: timeOffs, isLoading: isLoadingTimeOffs } = useQuery({
+  const { data: timeOffs, isLoading: isLoadingTimeOffs } = useQuery<TimeOffDTO[]>({
     queryKey: ['doctorTimeOffs', doctorId],
     queryFn: () => getDoctorTimeOffs(doctorId),
     enabled: !!doctorId && open,
     retry: 1,
   });
 
-  const { data: globalHolidays, isLoading: isLoadingGlobal } = useQuery({
+  const { data: globalHolidays, isLoading: isLoadingGlobal } = useQuery<TimeOffDTO[]>({
     queryKey: ['globalHolidays'],
     queryFn: getGlobalHolidays,
     enabled: open,
     retry: 1,
   });
 
+  const { data: patientPlans, isLoading: isLoadingPlans } = useQuery<TreatmentPlanDTO[]>({
+    queryKey: ['treatmentPlans', patientId],
+    queryFn: () => getPlansByPatientId(Number(patientId)),
+    enabled: !!patientId && open,
+  });
+
   const activeAndSortedPatients = useMemo(() => {
     if (!patients) return [];
     return patients
       .filter((p: PatientDropDownDTO) => !p.email.includes('@anonymised.com'))
-      .sort((a, b) => (a.fullName || '').toLowerCase().localeCompare((b.fullName || '').toLowerCase()));
+      .sort((a: PatientDropDownDTO, b: PatientDropDownDTO) =>
+        (a.fullName || '').toLowerCase().localeCompare((b.fullName || '').toLowerCase()),
+      );
   }, [patients]);
 
-  const selectedService = useMemo(() => services?.find((s) => s.id === serviceId), [services, serviceId]);
+  const selectedService = useMemo(() => {
+    return services?.find((s: ServiceDTO) => s.id === serviceId);
+  }, [services, serviceId]);
 
   const availableSlots = useMemo(() => {
     if (!date || !doctorId || !selectedService || !weeklySchedule) return [];
 
     const allTimeOffs = [...(timeOffs || []), ...(globalHolidays || [])];
-    if (allTimeOffs.some((off) => date >= off.startDate && date <= off.endDate)) return [];
+    if (allTimeOffs.some((off: TimeOffDTO) => date >= off.startDate && date <= off.endDate)) return [];
 
     const dateObj = new Date(date);
     const daysOfWeek = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
-    const daySchedule = weeklySchedule.find((s) => s.dayOfWeek === daysOfWeek[dateObj.getDay()]);
+    const daySchedule = weeklySchedule.find((s: ScheduleDTO) => s.dayOfWeek === daysOfWeek[dateObj.getDay()]);
 
     if (!daySchedule || !daySchedule.isWorking) return [];
 
@@ -133,19 +174,22 @@ function DoctorBookModal({ open, onClose, doctorId }: DoctorBookModalProps) {
     const slots: string[] = [];
     let iterations = 0;
 
-    while (current < endOfDay && iterations < 50) {
+    while (current.getTime() < endOfDay.getTime() && iterations < 50) {
       iterations++;
       const slotEnd = new Date(current.getTime() + duration * 60000);
-      if (slotEnd > endOfDay) break;
+      if (slotEnd.getTime() > endOfDay.getTime()) break;
 
-      const isOverlapping = (bookedSlots || []).some(
-        (b) => current < new Date(b.endTime) && slotEnd > new Date(b.startTime),
-      );
+      const isOverlapping = (bookedSlots || []).some((b: BookedSlotDTO) => {
+        const bStart = new Date(b.startTime).getTime();
+        const bEnd = new Date(b.endTime).getTime();
+        return current.getTime() < bEnd && slotEnd.getTime() > bStart;
+      });
 
-      if (!isOverlapping && current > now) {
-        slots.push(
-          `${current.getHours().toString().padStart(2, '0')}:${current.getMinutes().toString().padStart(2, '0')}`,
-        );
+      if (!isOverlapping && current.getTime() > now.getTime()) {
+        const timeString = `${current.getHours().toString().padStart(2, '0')}:${current.getMinutes().toString().padStart(2, '0')}`;
+        if (!slots.includes(timeString)) {
+          slots.push(timeString);
+        }
       }
 
       current = new Date(current.getTime() + (duration + APPOINTMENT_BUFFER_MINUTES) * 60000);
@@ -154,22 +198,40 @@ function DoctorBookModal({ open, onClose, doctorId }: DoctorBookModalProps) {
   }, [date, doctorId, selectedService, bookedSlots, weeklySchedule, timeOffs, globalHolidays]);
 
   const bookMutation = useMutation({
-    mutationFn: (payload: any) => createAppointmentByDoctor(doctorId, payload),
+    mutationFn: (payload: DoctorCreateAppointmentDTO) => createAppointmentByDoctor(doctorId, payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['doctorAppointments'] });
       onClose();
     },
-    onError: (error: any) => setErrorMessage(t(error.response?.data?.message || 'error.unknown')),
+    onError: (error: unknown) => {
+      const err = error as ApiError;
+      setErrorMessage(t(err.response?.data?.message || 'error.unknown'));
+    },
   });
 
+  const handlePatientChange = (_: React.SyntheticEvent, value: PatientDropDownDTO | null) => {
+    setPatientId(value ? value.userId : '');
+    setTreatmentPlanId('');
+  };
+
+  const handleServiceChange = (e: SelectChangeEvent<number | ''>) => {
+    setServiceId(e.target.value === '' ? '' : Number(e.target.value));
+  };
+
+  const handleTreatmentPlanChange = (e: SelectChangeEvent<number | ''>) => {
+    setTreatmentPlanId(e.target.value === '' ? '' : Number(e.target.value));
+  };
+
   const handleSubmit = () => {
-    if (!patientId || !serviceId || !date || !selectedTime) {
+    if (patientId === '' || serviceId === '' || !date || !selectedTime) {
       setErrorMessage(t('pleaseFillAllFields'));
       return;
     }
+
     bookMutation.mutate({
-      patientId,
-      serviceId,
+      patientId: Number(patientId),
+      serviceId: Number(serviceId),
+      treatmentPlanId: treatmentPlanId === '' ? null : Number(treatmentPlanId),
       startTime: `${date}T${selectedTime}:00`,
       notes,
       resourceLink,
@@ -191,21 +253,46 @@ function DoctorBookModal({ open, onClose, doctorId }: DoctorBookModalProps) {
         <Autocomplete
           options={activeAndSortedPatients}
           loading={isLoadingPatients}
-          getOptionLabel={(p) => `${p.fullName} (${p.email})`}
-          value={activeAndSortedPatients.find((p) => p.userId === patientId) || null}
-          onChange={(_, v) => setPatientId(v ? v.userId : '')}
+          getOptionLabel={(p: PatientDropDownDTO) => `${p.fullName} (${p.email})`}
+          value={activeAndSortedPatients.find((p: PatientDropDownDTO) => p.userId === patientId) || null}
+          onChange={handlePatientChange}
           renderInput={(params) => <TextField {...params} label={t('selectPatient')} />}
         />
 
+        {patientId !== '' && (
+          <FormControl fullWidth>
+            <InputLabel shrink>{t('selectTreatmentPlan')}</InputLabel>
+            <Select
+              value={treatmentPlanId}
+              onChange={handleTreatmentPlanChange}
+              label={t('selectTreatmentPlan')}
+              notched
+              displayEmpty
+            >
+              <MenuItem value="">
+                <em>{t('none')}</em>
+              </MenuItem>
+              {isLoadingPlans ? (
+                <MenuItem disabled>
+                  <CircularProgress size={20} />
+                </MenuItem>
+              ) : (
+                patientPlans
+                  ?.filter((p: TreatmentPlanDTO) => p.status === 'ACTIVE')
+                  .map((plan: TreatmentPlanDTO) => (
+                    <MenuItem key={plan.id} value={plan.id as number}>
+                      {plan.primaryServiceName || `Plan #${plan.id}`}
+                    </MenuItem>
+                  ))
+              )}
+            </Select>
+          </FormControl>
+        )}
+
         <FormControl fullWidth>
           <InputLabel shrink>{t('selectService')}</InputLabel>
-          <Select
-            value={serviceId}
-            onChange={(e) => setServiceId(e.target.value as number)}
-            label={t('selectService')}
-            notched
-          >
-            {services?.map((s: any) => (
+          <Select value={serviceId} onChange={handleServiceChange} label={t('selectService')} notched>
+            {services?.map((s: ServiceDTO) => (
               <MenuItem key={s.id} value={s.id}>
                 {s.name} ({s.durationMinutes} min)
               </MenuItem>
@@ -233,7 +320,7 @@ function DoctorBookModal({ open, onClose, doctorId }: DoctorBookModalProps) {
               <Typography>{t('noAvailableSlots')}</Typography>
             ) : (
               <Grid container spacing={1}>
-                {availableSlots.map((time) => (
+                {availableSlots.map((time: string) => (
                   <Grid size={{ xs: 3 }} key={time}>
                     <Button
                       variant={selectedTime === time ? 'contained' : 'outlined'}

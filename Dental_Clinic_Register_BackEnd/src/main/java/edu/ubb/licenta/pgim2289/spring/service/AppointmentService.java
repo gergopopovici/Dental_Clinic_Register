@@ -1,6 +1,7 @@
 package edu.ubb.licenta.pgim2289.spring.service;
 
 import edu.ubb.licenta.pgim2289.spring.dto.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -25,4 +26,8 @@ public interface AppointmentService {
     List<ResponseAppointmentDTO> getAppointmentsByPatient(Long userId);
 
     List<ResponseAppointmentDTO> getDailyAppointmentsForDoctor(Long userId, LocalDate date);
+
+    AppointmentSummaryDTO addSummaryToAppointment(Long appointmentId, Long doctorUserId,
+                                                  String notes, MultipartFile audio,
+                                                  MultipartFile image, MultipartFile document);
 }

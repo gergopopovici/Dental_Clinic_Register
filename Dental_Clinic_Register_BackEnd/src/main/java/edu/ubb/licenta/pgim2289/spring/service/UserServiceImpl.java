@@ -111,22 +111,43 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public ResponseEntity<MessageResponse> deleteUser(Long id) {
-        if (userRepository.existsById(id)) {
-            Optional<User> userOptional = userRepository.findById(id);
-            User user = userOptional.get();
-            String randomStr = UUID.randomUUID().toString();
-            user.setEmail("deleted_" + randomStr + "@anonymised.com");
-            user.setUserName("anon_" + randomStr.substring(0, 8));
-            user.setFirstName("Deleted");
-            user.setLastName("Patient");
-            user.setPhoneNumber(randomStr.substring(0, 10));
-            user.setEnabled(false);
-            userRepository.save(user);
-            return ResponseEntity.ok(new MessageResponse("success.user.deleted"));
-        } else {
+        Optional<User> userOptional = userRepository.findById(id);
+
+        if (userOptional.isEmpty()) {
             return ResponseEntity.badRequest().body(new MessageResponse("error.user.not_found"));
         }
+
+        User user = userOptional.get();
+
+        boolean isAdmin = user.getRoles().stream().anyMatch(role -> role.getRoleName() == Role.RoleName.ROLE_ADMIN);
+        boolean isDoctor = user.getRoles().stream().anyMatch(role -> role.getRoleName() == Role.RoleName.ROLE_DOCTOR);
+
+        if (isAdmin) {
+            long activeAdminCount = userRepository.countActiveAdmins(Role.RoleName.ROLE_ADMIN);
+            if (activeAdminCount <= 1) {
+                return ResponseEntity.badRequest().body(new MessageResponse("error.admin.cannot_delete_last_admin"));
+            }
+        }
+
+        if (isDoctor) {
+            user.setEnabled(false);
+            user.setAccountNonLocked(false);
+            userRepository.save(user);
+            return ResponseEntity.ok(new MessageResponse("success.doctor.deactivated"));
+        }
+
+        String randomStr = UUID.randomUUID().toString();
+        user.setEmail("deleted_" + randomStr + "@anonymised.com");
+        user.setUserName("anon_" + randomStr.substring(0, 8));
+        user.setFirstName("Deleted");
+        user.setLastName("User");
+        user.setPhoneNumber(randomStr.substring(0, 10));
+        user.setEnabled(false);
+        user.setAccountNonLocked(false);
+        userRepository.save(user);
+        return ResponseEntity.ok(new MessageResponse("success.user.deleted"));
     }
 
     @Override

@@ -1,4 +1,4 @@
-import { appointmentsApiUrl } from "../config/apiUrl";
+import { appointmentsApiUrl, appointmentSummaryBaseApiUrl } from "../config/apiUrl";
 import { 
   DoctorCreateAppointmentDTO, 
   DoctorUpdateAppointmentDTO, 
@@ -6,6 +6,7 @@ import {
   ResponseAppointmentDTO,
   BookedSlotDTO
 } from "../models/Appointment";
+import { AppointmentSummaryDTO } from "../models/TreatmentPlan";
 import apiClient from "../utils/axiosInterceptor";
 
 export const getBookedSlotsForDoctor = async (doctorId: number, date: string): Promise<BookedSlotDTO[]> => {
@@ -62,3 +63,41 @@ export const markAsCompleted = async (userId: number, appointmentId: number): Pr
     const response = await apiClient.put(`${appointmentsApiUrl}/doctor/${userId}/complete/${appointmentId}`)
     return response.data;
 };
+
+export const addSummaryToAppointment = async(
+    userId:number,
+    appointmentId:number,
+    notes?:string,
+    audioFile?: File | null,
+    imageFile?: File | null,
+    documentFile?: File | null,
+): Promise<AppointmentSummaryDTO> => {
+  try{
+    const formData = new FormData();
+    if(notes){
+        formData.append('notes',notes);
+    }
+    if(audioFile){
+        formData.append('audio',audioFile);
+    }
+    if(imageFile){
+        formData.append('image',imageFile);
+    }
+    if(documentFile){
+        formData.append('document',documentFile);
+    }
+    const response = await apiClient.post<AppointmentSummaryDTO>(
+      `${appointmentSummaryBaseApiUrl}/${userId}/summary/${appointmentId}`,
+      formData,
+      {
+        headers:{
+          'Content-Type':'multipart/form-data',
+        }
+      }
+    );
+    return response.data;
+  }catch(error){
+    console.error(`Error adding summary to appointment id ${appointmentId}:`, error);
+    throw error;
+  }
+}

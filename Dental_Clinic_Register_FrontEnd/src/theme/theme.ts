@@ -1,5 +1,14 @@
 import { createTheme, ThemeOptions } from "@mui/material/styles";
 
+declare module "@mui/material/styles" {
+  interface Palette {
+    summaryBox: string;
+  }
+  interface PaletteOptions {
+    summaryBox?: string;
+  }
+}
+
 const sharedTokens: ThemeOptions = {
   typography: {
     fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
@@ -13,6 +22,7 @@ export const darkThemeOptions: ThemeOptions = {
   ...sharedTokens,
   palette: {
     mode: "dark",
+    summaryBox: "#424242",
     background: {
       default: "#121212",
       paper: "#1e1e1e",
@@ -54,6 +64,7 @@ export const lightThemeOptions: ThemeOptions = {
   ...sharedTokens,
   palette: {
     mode: "light",
+    summaryBox: "#e3f2fd",
     background: {
       default: "#eef2f7",
       paper: "#ffffff",

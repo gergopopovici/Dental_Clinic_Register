@@ -698,24 +698,22 @@ function ProfileSettings() {
             </Button>
           </Box>
         </Box>
-        {!user.specialisation && (
-          <Box sx={{ width: '100%', mt: 4 }}>
-            <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold' }}>
-              {t('deleteAccount')}
-            </Typography>
-            <Typography variant="body1" sx={{ marginBottom: '16px' }}>
-              {t('wouldyouliketodeletetheaccount')}
-            </Typography>
-            <Button
-              variant="contained"
-              onClick={handleOpenDeleteModal}
-              sx={{ mt: 2, textTransform: 'none' }}
-              color="error"
-            >
-              {t('iwanttodeletetheaccount')}
-            </Button>
-          </Box>
-        )}
+        <Box sx={{ width: '100%', mt: 4 }}>
+          <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold' }}>
+            {t('deleteAccount')}
+          </Typography>
+          <Typography variant="body1" sx={{ marginBottom: '16px' }}>
+            {t('wouldyouliketodeletetheaccount')}
+          </Typography>
+          <Button
+            variant="contained"
+            onClick={handleOpenDeleteModal}
+            sx={{ mt: 2, textTransform: 'none' }}
+            color="error"
+          >
+            {t('iwanttodeletetheaccount')}
+          </Button>
+        </Box>
       </Box>
 
       <Dialog open={showCropperModal} onClose={closeCropperModal} maxWidth="sm" fullWidth>
