@@ -55,7 +55,6 @@ function DenturesScene({ treatmentPlanId = 1, readOnly = false }: DenturesSceneP
   const [placementMode, setPlacementMode] = useState<PlacementMode>('none');
   const [rubberBandStartPoint, setRubberBandStartPoint] = useState<THREE.Vector3 | null>(null);
   const [rubberBandColor, setRubberBandColor] = useState<string>('#FF0000');
-  const [archwireColor, setArchwireColor] = useState<string>('#d3d3d3');
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
 
   const {
@@ -218,10 +217,6 @@ function DenturesScene({ treatmentPlanId = 1, readOnly = false }: DenturesSceneP
               <Typography variant="body2">{t('rubberBandLabel')}</Typography>
               <input type="color" value={rubberBandColor} onChange={(e) => setRubberBandColor(e.target.value)} />
             </Box>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Typography variant="body2">{t('archwireLabel')}</Typography>
-              <input type="color" value={archwireColor} onChange={(e) => setArchwireColor(e.target.value)} />
-            </Box>
           </Box>
         </>
       )}
@@ -236,11 +231,9 @@ function DenturesScene({ treatmentPlanId = 1, readOnly = false }: DenturesSceneP
           <ambientLight intensity={1.0} />
           <directionalLight position={[10, 10, 5]} intensity={2.0} />
           <pointLight position={[5, 5, 5]} intensity={1.5} />
-          <DentureModel modelPath="/denture_model.glb" onModelClick={handleModelClick} />
-
-          {upperBrackets.length > 1 && <Archwire points={upperBrackets} color={archwireColor} />}
-          {lowerBrackets.length > 1 && <Archwire points={lowerBrackets} color={archwireColor} />}
-
+          <DentureModel modelPath="/denture_model.glb" onModelClick={handleModelClick} />z
+          {upperBrackets.length > 1 && <Archwire points={upperBrackets} color="#d3d3d3" />}
+          {lowerBrackets.length > 1 && <Archwire points={lowerBrackets} color="#d3d3d3" />}
           {components.map((comp, index) => {
             const pos = new THREE.Vector3(comp.positionX ?? 0, comp.positionY ?? 0, comp.positionZ ?? 0);
             if (comp.type === 'BRACE' && comp.positionX != null) {

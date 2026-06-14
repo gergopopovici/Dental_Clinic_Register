@@ -383,6 +383,12 @@ function DoctorTreatmentPlansView({ doctorId }: DoctorViewProps) {
         patientId={selectedPatient?.userId}
         initialStartTime={actionStartTime}
         initialTreatmentPlanId={actionPlanId}
+        onSuccess={() => {
+          setIsActionModalOpen(false);
+          setSnackbar({ open: true, message: t('appointmentUpdated'), severity: 'success' });
+          queryClient.invalidateQueries({ queryKey: ['treatmentPlans', selectedPatient?.userId] });
+          queryClient.invalidateQueries({ queryKey: ['doctorAppointments', doctorId] });
+        }}
       />
       <DoctorActionModal
         open={isSummaryModalOpen}
@@ -395,6 +401,12 @@ function DoctorTreatmentPlansView({ doctorId }: DoctorViewProps) {
         initialTreatmentPlanId={summaryPlanId}
         initialNotes={summaryExistingNotes}
         existingSummary={summaryExistingData}
+        onSuccess={() => {
+          setIsSummaryModalOpen(false);
+          setSnackbar({ open: true, message: t('appointmentCompleted'), severity: 'success' });
+          queryClient.invalidateQueries({ queryKey: ['treatmentPlans', selectedPatient?.userId] });
+          queryClient.invalidateQueries({ queryKey: ['doctorAppointments', doctorId] });
+        }}
       />
       <Dialog open={cancelDialogOpen} onClose={() => setCancelDialogOpen(false)}>
         <DialogTitle>{t('cancelAppointment')}</DialogTitle>
