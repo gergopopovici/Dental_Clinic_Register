@@ -160,7 +160,7 @@ function Register() {
       const doctorPayload = {
         userDetails: baseUserDetails,
         licenseNumber: licenseNumber,
-        specialisation: specialisation,
+        specialization: specialisation,
         serviceIds: serviceIds,
       };
       doctorRegisterMutation.mutate(doctorPayload as any);
