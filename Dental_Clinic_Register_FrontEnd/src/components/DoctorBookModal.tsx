@@ -26,17 +26,14 @@ import { getDoctorSchedule, getDoctorTimeOffs, getGlobalHolidays } from '../serv
 import { PatientDropDownDTO, BookedSlotDTO, DoctorCreateAppointmentDTO } from '../models/Appointment';
 import { getPlansByPatientId } from '../services/TreatmentPlanService';
 import { TreatmentPlanDTO } from '../models/TreatmentPlan';
+import { DoctorScheduleDTO, TimeOffDTO } from '../models/Schedule';
+import { ResponseServiceDTO } from '../models/Service';
 
 interface DoctorBookModalProps {
   open: boolean;
   onClose: () => void;
   doctorId: number;
-}
-
-interface ServiceDTO {
-  id: number;
-  name: string;
-  durationMinutes: number;
+  onSuccess?: () => void;
 }
 
 interface ApiError {
@@ -47,19 +44,7 @@ interface ApiError {
   };
 }
 
-interface ScheduleDTO {
-  dayOfWeek: string;
-  isWorking: boolean;
-  startTime: string;
-  endTime: string;
-}
-
-interface TimeOffDTO {
-  startDate: string;
-  endDate: string;
-}
-
-function DoctorBookModal({ open, onClose, doctorId }: DoctorBookModalProps) {
+function DoctorBookModal({ open, onClose, doctorId, onSuccess }: DoctorBookModalProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
@@ -97,7 +82,7 @@ function DoctorBookModal({ open, onClose, doctorId }: DoctorBookModalProps) {
     enabled: open,
   });
 
-  const { data: services, isLoading: isLoadingServices } = useQuery<ServiceDTO[]>({
+  const { data: services, isLoading: isLoadingServices } = useQuery<ResponseServiceDTO[]>({
     queryKey: ['services'],
     queryFn: getAllServices,
     enabled: open,
@@ -110,7 +95,7 @@ function DoctorBookModal({ open, onClose, doctorId }: DoctorBookModalProps) {
     retry: 1,
   });
 
-  const { data: weeklySchedule, isLoading: isLoadingSchedule } = useQuery<ScheduleDTO[]>({
+  const { data: weeklySchedule, isLoading: isLoadingSchedule } = useQuery<DoctorScheduleDTO[]>({
     queryKey: ['doctorSchedule', doctorId],
     queryFn: () => getDoctorSchedule(doctorId),
     enabled: !!doctorId && open,
@@ -147,7 +132,7 @@ function DoctorBookModal({ open, onClose, doctorId }: DoctorBookModalProps) {
   }, [patients]);
 
   const selectedService = useMemo(() => {
-    return services?.find((s: ServiceDTO) => s.id === serviceId);
+    return services?.find((s: ResponseServiceDTO) => s.id === serviceId);
   }, [services, serviceId]);
 
   const availableSlots = useMemo(() => {
@@ -158,7 +143,7 @@ function DoctorBookModal({ open, onClose, doctorId }: DoctorBookModalProps) {
 
     const dateObj = new Date(date);
     const daysOfWeek = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
-    const daySchedule = weeklySchedule.find((s: ScheduleDTO) => s.dayOfWeek === daysOfWeek[dateObj.getDay()]);
+    const daySchedule = weeklySchedule.find((s: DoctorScheduleDTO) => s.dayOfWeek === daysOfWeek[dateObj.getDay()]);
 
     if (!daySchedule || !daySchedule.isWorking) return [];
 
@@ -201,7 +186,11 @@ function DoctorBookModal({ open, onClose, doctorId }: DoctorBookModalProps) {
     mutationFn: (payload: DoctorCreateAppointmentDTO) => createAppointmentByDoctor(doctorId, payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['doctorAppointments'] });
-      onClose();
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        onClose();
+      }
     },
     onError: (error: unknown) => {
       const err = error as ApiError;
@@ -292,7 +281,7 @@ function DoctorBookModal({ open, onClose, doctorId }: DoctorBookModalProps) {
         <FormControl fullWidth>
           <InputLabel shrink>{t('selectService')}</InputLabel>
           <Select value={serviceId} onChange={handleServiceChange} label={t('selectService')} notched>
-            {services?.map((s: ServiceDTO) => (
+            {services?.map((s: ResponseServiceDTO) => (
               <MenuItem key={s.id} value={s.id}>
                 {s.name} ({s.durationMinutes} min)
               </MenuItem>

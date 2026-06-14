@@ -32,12 +32,15 @@ public class UserServiceImpl implements UserService {
     private final FileStorageService fileStorageService;
     private final EmailService emailService;
 
-
-    public UserServiceImpl(UserRepository userRepository, PasswordEncoder encoder,
-                           VerificationTokenJpa verificationTokenRepository,
-                           RoleRepository roleRepository,
-                           PhoneNumberUtilService phoneNumberUtilService,
-                           RefreshTokenService refreshTokenService, FileStorageService fileStorageService, EmailService emailService) {
+    public UserServiceImpl(
+            UserRepository userRepository,
+            PasswordEncoder encoder,
+            VerificationTokenJpa verificationTokenRepository,
+            RoleRepository roleRepository,
+            PhoneNumberUtilService phoneNumberUtilService,
+            RefreshTokenService refreshTokenService,
+            FileStorageService fileStorageService,
+            EmailService emailService) {
         this.userRepository = userRepository;
         this.encoder = encoder;
         this.verificationTokenRepository = verificationTokenRepository;
@@ -50,22 +53,21 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User createUser(RequestUserDTO dto) {
-        User user = setUpUser(dto);
+        User user = buildUser(dto);
         Set<String> roleNamesForNewUser = dto.getRoles();
         log.info("roleNamesForNewUser: {}", roleNamesForNewUser);
         log.info("All roles from the Role entity: {}", roleRepository.findAll());
-        User savedUser = registerUser(user, roleNamesForNewUser);
-        return userRepository.save(savedUser);
+        return registerUser(user, roleNamesForNewUser);
     }
 
     @Override
     public User createAdminUser(RequestUserDTO dto) {
-        User user = setUpUser(dto);
+        User user = buildUser(dto);
         user.setEnabled(true);
         return registerUser(user, dto.getRoles());
     }
 
-    private User setUpUser(RequestUserDTO dto) {
+    private User buildUser(RequestUserDTO dto) {
         User user = new User();
         user.setUserName(dto.getUsername());
         user.setEmail(dto.getEmail());
@@ -82,18 +84,18 @@ public class UserServiceImpl implements UserService {
     public ResponseEntity<MessageResponse> verifyUserAccount(String token) {
         Optional<VerificationToken> optionalToken = verificationTokenRepository.findByToken(token);
         if (optionalToken.isEmpty()) {
-            return ResponseEntity.badRequest().body(new MessageResponse("Error: Invalid verification token!"));
+            return ResponseEntity.badRequest()
+                    .body(new MessageResponse("Error: Invalid verification token!"));
         }
 
         VerificationToken verificationToken = optionalToken.get();
         if (verificationToken.isUsed()) {
-            return ResponseEntity.ok(new MessageResponse("Account has already "
-                    + "been verified!"));
+            return ResponseEntity.ok(new MessageResponse("Account has already been verified!"));
         }
 
         if (verificationToken.getExpiryDate().isBefore(Instant.now())) {
-            return ResponseEntity.badRequest().body(new MessageResponse("Error: "
-                    + "Verification token has expired!"));
+            return ResponseEntity.badRequest()
+                    .body(new MessageResponse("Error: Verification token has expired!"));
         }
 
         User user = verificationToken.getUser();
@@ -101,8 +103,7 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
         verificationToken.setUsed(true);
         verificationTokenRepository.save(verificationToken);
-        return ResponseEntity.ok(new MessageResponse("Account verified successfully!"
-                + "You can now log in."));
+        return ResponseEntity.ok(new MessageResponse("Account verified successfully! You can now log in."));
     }
 
     @Override
@@ -121,13 +122,16 @@ public class UserServiceImpl implements UserService {
 
         User user = userOptional.get();
 
-        boolean isAdmin = user.getRoles().stream().anyMatch(role -> role.getRoleName() == Role.RoleName.ROLE_ADMIN);
-        boolean isDoctor = user.getRoles().stream().anyMatch(role -> role.getRoleName() == Role.RoleName.ROLE_DOCTOR);
+        boolean isAdmin = user.getRoles().stream()
+                .anyMatch(role -> role.getRoleName() == Role.RoleName.ROLE_ADMIN);
+        boolean isDoctor = user.getRoles().stream()
+                .anyMatch(role -> role.getRoleName() == Role.RoleName.ROLE_DOCTOR);
 
         if (isAdmin) {
             long activeAdminCount = userRepository.countActiveAdmins(Role.RoleName.ROLE_ADMIN);
             if (activeAdminCount <= 1) {
-                return ResponseEntity.badRequest().body(new MessageResponse("error.admin.cannot_delete_last_admin"));
+                return ResponseEntity.badRequest()
+                        .body(new MessageResponse("error.admin.cannot_delete_last_admin"));
             }
         }
 
@@ -155,13 +159,12 @@ public class UserServiceImpl implements UserService {
         if (!userRepository.existsById(id)) {
             return ResponseEntity.badRequest().body(new MessageResponse("Error: User not found!"));
         }
-        Optional<User> userOptional = userRepository.findById(id);
-        User user = userOptional.get();
+        User user = userRepository.findById(id).get();
         String emailRegex = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$";
         if (!email.matches(emailRegex)) {
             return ResponseEntity.badRequest().body(new MessageResponse("Error: Invalid email format!"));
         }
-        if (!user.getEmail().equals(email) && userRepository.existsByEmail(email)) {
+        if (!email.equals(user.getEmail()) && userRepository.existsByEmail(email)) {
             return ResponseEntity.badRequest().body(new MessageResponse("Error: Email already exist!"));
         }
         user.setEmail(email);
@@ -174,11 +177,11 @@ public class UserServiceImpl implements UserService {
         if (!userRepository.existsById(id)) {
             return ResponseEntity.badRequest().body(new MessageResponse("Error: User not found!"));
         }
-        Optional<User> userOptional = userRepository.findById(id);
-        User user = userOptional.get();
+        User user = userRepository.findById(id).get();
         String passwordRegex = "^[a-zA-Z0-9]{6,16}$";
         if (!password.matches(passwordRegex)) {
-            return ResponseEntity.badRequest().body(new MessageResponse("Error: Invalid password format!"));
+            return ResponseEntity.badRequest()
+                    .body(new MessageResponse("Error: Invalid password format!"));
         }
         user.setPassword(encoder.encode(password));
         userRepository.save(user);
@@ -190,16 +193,15 @@ public class UserServiceImpl implements UserService {
         if (!userRepository.existsById(id)) {
             return ResponseEntity.badRequest().body(new MessageResponse("Error: User not found!"));
         }
-        Optional<User> userOptional = userRepository.findById(id);
-        User user = userOptional.get();
+        User user = userRepository.findById(id).get();
         user.setFirstName(dto.getFirstName());
         user.setLastName(dto.getLastName());
         user.setDateOfBirth(dto.getDateOfBirth());
         user.setGender(dto.getGender());
-        if (!user.getPhoneNumber().equals(dto.getPhoneNumber())
+        if (!dto.getPhoneNumber().equals(user.getPhoneNumber())
                 && userRepository.existsByPhoneNumber(dto.getPhoneNumber())) {
-            return ResponseEntity.badRequest().body(new MessageResponse("Error:"
-                    + " Phone number already exist!"));
+            return ResponseEntity.badRequest()
+                    .body(new MessageResponse("Error: Phone number already exist!"));
         }
         if (!phoneNumberUtilService.isValidPhoneNumber(dto.getPhoneNumber(), "RO")) {
             return ResponseEntity.badRequest().body(new MessageResponse("Error: Invalid phone number!"));
@@ -214,10 +216,11 @@ public class UserServiceImpl implements UserService {
         if (!userRepository.existsById(id)) {
             return ResponseEntity.badRequest().body(new MessageResponse("Error: User not found!"));
         }
-        Optional<User> userOptional = userRepository.findById(id);
-        User user = userOptional.get();
-        if (!user.getPhoneNumber().equals(phoneNumber) && userRepository.existsByPhoneNumber(phoneNumber)) {
-            return ResponseEntity.badRequest().body(new MessageResponse("Error: Phone number already exist!"));
+        User user = userRepository.findById(id).get();
+        if (!phoneNumber.equals(user.getPhoneNumber())
+                && userRepository.existsByPhoneNumber(phoneNumber)) {
+            return ResponseEntity.badRequest()
+                    .body(new MessageResponse("Error: Phone number already exist!"));
         }
         if (!phoneNumberUtilService.isValidPhoneNumber(phoneNumber, "RO")) {
             return ResponseEntity.badRequest().body(new MessageResponse("Error: Invalid phone number!"));
@@ -240,7 +243,6 @@ public class UserServiceImpl implements UserService {
     @Override
     public Optional<RefreshToken> findByRefreshToken(String token) {
         return refreshTokenService.findByToken(token);
-
     }
 
     @Transactional
@@ -250,11 +252,10 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         String oldProfilePictureFileName = user.getProfilePictureUrl();
-
         String newFileName = fileStorageService.storeFile(fileName);
 
         user.setProfilePictureUrl(newFileName);
-        userRepository.save(user); // Save the updated user
+        userRepository.save(user);
 
         if (oldProfilePictureFileName != null && !oldProfilePictureFileName.isEmpty()) {
             fileStorageService.deleteFile(oldProfilePictureFileName);
@@ -278,11 +279,10 @@ public class UserServiceImpl implements UserService {
         return userRepository.countByAccountNonLockedFalse();
     }
 
-
     @Override
     public List<UserManagmentDTO> getAllUsersForAdmin(String keyword) {
         List<User> users;
-        if (keyword == null || keyword.trim().isEmpty()) {
+        if (keyword == null || keyword.isBlank()) {
             users = userRepository.findAll();
         } else {
             users = userRepository.searchUsers(keyword.trim());
@@ -292,11 +292,11 @@ public class UserServiceImpl implements UserService {
                 .filter(user -> !user.getEmail().endsWith("@anonymised.com"))
                 .map(user -> {
                     String fullName = Stream.of(user.getFirstName(), user.getLastName())
-                            .filter(name -> name != null && !name.trim().isEmpty())
+                            .filter(name -> name != null && !name.isBlank())
                             .collect(Collectors.joining(" "));
-                    String role = user.getRoles().isEmpty() ? "NONE" :
-                            user.getRoles().iterator().next().getRoleName().name();
-
+                    String role = user.getRoles().isEmpty()
+                            ? "NONE"
+                            : user.getRoles().iterator().next().getRoleName().name();
                     return new UserManagmentDTO(
                             user.getId(),
                             user.getUserName(),
@@ -317,19 +317,22 @@ public class UserServiceImpl implements UserService {
         User targetUser = userRepository.findById(targetUserId)
                 .orElseThrow(() -> new RuntimeException("error.user.not_found"));
 
-        if (targetUser.getRoles().stream().anyMatch(role -> role.getRoleName().name().equals("ROLE_ADMIN"))
+        if (targetUser.getRoles().stream()
+                .anyMatch(role -> role.getRoleName().name().equals("ROLE_ADMIN"))
                 && targetUser.getAccountNonLocked()) {
 
             long activeAdminCount = userRepository.countActiveAdmins(Role.RoleName.ROLE_ADMIN);
             if (activeAdminCount <= 1) {
-                return ResponseEntity.badRequest().body(new MessageResponse("error.admin.cannot_ban_last_admin"));
+                return ResponseEntity.badRequest()
+                        .body(new MessageResponse("error.admin.cannot_ban_last_admin"));
             }
         }
+
         targetUser.setAccountNonLocked(!targetUser.getAccountNonLocked());
-        if (!targetUser.getAccountNonLocked()) {
-            emailService.sendBanningNotificationEmail(targetUser.getEmail(), targetUser.getUserName());
-        } else {
+        if (targetUser.getAccountNonLocked()) {
             emailService.sendReactivatingNotificationEmail(targetUser.getEmail(), targetUser.getUserName());
+        } else {
+            emailService.sendBanningNotificationEmail(targetUser.getEmail(), targetUser.getUserName());
         }
         userRepository.save(targetUser);
         return ResponseEntity.ok(new MessageResponse("success.user.status_toggled"));
@@ -339,13 +342,10 @@ public class UserServiceImpl implements UserService {
         Set<Role> roles = new HashSet<>();
         for (String roleName : roleNames) {
             Role role = roleRepository.findByRoleName(Role.RoleName.valueOf(roleName))
-                    .orElseThrow(() -> new RuntimeException("Error:"
-                            + " Role not found."));
+                    .orElseThrow(() -> new RuntimeException("Error: Role not found."));
             roles.add(role);
         }
         user.setRoles(roles);
         return userRepository.save(user);
     }
-
-
 }

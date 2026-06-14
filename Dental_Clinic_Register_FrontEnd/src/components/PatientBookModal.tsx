@@ -28,9 +28,10 @@ interface PatientBookModalProps {
   open: boolean;
   onClose: () => void;
   userId: number;
+  onSuccess?: () => void;
 }
 
-function PatientBookModal({ open, onClose, userId }: PatientBookModalProps) {
+function PatientBookModal({ open, onClose, userId, onSuccess }: PatientBookModalProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
@@ -197,7 +198,11 @@ function PatientBookModal({ open, onClose, userId }: PatientBookModalProps) {
     mutationFn: (request: RequestPatientAppointmentDTO) => requestAppointment(userId, request),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['patientAppointments', userId] });
-      onClose();
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        onClose();
+      }
     },
     onError: (error: any) => {
       const backendErrorKey = error.response?.data?.message || 'error.unknown';

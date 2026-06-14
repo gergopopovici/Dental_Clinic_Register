@@ -202,8 +202,8 @@ function Register() {
         backgroundSize: '800px 800px',
         backgroundAttachment: 'scroll',
         backgroundColor: '#ffffff',
-        position: 'relative',
-        overflow: 'auto',
+        position: 'fixed',
+        overflow: 'hidden',
       }}
     >
       <Box
@@ -224,12 +224,14 @@ function Register() {
         display="flex"
         flexGrow={1}
         justifyContent="center"
-        alignItems="center"
+        alignItems="flex-start"
         sx={{
           position: 'relative',
           zIndex: 2,
           padding: '20px',
-          minHeight: '100vh',
+          paddingTop: '10px',
+          height: '100vh',
+          overflowY: 'auto',
         }}
       >
         <Card

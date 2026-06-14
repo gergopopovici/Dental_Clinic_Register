@@ -396,5 +396,7 @@
   "documentAlreadyUploaded": "Dokumentum már feltöltve",
   "selectTreatmentPlan": "Kezelési terv (Opcionális)",
   "none": "Nincs",
-  "dailySummary": "Ma {{total}} időpontja van (ebből {{remaining}} van hátra)."
+  "dailySummary": "Ma {{total}} időpontja van (ebből {{remaining}} van hátra).",
+  "appointmentUpdated": "Időpont sikeresen frissítve.",
+  "appointmentCreated": "Időpont sikeresen létrehozva."
 }

@@ -396,5 +396,7 @@
   "documentAlreadyUploaded": "Document deja încărcat",
   "selectTreatmentPlan": "Plan de tratament (Opțional)",
   "none": "Niciunul",
-  "dailySummary": "Aveți {{total}} programări astăzi ({{remaining}} rămase)."
+  "dailySummary": "Aveți {{total}} programări astăzi ({{remaining}} rămase).",
+  "appointmentUpdated": "Programarea a fost actualizată cu succes.",
+  "appointmentCreated": "Programarea a fost creată cu succes."
 }

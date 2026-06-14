@@ -137,8 +137,15 @@ function PatientAppointments({ userId }: PatientAppointmentsProps) {
         ))}
       </Grid>
 
-      <PatientBookModal open={isBookModalOpen} onClose={() => setIsBookModalOpen(false)} userId={userId} />
-
+      <PatientBookModal
+        open={isBookModalOpen}
+        onClose={() => setIsBookModalOpen(false)}
+        userId={userId}
+        onSuccess={() => {
+          setIsBookModalOpen(false);
+          setSnackbar({ open: true, message: t('appointmentCreated'), severity: 'success' });
+        }}
+      />
       <Dialog open={cancelDialogOpen} onClose={() => setCancelDialogOpen(false)}>
         <DialogTitle>{t('cancelAppointment')}</DialogTitle>
         <DialogContent sx={{ pt: '24px !important' }}>

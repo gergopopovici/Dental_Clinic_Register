@@ -397,5 +397,7 @@
   "documentAlreadyUploaded": "Document already uploaded",
   "selectTreatmentPlan": "Treatment Plan (Optional)",
   "none": "None",
-  "dailySummary": "You have {{total}} appointments today ({{remaining}} remaining)."
+  "dailySummary": "You have {{total}} appointments today ({{remaining}} remaining).",
+  "appointmentUpdated": "Időpont sikeresen frissítve.",
+  "appointmentCreated": "Appointment successfully created."
 }

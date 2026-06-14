@@ -77,7 +77,7 @@ function DoctorAppointments({ userId }: DoctorAppointmentsProps) {
 
   async function handleSuccess(msgKey: string) {
     setSnackbar({ open: true, message: t(msgKey), severity: 'success' });
-    await queryClient.invalidateQueries({ queryKey: ['doctorAppointments', userId] });
+    await queryClient.invalidateQueries({ queryKey: ['doctorAppointments'] });
   }
 
   function handleError(error: any) {
@@ -169,7 +169,6 @@ function DoctorAppointments({ userId }: DoctorAppointmentsProps) {
                     }
                     onUpdate={!isDeleted && apt.status === 'CONFIRMED' ? () => openRescheduleModal(apt) : undefined}
                     onNoShow={!isDeleted && apt.status === 'CONFIRMED' ? (id) => noShowMutation.mutate(id) : undefined}
-                    // GOMB: Befejezés (Ha még aktív, de a doktor le akarja zárni az összefoglalóval)
                     onComplete={
                       !isDeleted && apt.status === 'CONFIRMED'
                         ? (id) => {
@@ -209,6 +208,10 @@ function DoctorAppointments({ userId }: DoctorAppointmentsProps) {
         patientId={selectedAppointment?.patientId}
         initialStartTime={selectedAppointment?.startTime}
         initialTreatmentPlanId={selectedAppointment?.treatmentPlanId}
+        onSuccess={() => {
+          setIsActionModalOpen(false);
+          handleSuccess('appointmentUpdated');
+        }}
       />
 
       <DoctorActionModal
@@ -219,9 +222,21 @@ function DoctorAppointments({ userId }: DoctorAppointmentsProps) {
         initialNotes={summaryExistingNotes}
         existingSummary={summaryExistingData}
         mode="COMPLETE"
+        onSuccess={() => {
+          setIsSummaryModalOpen(false);
+          handleSuccess('appointmentCompleted');
+        }}
       />
 
-      <DoctorBookModal open={isBookModalOpen} onClose={() => setIsBookModalOpen(false)} doctorId={userId} />
+      <DoctorBookModal
+        open={isBookModalOpen}
+        onClose={() => setIsBookModalOpen(false)}
+        doctorId={userId}
+        onSuccess={() => {
+          setIsBookModalOpen(false);
+          handleSuccess('appointmentCreated');
+        }}
+      />
 
       <Dialog open={cancelDialogOpen} onClose={() => setCancelDialogOpen(false)}>
         <DialogTitle>{t('cancelAppointment')}</DialogTitle>
@@ -259,7 +274,11 @@ function DoctorAppointments({ userId }: DoctorAppointmentsProps) {
       </Dialog>
 
       <Snackbar open={snackbar.open} autoHideDuration={6000} onClose={() => setSnackbar({ ...snackbar, open: false })}>
-        <Alert onClose={() => setSnackbar({ ...snackbar, open: false })} severity={snackbar.severity}>
+        <Alert
+          onClose={() => setSnackbar({ ...snackbar, open: false })}
+          severity={snackbar.severity}
+          variant="standard"
+        >
           {snackbar.message}
         </Alert>
       </Snackbar>
