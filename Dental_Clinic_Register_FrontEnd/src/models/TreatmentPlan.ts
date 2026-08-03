@@ -1,3 +1,5 @@
+import { PanoramaImageDTO } from "./PanoramaImage";
+
 export interface AppointmentSummaryDTO {
   id: number;
   notes?: string;
@@ -27,4 +29,7 @@ export interface TreatmentPlanDTO {
   status: 'ACTIVE' | 'COMPLETED' | 'SUSPENDED' | 'CANCELLED';
   generalNotes?: string;
   appointments?: PlanAppointmentDTO[];
+  panoramaImages?: PanoramaImageDTO[];
+  estimatedDurationMonths?: number;
+  progressPercentage?: number;
 }

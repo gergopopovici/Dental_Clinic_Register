@@ -13,6 +13,7 @@ import {
   Box,
   FormControlLabel,
   Checkbox,
+  Slider,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -48,6 +49,8 @@ function TreatmentPlanModal({
   const [status, setStatus] = useState<'ACTIVE' | 'COMPLETED' | 'SUSPENDED' | 'CANCELLED'>('ACTIVE');
   const [generalNotes, setGeneralNotes] = useState('');
   const [plannedServices, setPlannedServices] = useState<ResponseServiceDTO[]>([]);
+  const [estimatedDurationMonths, setEstimatedDurationMonths] = useState<number | ''>('');
+  const [progressPercentage, setProgressPercentage] = useState<number>(0);
 
   const { data: availableServices, isLoading: isLoadingServices } = useQuery({
     queryKey: ['allServices'],
@@ -61,6 +64,8 @@ function TreatmentPlanModal({
       setEndDate(existingPlan.endDate || '');
       setStatus(existingPlan.status);
       setGeneralNotes(existingPlan.generalNotes || '');
+      setEstimatedDurationMonths(existingPlan.estimatedDurationMonths || '');
+      setProgressPercentage(existingPlan.progressPercentage || 0);
       if (availableServices) {
         setPrimaryService(availableServices.find((s) => s.id === existingPlan.primaryServiceId) || null);
         setPlannedServices(availableServices.filter((s) => existingPlan.plannedServiceIds?.includes(s.id)));
@@ -73,6 +78,8 @@ function TreatmentPlanModal({
       setStatus('ACTIVE');
       setGeneralNotes('');
       setPlannedServices([]);
+      setEstimatedDurationMonths('');
+      setProgressPercentage(0);
     }
   }, [open, existingPlan, availableServices]);
 
@@ -97,6 +104,8 @@ function TreatmentPlanModal({
       status,
       generalNotes,
       plannedServiceIds: plannedServices.map((s) => s.id),
+      estimatedDurationMonths: estimatedDurationMonths === '' ? undefined : Number(estimatedDurationMonths),
+      progressPercentage,
     });
   };
 
@@ -139,6 +148,31 @@ function TreatmentPlanModal({
             slotProps={{ inputLabel: { shrink: true } }}
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
+          />
+        </Box>
+        <Box sx={{ display: 'flex', gap: 2 }}>
+          <TextField
+            type="number"
+            label={t('estimatedDurationMonths', 'Becsült időtartam (hónap)')}
+            fullWidth
+            value={estimatedDurationMonths}
+            onChange={(e) => setEstimatedDurationMonths(e.target.value === '' ? '' : Number(e.target.value))}
+            inputProps={{ min: 0 }}
+          />
+        </Box>
+
+        <Box sx={{ px: 1 }}>
+          <Typography gutterBottom color="textSecondary" variant="body2">
+            {t('progressPercentage', 'Kezelés állapota (haladás)')}: {progressPercentage}%
+          </Typography>
+          <Slider
+            value={progressPercentage}
+            onChange={(_, val) => setProgressPercentage(val as number)}
+            step={5}
+            marks
+            min={0}
+            max={100}
+            valueLabelDisplay="auto"
           />
         </Box>
         <TextField

@@ -1,11 +1,9 @@
 package edu.ubb.licenta.pgim2289.spring.mapper;
 
+import edu.ubb.licenta.pgim2289.spring.dto.PanoramaImageDTO;
 import edu.ubb.licenta.pgim2289.spring.dto.PlanAppointmentDTO;
 import edu.ubb.licenta.pgim2289.spring.dto.TreatmentPlanDTO;
-import edu.ubb.licenta.pgim2289.spring.model.Appointment;
-import edu.ubb.licenta.pgim2289.spring.model.BaseEntity;
-import edu.ubb.licenta.pgim2289.spring.model.ServiceProvided;
-import edu.ubb.licenta.pgim2289.spring.model.TreatmentPlan;
+import edu.ubb.licenta.pgim2289.spring.model.*;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
@@ -28,6 +26,7 @@ public interface TreatmentPlanMapper {
     @Mapping(source = "service.name", target = "serviceName")
     PlanAppointmentDTO toPlanAppointmentDto(Appointment appointment);
 
+    PanoramaImageDTO toPanoramaImageDto(PanoramaImage panoramaImage);
 
     @Named("mapServiceIds")
     default Set<Long> mapServiceIds(Set<ServiceProvided> services) {

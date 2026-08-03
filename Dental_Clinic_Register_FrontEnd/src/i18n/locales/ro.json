@@ -398,5 +398,14 @@
   "none": "Niciunul",
   "dailySummary": "Aveți {{total}} programări astăzi ({{remaining}} rămase).",
   "appointmentUpdated": "Programarea a fost actualizată cu succes.",
-  "appointmentCreated": "Programarea a fost creată cu succes."
+  "appointmentCreated": "Programarea a fost creată cu succes.",
+  "uploadFailed": "A apărut o eroare la încărcare.",
+  "panoramaImages": "Imagini Panoramice",
+  "uploadNewImage": "Încărcare imagine panoramică nouă",
+  "selectFile": "Selectare fișier",
+  "noImagesYet": "Nu există imagini încărcate încă.",
+  "close": "Închidere",
+  "estimatedDuration": "Durată estimată",
+  "months": "luni",
+  "viewPanoramaImages": "Vizualizare imagini panoramice"
 }

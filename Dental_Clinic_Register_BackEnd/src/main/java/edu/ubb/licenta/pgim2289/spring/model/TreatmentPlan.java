@@ -4,13 +4,14 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-@EqualsAndHashCode(callSuper = true, exclude = {"plannedServices", "braceComponents", "appointments"})
+@EqualsAndHashCode(callSuper = true, exclude = {"plannedServices", "braceComponents", "appointments","panoramaImages"})
 @Entity
 @Table(name = "Treatment_Plan")
 @Data
@@ -57,4 +58,14 @@ public class TreatmentPlan extends BaseEntity {
     public enum TreatmentPlanStatus {
         ACTIVE, COMPLETED, SUSPENDED, CANCELLED
     }
+
+    @Column(name = "estimated_duration_months")
+    private Integer estimatedDurationMonths;
+
+    @Column(name = "progress_percentage")
+    private Integer progressPercentage;
+
+    @OneToMany(mappedBy = "treatmentPlan", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PanoramaImage> panoramaImages = new ArrayList<>();
+
 }

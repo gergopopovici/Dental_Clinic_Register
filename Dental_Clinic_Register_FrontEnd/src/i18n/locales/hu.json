@@ -398,5 +398,14 @@
   "none": "Nincs",
   "dailySummary": "Ma {{total}} időpontja van (ebből {{remaining}} van hátra).",
   "appointmentUpdated": "Időpont sikeresen frissítve.",
-  "appointmentCreated": "Időpont sikeresen létrehozva."
+  "appointmentCreated": "Időpont sikeresen létrehozva.",
+  "uploadFailed": "Hiba történt a feltöltés során.",
+  "panoramaImages": "Panoráma Képek",
+  "uploadNewImage": "Új panorámakép feltöltése",
+  "selectFile": "Fájl kiválasztása",
+  "noImagesYet": "Még nincsenek feltöltve képek.",
+  "close": "Bezárás",
+  "estimatedDuration": "Becsült időtartam",
+  "months": "hónap",
+  "viewPanoramaImages": "Panoráma képek"
 }

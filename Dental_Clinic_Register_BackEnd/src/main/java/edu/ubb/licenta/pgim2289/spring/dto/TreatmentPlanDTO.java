@@ -21,4 +21,7 @@ public class TreatmentPlanDTO {
     private TreatmentPlan.TreatmentPlanStatus status;
     private String generalNotes;
     private List<PlanAppointmentDTO> appointments;
+    private Integer estimatedDurationMonths;
+    private Integer progressPercentage;
+    private List<PanoramaImageDTO> panoramaImages;
 }

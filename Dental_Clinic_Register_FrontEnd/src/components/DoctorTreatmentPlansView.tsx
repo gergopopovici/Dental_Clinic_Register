@@ -28,6 +28,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import AudiotrackIcon from '@mui/icons-material/Audiotrack';
 import ImageIcon from '@mui/icons-material/Image';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
+import { LinearProgress } from '@mui/material';
 
 import { getAllPatientsForDropdown } from '../services/PatientService';
 import { getPlansByPatientId } from '../services/TreatmentPlanService';
@@ -37,6 +38,7 @@ import TreatmentPlanModal from './TreatmentPlanModal';
 import { apiURL } from '../config/apiUrl';
 import { cancelAppointmentByDoctor, markAsNoShow } from '../services/AppointmentService';
 import DoctorActionModal from './DoctorActionModal';
+import PanoramaViewerModal from './PanoramaViewerModal';
 
 interface DoctorViewProps {
   doctorId: number;
@@ -67,6 +69,19 @@ function DoctorTreatmentPlansView({ doctorId }: DoctorViewProps) {
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [appointmentToCancel, setAppointmentToCancel] = useState<number | null>(null);
   const [cancelReason, setCancelReason] = useState('');
+
+  const [isPanoramaModalOpen, setIsPanoramaModalOpen] = useState(false);
+  const [selectedPlanForPanorama, setSelectedPlanForPanorama] = useState<TreatmentPlanDTO | null>(null);
+  const openPanoramaModal = (plan: TreatmentPlanDTO) => {
+    setSelectedPlanForPanorama(plan);
+    setIsPanoramaModalOpen(true);
+  }
+  const getProgressColor = (progress: number) => {
+  if (progress < 33) return 'error';     
+  if (progress < 66) return 'warning';  
+  if (progress < 100) return 'primary';  
+  return 'success';                     
+};
 
   const { data: patients, isLoading: isLoadingPatients } = useQuery({
     queryKey: ['patientsDropdown'],
@@ -280,6 +295,27 @@ function DoctorTreatmentPlansView({ doctorId }: DoctorViewProps) {
               />
             </Box>
           </Box>
+          <Box sx={{mt:2,mb:2}}>
+            <Box sx={{display:'flex', justifyContent:'space-between',mb:0.5}}>
+              <Typography variant="body2" color="textSecondary">
+                {t('estimatedDuration','Estimated Duration')}: {plan.estimatedDurationMonths || 0} {t('months','months')}
+              </Typography>
+              <Typography variant="body2" color="textSecondary" fontWeight="bold">
+                {plan.progressPercentage || 0}%
+              </Typography>
+            </Box>
+            <LinearProgress 
+              variant="determinate"
+              value={plan.progressPercentage || 0}
+              sx={{height:10, borderRadius:5}}
+              color={getProgressColor(plan.progressPercentage || 0)}
+              />
+          </Box>
+          <Box sx={{mb:2}}>
+            <Button variant="outlined" size="small" onClick={()=>openPanoramaModal(plan)}>
+              {t('viewPanoramaImages','Panorama Images')}
+            </Button>
+          </Box>
           <Typography variant="body1" sx={{ mt: 2, mb: 1 }}>
             {plan.generalNotes || t('noNotesProvided')}
           </Typography>
@@ -408,6 +444,12 @@ function DoctorTreatmentPlansView({ doctorId }: DoctorViewProps) {
           queryClient.invalidateQueries({ queryKey: ['doctorAppointments', doctorId] });
         }}
       />
+      <PanoramaViewerModal
+       open={isPanoramaModalOpen}
+       onClose={()=>setIsPanoramaModalOpen(false)}
+       plan={selectedPlanForPanorama}
+       isDoctor={true}
+       />
       <Dialog open={cancelDialogOpen} onClose={() => setCancelDialogOpen(false)}>
         <DialogTitle>{t('cancelAppointment')}</DialogTitle>
         <DialogContent sx={{ pt: '24px !important' }}>

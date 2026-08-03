@@ -1,11 +1,13 @@
 package edu.ubb.licenta.pgim2289.spring.presentation;
 
+import edu.ubb.licenta.pgim2289.spring.dto.PanoramaImageDTO;
 import edu.ubb.licenta.pgim2289.spring.dto.TreatmentPlanDTO;
 import edu.ubb.licenta.pgim2289.spring.service.TreatmentPlanService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -48,4 +50,12 @@ public class TreatmentPlanController {
         treatmentPlanService.deletePlan(id);
         return ResponseEntity.noContent().build();
     }
+    @PostMapping("/{planId}/panorama-images")
+    @PreAuthorize("hasRole('DOCTOR')")
+    public ResponseEntity<PanoramaImageDTO> uploadPanoramaImage(
+            @PathVariable Long planId,
+            @RequestParam("file") MultipartFile file) {
+        return ResponseEntity.ok(treatmentPlanService.savePanoramaImage(planId, file));
+    }
+
 }

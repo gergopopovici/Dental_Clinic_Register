@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Typography,
@@ -11,6 +11,7 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
+  LinearProgress,
 } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
@@ -21,6 +22,7 @@ import ImageIcon from '@mui/icons-material/Image';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import { getPlansByPatientId } from '../services/TreatmentPlanService';
 import { TreatmentPlanDTO, PlanAppointmentDTO } from '../models/TreatmentPlan';
+import PanoramaViewerModal from './PanoramaViewerModal';
 
 interface PatientViewProps {
   patientId: number;
@@ -29,6 +31,14 @@ interface PatientViewProps {
 function PatientTreatmentPlansView({ patientId }: PatientViewProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
+
+  const [isPanoramaModalOpen, setIsPanoramaModalOpen] = useState(false);
+  const [selectedPlanForPanorama, setSelectedPlanForPanorama] = useState<TreatmentPlanDTO | null>(null);
+
+  const openPanoramaModal = (plan: TreatmentPlanDTO) => {
+    setSelectedPlanForPanorama(plan);
+    setIsPanoramaModalOpen(true);
+  }
 
   const { data: plans, isLoading } = useQuery({
     queryKey: ['myTreatmentPlans', patientId],
@@ -40,6 +50,13 @@ function PatientTreatmentPlansView({ patientId }: PatientViewProps) {
   const activePlans = plans?.filter((p) => p.status === 'ACTIVE' || p.status === 'SUSPENDED') || [];
   const pastPlans = plans?.filter((p) => p.status === 'COMPLETED' || p.status === 'CANCELLED') || [];
   const getFileUrl = (url: string) => `http://localhost:8080/api/files/${url.split('/').pop()}`;
+
+  const getProgressColor = (progress: number) => {
+  if (progress < 33) return 'error';     
+  if (progress < 66) return 'warning';   
+  if (progress < 100) return 'primary';  
+  return 'success';                     
+};
 
   const renderAppointmentHistory = (appointments?: PlanAppointmentDTO[]) => {
     if (!appointments || appointments.length === 0)
@@ -122,6 +139,22 @@ function PatientTreatmentPlansView({ patientId }: PatientViewProps) {
         <Typography variant="body2" gutterBottom>
           {t('startDate')}: {plan.startDate} | {t('endDate')}: {plan.endDate || t('ongoing')}
         </Typography>
+        <Box sx={{mt:2,mb:2}}>
+          <Box sx={{display:'flex',justifyContent:'space-between',mb:0.5}}>
+            <Typography variant="body2" color="textSecondary">
+              {t('estimatedDuration', 'Estimated duration')}: {plan.estimatedDurationMonths || 0} {t('months','months')}
+            </Typography>
+            <Typography variant="body2" color="textSecondary" fontWeight={"bold"}>
+              {plan.progressPercentage || 0}%
+            </Typography>
+          </Box>
+          <LinearProgress variant="determinate" value={plan.progressPercentage || 0} sx={{height:10, borderRadius:5}} color={getProgressColor(plan.progressPercentage || 0)}/>
+        </Box>
+        <Box sx={{mb:2}}>
+          <Button variant="outlined" size="small" onClick={()=>openPanoramaModal(plan)}>
+            {t('viewPanoramaImages','Panorama Images')}
+          </Button>
+        </Box>
         <Typography variant="body1" sx={{ mt: 2 }}>
           {plan.generalNotes || t('noNotesProvided')}
         </Typography>
@@ -167,6 +200,12 @@ function PatientTreatmentPlansView({ patientId }: PatientViewProps) {
           pastPlans.map(renderPlanCard)
         )}
       </Box>
+        <PanoramaViewerModal
+          open={isPanoramaModalOpen}
+          onClose={() => setIsPanoramaModalOpen(false)}
+          plan={selectedPlanForPanorama}
+          isDoctor={false} 
+        />
     </Box>
   );
 }
