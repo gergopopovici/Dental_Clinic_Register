@@ -27,6 +27,7 @@ export interface UserDetails {
   roles: string[];
   licenseNumber?: string;
   specialisation?: string;
+  services?: any[];
 }
 
 interface UserContextType {

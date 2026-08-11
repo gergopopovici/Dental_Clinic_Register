@@ -5,6 +5,7 @@ import edu.ubb.licenta.pgim2289.spring.model.Patient;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -23,4 +24,5 @@ public class ResponseUserDTO {
     private Set<String> roles;
     private String specialisation;
     private String licenseNumber;
+    private List<ResponseServiceDTO> services;
 }

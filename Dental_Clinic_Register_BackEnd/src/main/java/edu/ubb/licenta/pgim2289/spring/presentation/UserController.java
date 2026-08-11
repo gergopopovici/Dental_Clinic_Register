@@ -30,14 +30,16 @@ public class UserController {
     private final VerificationCodeService verificationCodeService;
     private final EmailService emailService;
     private final FileStorageService fileStorageService;
+    private List<ResponseServiceDTO> services;
 
     public UserController(UserService userService, VerificationCodeService verificationCodeService,
                           EmailService emailService,
-                          FileStorageService fileStorageService) {
+                          FileStorageService fileStorageService, List<ResponseServiceDTO> services) {
         this.userService = userService;
         this.verificationCodeService = verificationCodeService;
         this.emailService = emailService;
         this.fileStorageService = fileStorageService;
+        this.services = services;
     }
 
     @PreAuthorize("hasAnyRole('DOCTOR', 'PATIENT','ADMIN')")
@@ -231,6 +233,16 @@ public class UserController {
         if (user.getDoctorDetails() != null) {
             userDTO.setLicenseNumber(user.getDoctorDetails().getLicenseNumber());
             userDTO.setSpecialisation(user.getDoctorDetails().getSpecialization());
+
+            userDTO.setServices(user.getDoctorDetails().getServices().stream()
+                    .map(service -> {
+                        ResponseServiceDTO sDTO = new ResponseServiceDTO();
+                        sDTO.setId(service.getId());
+                        sDTO.setName(service.getName());
+                        sDTO.setPrice(service.getPrice());
+                        return sDTO;
+                    })
+                    .collect(Collectors.toList()));
         }
 
         return ResponseEntity.ok(userDTO);

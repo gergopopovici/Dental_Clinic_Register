@@ -407,5 +407,12 @@
   "close": "Bezárás",
   "estimatedDuration": "Becsült időtartam",
   "months": "hónap",
-  "viewPanoramaImages": "Panoráma képek"
+  "viewPanoramaImages": "Panoráma képek",
+  "error.account.disabled": "A fiók inaktív.",
+"error.account.locked": "A fiók zárolva van.",
+"error.bad.credentials": "Hibás felhasználónév vagy jelszó.",
+"accountDeactivatedMessage": "A fiókod zárolva van. A feloldáshoz kérjük, állíts be egy új jelszót!",
+"success.doctor.services.updated": "Szolgáltatások sikeresen frissítve!",
+"error.generic": "Valami hiba történt.",
+"updatedServices": "Szolgáltatások frissítése"
 }

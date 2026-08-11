@@ -39,6 +39,7 @@ import getCroppedImg from '../utils/cropImage';
 import Cropper from 'react-easy-crop';
 import { Area } from 'react-easy-crop';
 import { useTranslation } from 'react-i18next';
+import DoctorServicesModal from '../components/DoctorServicesModal';
 
 function ProfileSettings() {
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
@@ -62,6 +63,7 @@ function ProfileSettings() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [isServicesModalOpen, setIsServicesModalOpen] = useState(false);
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
@@ -696,6 +698,11 @@ function ProfileSettings() {
             <Button variant="contained" onClick={handleOpenUpdateUserModal} sx={{ mt: 2, textTransform: 'none' }}>
               {t('updateProfile')}
             </Button>
+            {user.roles?.includes('ROLE_DOCTOR') && (
+              <Button variant="contained" onClick={() => setIsServicesModalOpen(true)} sx={{ mt: 2, textTransform: 'none' }}>
+                {t('updatedServices', 'Update Services')}
+              </Button>
+            )}
           </Box>
         </Box>
         <Box sx={{ width: '100%', mt: 4 }}>
@@ -831,6 +838,13 @@ function ProfileSettings() {
         successMessage={successMessage}
         errorMessage={errorMessage}
       />
+      {user.roles?.includes('ROLE_DOCTOR') && (
+        <DoctorServicesModal
+          open={isServicesModalOpen}
+          onClose={() => setIsServicesModalOpen(false)}
+          currentServiceIds={user.services?.map((s: any) => s.id) || []} 
+        />
+      )}
     </Box>
   );
 }

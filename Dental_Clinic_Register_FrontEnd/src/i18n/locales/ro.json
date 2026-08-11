@@ -407,5 +407,12 @@
   "close": "Închidere",
   "estimatedDuration": "Durată estimată",
   "months": "luni",
-  "viewPanoramaImages": "Vizualizare imagini panoramice"
+  "viewPanoramaImages": "Vizualizare imagini panoramice",
+  "error.account.disabled": "Contul este dezactivat.",
+"error.account.locked": "Contul este blocat.",
+"error.bad.credentials": "Nume de utilizator sau parolă incorectă.",
+"accountDeactivatedMessage": "Contul tău este blocat. Pentru a-l debloca, te rugăm să setezi o nouă parolă!",
+"success.doctor.services.updated": "Serviciile au fost actualizate cu succes!",
+"error.generic": "Ceva nu a mers bine.",
+"updatedServices": "Actualizare Servicii"
 }

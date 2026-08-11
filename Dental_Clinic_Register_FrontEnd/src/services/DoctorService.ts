@@ -1,5 +1,6 @@
 import { getDoctorsByServiceBaseApiUrl } from "../config/apiUrl";
 import { DoctorDropDownDTO } from "../models/Appointment";
+import { MessageResponse } from "../models/MessageResponse";
 import apiClient from "../utils/axiosInterceptor";
 
 export const getDoctorsByService = async(serviceId:number) : Promise<DoctorDropDownDTO[]> => {
@@ -11,3 +12,13 @@ export const getDoctorsByService = async(serviceId:number) : Promise<DoctorDropD
         throw error;
     }
 }
+
+export const updateMyServices = async (serviceIds: number[]): Promise<MessageResponse> => {
+    try{
+        const response = await apiClient.put<MessageResponse>('/api/doctor/me/services',serviceIds);
+        return response.data;
+    }catch (error){
+        console.error('Error updating doctor services:', error);
+        throw error;
+    }
+};

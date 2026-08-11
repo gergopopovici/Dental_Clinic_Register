@@ -141,16 +141,11 @@ public class UserServiceImpl implements UserService {
             userRepository.save(user);
             return ResponseEntity.ok(new MessageResponse("success.doctor.deactivated"));
         }
-
-        String randomStr = UUID.randomUUID().toString();
-        user.setEmail("deleted_" + randomStr + "@anonymised.com");
-        user.setUserName("anon_" + randomStr.substring(0, 8));
-        user.setFirstName("Deleted");
-        user.setLastName("User");
-        user.setPhoneNumber(randomStr.substring(0, 10));
         user.setEnabled(false);
         user.setAccountNonLocked(false);
         userRepository.save(user);
+        refreshTokenService.deleteByUserId(user.getId());
+        verificationTokenRepository.deleteByUser(user);
         return ResponseEntity.ok(new MessageResponse("success.user.deleted"));
     }
 

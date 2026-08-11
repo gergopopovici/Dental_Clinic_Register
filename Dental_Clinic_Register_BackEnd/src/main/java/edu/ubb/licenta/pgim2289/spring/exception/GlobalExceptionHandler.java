@@ -1,6 +1,9 @@
 package edu.ubb.licenta.pgim2289.spring.exception;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -112,6 +115,30 @@ public class GlobalExceptionHandler {
 
         Map<String, String> errorMap = new ConcurrentHashMap<>();
         errorMap.put("message", ex.getMessage());
+        return errorMap;
+    }
+
+    @ExceptionHandler(DisabledException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public Map<String, String> handleDisabledException(DisabledException ex) {
+        Map<String, String> errorMap = new ConcurrentHashMap<>();
+        errorMap.put("error", ex.getMessage());
+        return errorMap;
+    }
+
+    @ExceptionHandler(LockedException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public Map<String, String> handleLockedException(LockedException ex) {
+        Map<String, String> errorMap = new ConcurrentHashMap<>();
+        errorMap.put("error", ex.getMessage());
+        return errorMap;
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public Map<String, String> handleBadCredentialsException(BadCredentialsException ex) {
+        Map<String, String> errorMap = new ConcurrentHashMap<>();
+        errorMap.put("error", ex.getMessage());
         return errorMap;
     }
 }

@@ -69,8 +69,17 @@ function LoginPage() {
       fetchUserDetailsMutation.mutate();
     },
     onError: (error) => {
-      if (axios.isAxiosError(error) && error.response?.data?.message) {
-        alert(`${t('loginFailed')}: ${error.response.data.message}`);
+      if (axios.isAxiosError(error) && error.response?.data) {
+        const errMsg = error.response.data.message || error.response.data.error || '';
+        
+        if (errMsg === 'error.account.disabled' || errMsg === 'error.account.locked') {
+           alert(t('accountDeactivatedMessage')); 
+           navigate('/forgot-password')
+        } else if (errMsg === 'error.bad.credentials') {
+           alert(t('error.bad.credentials'));
+        } else {
+           alert(`${t('loginFailed')}: ${t(errMsg)}`);
+        }
       } else {
         alert(t('loginCredentialsInvalid'));
       }

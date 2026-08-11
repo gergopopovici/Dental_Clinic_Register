@@ -408,5 +408,12 @@
   "close": "Close",
   "estimatedDuration": "Estimated duration",
   "months": "months",
-  "viewPanoramaImages": "View Panorama Images"
+  "viewPanoramaImages": "View Panorama Images",
+  "error.account.disabled": "The account is disabled.",
+"error.account.locked": "The account is locked.",
+"error.bad.credentials": "Invalid username or password.",
+"accountDeactivatedMessage": "Your account is locked. To unlock it, please set a new password!",
+"success.doctor.services.updated": "Services updated successfully!",
+"error.generic": "Something went wrong.",
+"updatedServices": "Update Services"
 }

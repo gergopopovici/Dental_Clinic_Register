@@ -11,8 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -35,28 +34,36 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public LoginResponse authenticateUser(LoginRequest loginRequest) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        loginRequest.getUsername(),
-                        loginRequest.getPassword()
-                )
-        );
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            loginRequest.getUsername(),
+                            loginRequest.getPassword()
+                    )
+            );
 
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 
-        User user = userAuthService.findByUsername(userDetails.getUsername())
-                .orElseThrow(() -> new RuntimeException("error.user.not.found.after.authentication"));
+            User user = userAuthService.findByUsername(userDetails.getUsername())
+                    .orElseThrow(() -> new RuntimeException("error.user.not.found.after.authentication"));
 
-        AuthTokenPair tokenPair = tokenManagementService.generateTokenPair(user);
-        cookieManagementService.setAccessTokenCookie(tokenPair.getAccessToken());
+            AuthTokenPair tokenPair = tokenManagementService.generateTokenPair(user);
+            cookieManagementService.setAccessTokenCookie(tokenPair.getAccessToken());
 
-        return new LoginResponse(
-                null,
-                tokenPair.getRefreshToken(),
-                "Bearer",
-                userDetails.getUsername()
-        );
+            return new LoginResponse(
+                    null,
+                    tokenPair.getRefreshToken(),
+                    "Bearer",
+                    userDetails.getUsername()
+            );
+        } catch (DisabledException e) {
+            throw new DisabledException("error.account.disabled");
+        } catch (LockedException e) {
+            throw new LockedException("error.account.locked");
+        } catch (BadCredentialsException e) {
+            throw new BadCredentialsException("error.bad.credentials");
+        }
     }
 
     @Override

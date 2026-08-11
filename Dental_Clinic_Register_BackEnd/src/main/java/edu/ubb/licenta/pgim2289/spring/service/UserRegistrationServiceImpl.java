@@ -91,8 +91,12 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
         }
         User user = userRepository.findByEmail(email);
         if (user != null) {
-            if (!user.getEnabled() && user.getAccountNonLocked()) {
+            if (!user.getEnabled()) {
                 VerificationToken verificationToken = user.getVerificationToken();
+                if (verificationToken == null) {
+                    verificationToken = new VerificationToken();
+                    verificationToken.setUser(user);
+                }
                 verificationToken.setToken(UUID.randomUUID().toString());
                 verificationToken.setUsed(false);
                 verificationToken.setExpiryDate(Instant.now().plus(24, ChronoUnit.HOURS));
