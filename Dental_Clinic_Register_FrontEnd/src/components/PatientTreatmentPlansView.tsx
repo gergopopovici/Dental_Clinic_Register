@@ -21,6 +21,7 @@ import AudiotrackIcon from '@mui/icons-material/Audiotrack';
 import ImageIcon from '@mui/icons-material/Image';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import { getPlansByPatientId } from '../services/TreatmentPlanService';
+import { getAllServices } from '../services/ProvidedServiceService';
 import { TreatmentPlanDTO, PlanAppointmentDTO } from '../models/TreatmentPlan';
 import PanoramaViewerModal from './PanoramaViewerModal';
 
@@ -29,7 +30,7 @@ interface PatientViewProps {
 }
 
 function PatientTreatmentPlansView({ patientId }: PatientViewProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
 
   const [isPanoramaModalOpen, setIsPanoramaModalOpen] = useState(false);
@@ -44,6 +45,22 @@ function PatientTreatmentPlansView({ patientId }: PatientViewProps) {
     queryKey: ['myTreatmentPlans', patientId],
     queryFn: () => getPlansByPatientId(patientId),
   });
+
+  // Háttérben lekérjük a szolgáltatásokat is a fordításhoz
+  const { data: allServices } = useQuery({
+    queryKey: ['allServices'],
+    queryFn: getAllServices,
+  });
+
+  // Segédfüggvény a név fordításához
+  const getLocalizedServiceName = (serviceName: string) => {
+    if (!allServices) return serviceName;
+    const service = allServices.find(s => s.nameEn === serviceName || s.nameHu === serviceName || s.nameRo === serviceName);
+    if (!service) return serviceName;
+    if (i18n.language.startsWith('hu')) return service.nameHu;
+    if (i18n.language.startsWith('ro')) return service.nameRo;
+    return service.nameEn;
+  };
 
   if (isLoading) return <CircularProgress />;
 
@@ -69,7 +86,7 @@ function PatientTreatmentPlansView({ patientId }: PatientViewProps) {
           sx={{ mb: 2, p: 2, bgcolor: 'background.paper', borderRadius: 1, border: '1px solid #e0e0e0' }}
         >
           <Typography variant="subtitle2" fontWeight="bold">
-            {new Date(apt.startTime).toLocaleString()} - {apt.serviceName}
+            {new Date(apt.startTime).toLocaleString()} - {getLocalizedServiceName(apt.serviceName)}
           </Typography>
           {apt.summary ? (
             <Box sx={{ mt: 1 }}>
@@ -164,7 +181,7 @@ function PatientTreatmentPlansView({ patientId }: PatientViewProps) {
         {plan.plannedServiceNames && plan.plannedServiceNames.length > 0 && (
           <Box sx={{ mt: 2, mb: 2, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
             {plan.plannedServiceNames.map((name, i) => (
-              <Chip key={i} label={name} size="small" variant="outlined" />
+              <Chip key={i} label={getLocalizedServiceName(name)} size="small" variant="outlined" />
             ))}
           </Box>
         )}

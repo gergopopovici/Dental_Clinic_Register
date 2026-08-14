@@ -19,6 +19,7 @@ import {
   TableRow,
   TextField,
   Typography,
+  Snackbar,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 
@@ -31,6 +32,12 @@ function UserTable({ currentUserId }: UserTableProps) {
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
+
+  const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({
+    open: false,
+    message: '',
+    severity: 'success',
+  });
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -53,12 +60,16 @@ function UserTable({ currentUserId }: UserTableProps) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['adminUsers'] });
       queryClient.invalidateQueries({ queryKey: ['adminStats'] });
+      setSnackbar({ open: true, message: t('success.user.status_toggled'), severity: 'success' });
     },
     onError: (error: any) => {
       console.error('Failed to toggle user status:', error);
-      alert(t('error.toggle_user_status'));
+      setSnackbar({ open: true, message: t('error.toggle_user_status'), severity: 'error' });
     },
   });
+
+  const handleCloseSnackbar = () => setSnackbar({ ...snackbar, open: false });
+
   return (
     <Paper sx={{ mt: 4, overflow: 'hidden' }}>
       <Box
@@ -154,6 +165,17 @@ function UserTable({ currentUserId }: UserTableProps) {
           </TableBody>
         </Table>
       </TableContainer>
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+      >
+        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%' }} variant="standard">
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Paper>
   );
 }

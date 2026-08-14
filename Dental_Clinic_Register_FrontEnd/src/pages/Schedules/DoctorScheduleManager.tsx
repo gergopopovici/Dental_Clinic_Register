@@ -40,7 +40,7 @@ interface DoctorScheduleManagerProps {
 }
 
 function DoctorScheduleManager({ userId }: DoctorScheduleManagerProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
   const [tabValue, setTabValue] = useState(0);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
@@ -134,8 +134,17 @@ function DoctorScheduleManager({ userId }: DoctorScheduleManagerProps) {
       doctorId: userId,
       startDate: timeOffForm.startDate,
       endDate: timeOffForm.endDate,
-      reason: timeOffForm.reason,
+      // A doktor által beírt szöveget küldjük el mind a 3 nyelvi mezőbe:
+      reasonHu: timeOffForm.reason,
+      reasonEn: timeOffForm.reason,
+      reasonRo: timeOffForm.reason,
     });
+  };
+
+  const getLocalizedReason = (holiday: TimeOffDTO) => {
+    if (i18n.language.startsWith('hu')) return holiday.reasonHu;
+    if (i18n.language.startsWith('ro')) return holiday.reasonRo;
+    return holiday.reasonEn;
   };
 
   const allTimeOffs = [
@@ -217,7 +226,7 @@ function DoctorScheduleManager({ userId }: DoctorScheduleManagerProps) {
                   <CardContent sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                     <Box>
                       <Typography variant="subtitle1" fontWeight="bold" color="text.primary">
-                        {pto.reason}
+                        {getLocalizedReason(pto)}
                       </Typography>
                       <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
                         {pto.startDate} - {pto.endDate}

@@ -50,16 +50,17 @@ public class PatientServiceImpl implements PatientService {
     public List<PatientDropDownDTO> getAllPatientsForDropdown() {
         return patientRepository.findAll().stream()
                 .filter(patient -> patient.getUser().getEnabled())
+                .filter(patient -> patient.getUser().getAccountNonLocked())
+                .filter(patient -> patient.getUser().getRoles().stream()
+                        .anyMatch(role -> role.getRoleName().name().equals("ROLE_PATIENT")))
                 .map(patient -> {
                     PatientDropDownDTO dto = new PatientDropDownDTO();
                     dto.setUserId(patient.getUser().getId());
                     dto.setFullName(patient.getUser().getFullName());
                     dto.setEmail(patient.getUser().getEmail());
                     return dto;
-
                 })
-                        .
-                toList();
+                .toList();
     }
 
     @Override

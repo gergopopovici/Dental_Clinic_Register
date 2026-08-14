@@ -21,6 +21,7 @@ import {
   TableRow,
   TextField,
   Typography,
+  Snackbar,
 } from '@mui/material';
 import { Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
 
@@ -52,6 +53,12 @@ function ServiceTable() {
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentService, setCurrentService] = useState<ServiceProvided>(emptyService);
+
+  const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({
+    open: false,
+    message: '',
+    severity: 'success',
+  });
 
   const {
     data: services = [],
@@ -100,16 +107,14 @@ function ServiceTable() {
 
   const createMutation = useMutation({
     mutationFn: (newService: ServiceProvided) => createService(newService),
-    onSuccess: async (newlyCreatedService) => {
-      queryClient.setQueryData<ServiceProvided[]>(['adminServices'], (oldData) => {
-        return oldData ? [newlyCreatedService, ...oldData] : [newlyCreatedService];
-      });
+    onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['adminServices'] });
+      setSnackbar({ open: true, message: t('success.service.created'), severity: 'success' });
       handleCloseModal();
     },
     onError: (error: Error) => {
       console.error('Failed to create service:', error);
-      alert(t('error.create.service') || 'Failed to create service');
+      setSnackbar({ open: true, message: t('error.create.service'), severity: 'error' });
     },
   });
 
@@ -117,41 +122,50 @@ function ServiceTable() {
     mutationFn: (updatedService: ServiceProvided) => updateService(updatedService.id!, updatedService),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['adminServices'] });
+      setSnackbar({ open: true, message: t('success.service.updated'), severity: 'success' });
       handleCloseModal();
     },
     onError: (error: Error) => {
       console.error('Failed to update service:', error);
-      alert(t('error.update.service') || 'Failed to update service');
+      setSnackbar({ open: true, message: t('error.update.service'), severity: 'error' });
     },
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => deleteService(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['adminServices'] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['adminServices'] });
+      setSnackbar({ open: true, message: t('success.service.deleted'), severity: 'success' });
     },
     onError: (error: Error) => {
       console.error('Failed to delete service:', error);
-      alert(t('error.delete.service') || 'Failed to delete service');
+      setSnackbar({ open: true, message: t('error.delete.service'), severity: 'error' });
     },
   });
 
-  const isFormValid = currentService.nameHu && currentService.nameEn && currentService.nameRo && currentService.price > 0 && currentService.durationMinutes > 0;
+  const isFormValid =
+    currentService.nameHu &&
+    currentService.nameEn &&
+    currentService.nameRo &&
+    currentService.price > 0 &&
+    currentService.durationMinutes > 0;
+
+  const handleCloseSnackbar = () => setSnackbar({ ...snackbar, open: false });
 
   return (
     <Paper sx={{ mt: 4, overflow: 'hidden' }}>
       <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
         <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-          {t('manageServices') || 'Manage Services'}
+          {t('manageServices')}
         </Typography>
         <Button variant="contained" color="primary" startIcon={<AddIcon />} onClick={() => handleOpenModal()}>
-          {t('addService') || 'Add Service'}
+          {t('addService')}
         </Button>
       </Box>
 
       {isError && (
         <Alert severity="error" sx={{ m: 2 }}>
-          {t('error.fetch_services') || 'Failed to load services'}
+          {t('error.fetch_services')}
         </Alert>
       )}
 
@@ -159,11 +173,13 @@ function ServiceTable() {
         <Table sx={{ minWidth: 650 }}>
           <TableHead>
             <TableRow>
-              <TableCell sx={{ fontWeight: 'bold' }}>{t('serviceName') || 'Name'}</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>{t('description') || 'Description'}</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>{t('price') || 'Price'}</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>{t('duration') || 'Duration (mins)'}</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }} align="right">{t('actions') || 'Actions'}</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>{t('serviceName')}</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>{t('description')}</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>{t('price')}</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>{t('duration')}</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }} align="right">
+                {t('actions')}
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -193,7 +209,7 @@ function ServiceTable() {
             ) : (
               <TableRow>
                 <TableCell colSpan={5} align="center" sx={{ py: 3 }}>
-                  {t('noServicesFound') || 'No services found.'}
+                  {t('noServicesFound')}
                 </TableCell>
               </TableRow>
             )}
@@ -203,40 +219,48 @@ function ServiceTable() {
 
       <Dialog open={isModalOpen} onClose={handleCloseModal} maxWidth="md" fullWidth>
         <DialogTitle>
-          {currentService.id ? t('editService') || 'Edit Service' : t('addService') || 'Add New Service'}
+          {currentService.id ? t('editService') || 'Edit Service' : t('addService')}
         </DialogTitle>
         <DialogContent sx={{ mt: 2 }}>
-          <Typography variant="subtitle2" sx={{ mb: 1 }}>{t('serviceName') || 'Service Names'}</Typography>
+          <Typography variant="subtitle2" sx={{ mb: 1 }}>
+            {t('serviceName')}
+          </Typography>
           <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
             <TextField fullWidth label="Magyar (HU)" required value={currentService.nameHu} onChange={(e) => setCurrentService({ ...currentService, nameHu: e.target.value })} />
             <TextField fullWidth label="English (EN)" required value={currentService.nameEn} onChange={(e) => setCurrentService({ ...currentService, nameEn: e.target.value })} />
             <TextField fullWidth label="Română (RO)" required value={currentService.nameRo} onChange={(e) => setCurrentService({ ...currentService, nameRo: e.target.value })} />
           </Box>
 
-          <Typography variant="subtitle2" sx={{ mb: 1 }}>{t('description') || 'Descriptions'}</Typography>
+          <Typography variant="subtitle2" sx={{ mb: 1 }}>
+            {t('description')}
+          </Typography>
           <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
             <TextField fullWidth label="Magyar (HU)" multiline rows={2} value={currentService.descriptionHu || ''} onChange={(e) => setCurrentService({ ...currentService, descriptionHu: e.target.value })} />
             <TextField fullWidth label="English (EN)" multiline rows={2} value={currentService.descriptionEn || ''} onChange={(e) => setCurrentService({ ...currentService, descriptionEn: e.target.value })} />
             <TextField fullWidth label="Română (RO)" multiline rows={2} value={currentService.descriptionRo || ''} onChange={(e) => setCurrentService({ ...currentService, descriptionRo: e.target.value })} />
           </Box>
 
-          <Typography variant="subtitle2" sx={{ mb: 1 }}>{t('details') || 'Details'}</Typography>
+          <Typography variant="subtitle2" sx={{ mb: 1 }}>
+            {t('details')}
+          </Typography>
           <Box sx={{ display: 'flex', gap: 2 }}>
-            <TextField fullWidth label={t('price') || 'Price'} type="number" required value={currentService.price} onChange={(e) => setCurrentService({ ...currentService, price: parseFloat(e.target.value) || 0 })} />
-            <TextField fullWidth label={t('duration') || 'Duration (mins)'} type="number" required value={currentService.durationMinutes} onChange={(e) => setCurrentService({ ...currentService, durationMinutes: parseInt(e.target.value) || 0 })} />
+            <TextField fullWidth label={t('price')} type="number" required value={currentService.price} onChange={(e) => setCurrentService({ ...currentService, price: parseFloat(e.target.value) || 0 })} />
+            <TextField fullWidth label={t('duration')} type="number" required value={currentService.durationMinutes} onChange={(e) => setCurrentService({ ...currentService, durationMinutes: parseInt(e.target.value) || 0 })} />
           </Box>
         </DialogContent>
         <DialogActions sx={{ p: 3, pt: 0 }}>
-          <Button onClick={handleCloseModal}>{t('cancel') || 'Cancel'}</Button>
+          <Button onClick={handleCloseModal}>{t('cancel')}</Button>
           <Button variant="contained" onClick={handleSave} disabled={createMutation.isPending || updateMutation.isPending || !isFormValid}>
-            {createMutation.isPending || updateMutation.isPending ? (
-              <CircularProgress size={24} color="inherit" />
-            ) : (
-              t('save') || 'Save'
-            )}
+            {createMutation.isPending || updateMutation.isPending ? <CircularProgress size={24} color="inherit" /> : t('save')}
           </Button>
         </DialogActions>
       </Dialog>
+
+      <Snackbar open={snackbar.open} autoHideDuration={6000} onClose={handleCloseSnackbar} anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}>
+        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%' }} variant="standard">
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Paper>
   );
 }

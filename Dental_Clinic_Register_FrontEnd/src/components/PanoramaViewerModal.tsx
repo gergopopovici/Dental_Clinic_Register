@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   Dialog, DialogTitle, DialogContent, DialogActions, Box,
   Button, Typography, CircularProgress, Divider, IconButton, Tooltip,
-  DialogContentText
+  DialogContentText, Snackbar, Alert
 } from '@mui/material';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
@@ -29,6 +29,12 @@ export default function PanoramaViewerModal({ open, onClose, plan, isDoctor }: P
   const [selectedImage, setSelectedImage] = useState<PanoramaImageDTO | null>(null);
   const [imageToDelete, setImageToDelete] = useState<number | null>(null);
 
+  const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({
+    open: false,
+    message: '',
+    severity: 'success',
+  });
+
   const { data: activePlan, isLoading } = useQuery({
     queryKey: ['treatmentPlan', plan?.id],
     queryFn: () => getPlanById(plan!.id!),
@@ -53,6 +59,10 @@ export default function PanoramaViewerModal({ open, onClose, plan, isDoctor }: P
       queryClient.invalidateQueries({ queryKey: ['treatmentPlans', plan?.patientId] });
       queryClient.invalidateQueries({ queryKey: ['myTreatmentPlans', plan?.patientId] });
       setSelectedFile(null);
+      setSnackbar({ open: true, message: t('success.panorama.uploaded'), severity: 'success' });
+    },
+    onError: () => {
+      setSnackbar({ open: true, message: t('error.panorama.upload'), severity: 'error' });
     }
   });
 
@@ -62,6 +72,11 @@ export default function PanoramaViewerModal({ open, onClose, plan, isDoctor }: P
       queryClient.invalidateQueries({ queryKey: ['treatmentPlan', plan?.id] });
       queryClient.invalidateQueries({ queryKey: ['treatmentPlans', plan?.patientId] });
       queryClient.invalidateQueries({ queryKey: ['myTreatmentPlans', plan?.patientId] });
+      setImageToDelete(null);
+      setSnackbar({ open: true, message: t('success.panorama.deleted'), severity: 'success' });
+    },
+    onError: () => {
+      setSnackbar({ open: true, message: t('error.panorama.delete'), severity: 'error' });
       setImageToDelete(null);
     }
   });
@@ -78,6 +93,8 @@ export default function PanoramaViewerModal({ open, onClose, plan, isDoctor }: P
         link.click();
       });
   };
+
+  const handleCloseSnackbar = () => setSnackbar({ ...snackbar, open: false });
 
   if (!plan) return null;
 
@@ -272,6 +289,17 @@ export default function PanoramaViewerModal({ open, onClose, plan, isDoctor }: P
           </Button>
         </DialogActions>
       </Dialog>
+
+      <Snackbar 
+        open={snackbar.open} 
+        autoHideDuration={6000} 
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+      >
+        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%' }} variant="standard">
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </>
   );
 }

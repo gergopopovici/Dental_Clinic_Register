@@ -108,7 +108,9 @@ public class ScheduleServiceImpl implements ScheduleService {
 
         timeOff.setStartDate(timeOffDTO.getStartDate());
         timeOff.setEndDate(timeOffDTO.getEndDate());
-        timeOff.setReason(timeOffDTO.getReason());
+        timeOff.setReasonHu(timeOffDTO.getReasonHu());
+        timeOff.setReasonEn(timeOffDTO.getReasonEn());
+        timeOff.setReasonRo(timeOffDTO.getReasonRo());
 
         timeOffRepository.save(timeOff);
         return ResponseEntity.ok(new MessageResponse("time.off.added.successfully"));

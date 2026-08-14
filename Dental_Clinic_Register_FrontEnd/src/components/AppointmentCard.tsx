@@ -1,10 +1,12 @@
 import React from 'react';
 import { Card, CardContent, Typography, Box, Button, Chip } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import { useQuery } from '@tanstack/react-query';
 import { ResponseAppointmentDTO } from '../models/Appointment';
 import AudiotrackIcon from '@mui/icons-material/Audiotrack';
 import ImageIcon from '@mui/icons-material/Image';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
+import { getAllServices } from '../services/ProvidedServiceService';
 
 interface AppointmentCardProps {
   appointment: ResponseAppointmentDTO;
@@ -25,7 +27,23 @@ function AppointmentCard({
   onNoShow,
   onAddSummary,
 }: AppointmentCardProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+
+  // Szolgáltatások lekérése a fordításhoz
+  const { data: allServices } = useQuery({
+    queryKey: ['allServices'],
+    queryFn: getAllServices,
+  });
+
+  // Fordító segédfüggvény
+  const getLocalizedServiceName = (serviceName: string) => {
+    if (!allServices) return serviceName;
+    const service = allServices.find(s => s.nameEn === serviceName || s.nameHu === serviceName || s.nameRo === serviceName);
+    if (!service) return serviceName;
+    if (i18n.language.startsWith('hu')) return service.nameHu;
+    if (i18n.language.startsWith('ro')) return service.nameRo;
+    return service.nameEn;
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -66,9 +84,11 @@ function AppointmentCard({
           </Box>
         </Box>
 
+        {/* ITT TÖRTÉNIK A FORDÍTÁS */}
         <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 1 }}>
-          {appointment.serviceName}
+          {appointment.serviceName ? getLocalizedServiceName(appointment.serviceName) : ''}
         </Typography>
+
         <Typography variant="body1" sx={{ mb: 2 }}>
           {userRole === 'PATIENT'
             ? `${t('doctor')}: Dr. ${appointment.doctorName}`

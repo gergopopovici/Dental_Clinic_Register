@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Autocomplete,
@@ -19,6 +19,7 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  LinearProgress
 } from '@mui/material';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
@@ -28,9 +29,9 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import AudiotrackIcon from '@mui/icons-material/Audiotrack';
 import ImageIcon from '@mui/icons-material/Image';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
-import { LinearProgress } from '@mui/material';
 import { getAllPatientsForDropdown } from '../services/PatientService';
 import { getPlansByPatientId } from '../services/TreatmentPlanService';
+import { getAllServices } from '../services/ProvidedServiceService';
 import { PatientDropDownDTO } from '../models/Appointment';
 import { TreatmentPlanDTO, PlanAppointmentDTO, AppointmentSummaryDTO } from '../models/TreatmentPlan';
 import TreatmentPlanModal from './TreatmentPlanModal';
@@ -45,11 +46,23 @@ interface DoctorViewProps {
 }
 
 function DoctorTreatmentPlansView({ doctorId }: DoctorViewProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  const [selectedPatient, setSelectedPatient] = useState<PatientDropDownDTO | null>(null);
+  const [selectedPatient, setSelectedPatient] = useState<PatientDropDownDTO | null>(() => {
+    const saved = sessionStorage.getItem('selectedPatient');
+    return saved ? JSON.parse(saved) : null;
+  });
+
+  useEffect(() => {
+    if (selectedPatient) {
+      sessionStorage.setItem('selectedPatient', JSON.stringify(selectedPatient));
+    } else {
+      sessionStorage.removeItem('selectedPatient');
+    }
+  }, [selectedPatient]);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingPlan, setEditingPlan] = useState<TreatmentPlanDTO | null>(null);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
@@ -98,6 +111,20 @@ function DoctorTreatmentPlansView({ doctorId }: DoctorViewProps) {
     queryFn: () => getPlansByPatientId(selectedPatient!.userId),
     enabled: !!selectedPatient,
   });
+
+  const { data: allServices } = useQuery({
+    queryKey: ['allServices'],
+    queryFn: getAllServices,
+  });
+
+  const getLocalizedServiceName = (serviceName: string) => {
+    if (!allServices) return serviceName;
+    const service = allServices.find(s => s.nameEn === serviceName || s.nameHu === serviceName || s.nameRo === serviceName);
+    if (!service) return serviceName;
+    if (i18n.language.startsWith('hu')) return service.nameHu;
+    if (i18n.language.startsWith('ro')) return service.nameRo;
+    return service.nameEn;
+  };
 
   const activePlans = plans?.filter((p) => p.status === 'ACTIVE' || p.status === 'SUSPENDED') || [];
   const pastPlans = plans?.filter((p) => p.status === 'COMPLETED' || p.status === 'CANCELLED') || [];
@@ -174,7 +201,7 @@ function DoctorTreatmentPlansView({ doctorId }: DoctorViewProps) {
           }}
         >
           <Typography variant="subtitle2" fontWeight="bold">
-            {new Date(apt.startTime).toLocaleString()} - {apt.serviceName}
+            {new Date(apt.startTime).toLocaleString()} - {getLocalizedServiceName(apt.serviceName)}
           </Typography>
           <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
             {apt.status === 'CONFIRMED' && (
@@ -284,7 +311,7 @@ function DoctorTreatmentPlansView({ doctorId }: DoctorViewProps) {
                   size="small"
                   onClick={() => openBookModalForPlan(plan.id as number)}
                 >
-                  {t('bookAppointment')}
+                  {t('bookNewAppointment')} 
                 </Button>
               )}
               {plan.requires3DModel && (
@@ -346,7 +373,7 @@ function DoctorTreatmentPlansView({ doctorId }: DoctorViewProps) {
               </Typography>
               <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
                 {plan.plannedServiceNames.map((serviceName, idx) => (
-                  <Chip key={idx} label={serviceName} size="small" variant="outlined" />
+                  <Chip key={idx} label={getLocalizedServiceName(serviceName)} size="small" variant="outlined" />
                 ))}
               </Box>
             </Box>

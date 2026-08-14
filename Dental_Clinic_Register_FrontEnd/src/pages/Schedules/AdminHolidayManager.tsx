@@ -32,11 +32,11 @@ import {
 import { ClinicSettingsDTO, TimeOffDTO } from '../../models/Schedule';
 
 function AdminHolidayManager() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [form, setForm] = useState({ startDate: '', endDate: '', reason: '' });
+  const [form, setForm] = useState({ startDate: '', endDate: '', reasonHu: '', reasonEn: '', reasonRo: '' });
   const [settingsForm, setSettingsForm] = useState({ defaultStartTime: '', defaultEndTime: '' });
 
   const { data: holidays, isLoading: isLoadingHolidays } = useQuery({
@@ -58,13 +58,19 @@ function AdminHolidayManager() {
     }
   }, [clinicSettings]);
 
+  const getLocalizedReason = (holiday: TimeOffDTO) => {
+    if (i18n.language.startsWith('hu')) return holiday.reasonHu;
+    if (i18n.language.startsWith('ro')) return holiday.reasonRo;
+    return holiday.reasonEn;
+  };
+
   const addHolidayMutation = useMutation({
     mutationFn: (request: TimeOffDTO) => addGlobalHoliday(request),
     onSuccess: () => {
       setSnackbar({ open: true, message: t('time.off.added.successfully'), severity: 'success' });
       queryClient.invalidateQueries({ queryKey: ['globalHolidays'] });
       setIsModalOpen(false);
-      setForm({ startDate: '', endDate: '', reason: '' });
+      setForm({ startDate: '', endDate: '', reasonHu: '', reasonEn: '', reasonRo: '' });
     },
     onError: () => setSnackbar({ open: true, message: t('error.unknown'), severity: 'error' }),
   });
@@ -92,7 +98,9 @@ function AdminHolidayManager() {
       doctorId: null,
       startDate: form.startDate,
       endDate: form.endDate,
-      reason: form.reason,
+      reasonHu: form.reasonHu,
+      reasonEn: form.reasonEn,
+      reasonRo: form.reasonRo,
     });
   };
 
@@ -165,7 +173,7 @@ function AdminHolidayManager() {
               <CardContent sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <Box>
                   <Typography variant="subtitle1" fontWeight="bold">
-                    {holiday.reason}
+                    {getLocalizedReason(holiday)}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
                     {holiday.startDate} - {holiday.endDate}
@@ -180,29 +188,45 @@ function AdminHolidayManager() {
         ))}
       </Grid>
 
-      <Dialog open={isModalOpen} onClose={() => setIsModalOpen(false)}>
+      <Dialog open={isModalOpen} onClose={() => setIsModalOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>{t('addHoliday')}</DialogTitle>
         <DialogContent sx={{ pt: '24px !important', display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <TextField
+              type="date"
+              label={t('startDate')}
+              value={form.startDate}
+              onChange={(e) => setForm({ ...form, startDate: e.target.value })}
+              slotProps={{ inputLabel: { shrink: true } }}
+              fullWidth
+            />
+            <TextField
+              type="date"
+              label={t('endDate')}
+              value={form.endDate}
+              onChange={(e) => setForm({ ...form, endDate: e.target.value })}
+              slotProps={{ inputLabel: { shrink: true } }}
+              fullWidth
+            />
+          </Box>
+          <Divider sx={{ my: 1 }} />
+          <Typography variant="subtitle2">{t('reason') || 'Ok / Megnevezés'}</Typography>
           <TextField
-            type="date"
-            label={t('startDate')}
-            value={form.startDate}
-            onChange={(e) => setForm({ ...form, startDate: e.target.value })}
-            slotProps={{ inputLabel: { shrink: true } }}
+            label="Magyar (HU)"
+            value={form.reasonHu}
+            onChange={(e) => setForm({ ...form, reasonHu: e.target.value })}
             fullWidth
           />
           <TextField
-            type="date"
-            label={t('endDate')}
-            value={form.endDate}
-            onChange={(e) => setForm({ ...form, endDate: e.target.value })}
-            slotProps={{ inputLabel: { shrink: true } }}
+            label="English (EN)"
+            value={form.reasonEn}
+            onChange={(e) => setForm({ ...form, reasonEn: e.target.value })}
             fullWidth
           />
           <TextField
-            label={t('reason')}
-            value={form.reason}
-            onChange={(e) => setForm({ ...form, reason: e.target.value })}
+            label="Română (RO)"
+            value={form.reasonRo}
+            onChange={(e) => setForm({ ...form, reasonRo: e.target.value })}
             fullWidth
           />
         </DialogContent>
@@ -211,7 +235,7 @@ function AdminHolidayManager() {
           <Button
             variant="contained"
             onClick={handleAddHoliday}
-            disabled={!form.startDate || !form.endDate || !form.reason || addHolidayMutation.isPending}
+            disabled={!form.startDate || !form.endDate || !form.reasonHu || !form.reasonEn || !form.reasonRo || addHolidayMutation.isPending}
           >
             {t('save')}
           </Button>

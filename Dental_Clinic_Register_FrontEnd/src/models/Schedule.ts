@@ -24,7 +24,9 @@ export interface TimeOffDTO {
   doctorId?: number | null;
   startDate: string;   
   endDate: string;
-  reason: string;
+  reasonHu: string;
+  reasonEn: string;
+  reasonRo: string;
 }
 
 export interface ClinicSettingsDTO{

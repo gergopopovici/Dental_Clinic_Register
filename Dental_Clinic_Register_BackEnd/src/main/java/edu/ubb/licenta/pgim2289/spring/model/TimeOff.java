@@ -24,6 +24,12 @@ public class TimeOff extends BaseEntity {
     @Column(name = "end_date", nullable = false)
     private LocalDate endDate;
 
-    @Column(name = "reason")
-    private String reason;
+    @Column(name = "reason_hu")
+    private String reasonHu;
+
+    @Column(name = "reason_en")
+    private String reasonEn;
+
+    @Column(name = "reason_ro")
+    private String reasonRo;
 }

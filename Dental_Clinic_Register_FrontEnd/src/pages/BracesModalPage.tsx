@@ -24,7 +24,7 @@ function BracesModalPage() {
 
   return (
     <Box sx={{ p: 4, flexGrow: 1 }}>
-      <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/treatment-plans')} sx={{ mb: 3 }}>
+      <Button startIcon={<ArrowBackIcon />} onClick={() => navigate(-1)} sx={{ mb: 3 }}>
         {t('back', 'Back')}
       </Button>
       <Typography variant="h4" gutterBottom fontWeight="bold">
