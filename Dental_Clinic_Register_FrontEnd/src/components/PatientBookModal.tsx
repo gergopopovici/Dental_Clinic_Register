@@ -32,7 +32,7 @@ interface PatientBookModalProps {
 }
 
 function PatientBookModal({ open, onClose, userId, onSuccess }: PatientBookModalProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
 
   const [serviceId, setServiceId] = useState<number | ''>('');
@@ -113,9 +113,15 @@ function PatientBookModal({ open, onClose, userId, onSuccess }: PatientBookModal
     retry: 1,
   });
 
+  const getLocalizedName = (service: any) => {
+    if (i18n.language.startsWith('hu')) return service.nameHu;
+    if (i18n.language.startsWith('ro')) return service.nameRo;
+    return service.nameEn;
+  };
+
   const sortedServices = useMemo(
-    () => (services ? [...services].sort((a, b) => a.name.localeCompare(b.name)) : []),
-    [services],
+    () => (services ? [...services].sort((a, b) => getLocalizedName(a).localeCompare(getLocalizedName(b))) : []),
+    [services, i18n.language],
   );
 
   const sortedDoctors = useMemo(
@@ -257,7 +263,7 @@ function PatientBookModal({ open, onClose, userId, onSuccess }: PatientBookModal
                 <MenuItem key={s.id} value={s.id}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
                     <Typography variant="body2">
-                      {s.name} ({s.durationMinutes} min)
+                      {getLocalizedName(s)} ({s.durationMinutes} min)
                     </Typography>
                     <Typography variant="body2" sx={{ fontWeight: 'bold', ml: 2 }}>
                       {s.price} {t('currency')}

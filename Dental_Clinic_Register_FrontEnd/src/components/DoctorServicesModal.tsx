@@ -12,7 +12,7 @@ interface Props{
 }
 
 export default function DoctorServicesModal({open,onClose,currentServiceIds}:Props){
-    const {t} = useTranslation();
+    const { t, i18n } = useTranslation();
     const queryClient = useQueryClient();
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
 
@@ -27,6 +27,12 @@ export default function DoctorServicesModal({open,onClose,currentServiceIds}:Pro
         queryFn:getAllServices,
         enabled:open,
     });
+
+    const getLocalizedName = (service: any) => {
+        if (i18n.language.startsWith('hu')) return service.nameHu;
+        if (i18n.language.startsWith('ro')) return service.nameRo;
+        return service.nameEn;
+    };
 
     const updateMutation = useMutation({
         mutationFn:(ids:number[]) => updateMyServices(ids),
@@ -44,7 +50,6 @@ export default function DoctorServicesModal({open,onClose,currentServiceIds}:Pro
             <DialogContent>
                 {isLoading ? (
                     <CircularProgress sx={{display:'block',margin:'20px auto'}}/>
-
                 ):(
                     <FormControl fullWidth sx={{mt:2}}>
                         <InputLabel id="update-services-label">{t('servicesProvided') || 'Services'}</InputLabel>
@@ -57,14 +62,14 @@ export default function DoctorServicesModal({open,onClose,currentServiceIds}:Pro
                     renderValue={(selected) =>
                         services
                         .filter((service) => selected.includes(service.id))
-                        .map((service) => service.name)
+                        .map((service) => getLocalizedName(service))
                         .join(', ')
                     }
                     >
                     {services.map((service) => (
                         <MenuItem key={service.id} value={service.id}>
                         <Checkbox checked={selectedIds.includes(service.id)} />
-                        <ListItemText primary={service.name} secondary={`${service.price} RON`} />
+                        <ListItemText primary={getLocalizedName(service)} secondary={`${service.price} RON`} />
                         </MenuItem>
                     ))}
                 </Select>

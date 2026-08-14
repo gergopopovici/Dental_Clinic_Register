@@ -53,7 +53,15 @@ function Register() {
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [serviceIds, setServiceIds] = useState<number[]>([]);
-  const { t } = useTranslation();
+  
+  // Hozzáadva az i18n a nyelv lekérdezéséhez
+  const { t, i18n } = useTranslation();
+
+  const getLocalizedName = (service: any) => {
+    if (i18n.language.startsWith('hu')) return service.nameHu;
+    if (i18n.language.startsWith('ro')) return service.nameRo;
+    return service.nameEn;
+  };
 
   const registerMutation = useMutation({
     mutationFn: (data: RequestUserDTO) => signup(data),
@@ -439,7 +447,7 @@ function Register() {
                       renderValue={(selected) =>
                         services
                           .filter((service) => selected.includes(service.id))
-                          .map((service) => service.name)
+                          .map((service) => getLocalizedName(service))
                           .join(', ')
                       }
                       disabled={isLoadingServices}
@@ -447,7 +455,7 @@ function Register() {
                       {services.map((service) => (
                         <MenuItem key={service.id} value={service.id}>
                           <Checkbox checked={serviceIds.includes(service.id)} />
-                          <ListItemText primary={service.name} secondary={`${service.price} RON`} />
+                          <ListItemText primary={getLocalizedName(service)} secondary={`${service.price} RON`} />
                         </MenuItem>
                       ))}
                     </Select>

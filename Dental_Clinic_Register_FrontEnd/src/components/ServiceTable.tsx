@@ -26,20 +26,29 @@ import { Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon } from '@mui/ico
 
 export interface ServiceProvided {
   id?: number;
-  name: string;
-  description?: string;
+  nameHu: string;
+  nameEn: string;
+  nameRo: string;
+  descriptionHu?: string;
+  descriptionEn?: string;
+  descriptionRo?: string;
   price: number;
   durationMinutes: number;
 }
+
 const emptyService: ServiceProvided = {
-  name: '',
-  description: '',
+  nameHu: '',
+  nameEn: '',
+  nameRo: '',
+  descriptionHu: '',
+  descriptionEn: '',
+  descriptionRo: '',
   price: 0,
   durationMinutes: 0,
 };
 
 function ServiceTable() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentService, setCurrentService] = useState<ServiceProvided>(emptyService);
@@ -53,6 +62,18 @@ function ServiceTable() {
     queryFn: getAllServices,
   });
 
+  const getLocalizedName = (service: ServiceProvided) => {
+    if (i18n.language.startsWith('hu')) return service.nameHu;
+    if (i18n.language.startsWith('ro')) return service.nameRo;
+    return service.nameEn;
+  };
+
+  const getLocalizedDescription = (service: ServiceProvided) => {
+    if (i18n.language.startsWith('hu')) return service.descriptionHu;
+    if (i18n.language.startsWith('ro')) return service.descriptionRo;
+    return service.descriptionEn;
+  };
+
   const handleOpenModal = (service: ServiceProvided = emptyService) => {
     setCurrentService(service);
     setIsModalOpen(true);
@@ -62,6 +83,7 @@ function ServiceTable() {
     setCurrentService(emptyService);
     setIsModalOpen(false);
   };
+
   const handleSave = () => {
     if (currentService.id) {
       updateMutation.mutate(currentService);
@@ -75,6 +97,7 @@ function ServiceTable() {
       deleteMutation.mutate(id);
     }
   };
+
   const createMutation = useMutation({
     mutationFn: (newService: ServiceProvided) => createService(newService),
     onSuccess: async (newlyCreatedService) => {
@@ -113,11 +136,11 @@ function ServiceTable() {
     },
   });
 
+  const isFormValid = currentService.nameHu && currentService.nameEn && currentService.nameRo && currentService.price > 0 && currentService.durationMinutes > 0;
+
   return (
     <Paper sx={{ mt: 4, overflow: 'hidden' }}>
-      <Box
-        sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}
-      >
+      <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
         <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
           {t('manageServices') || 'Manage Services'}
         </Typography>
@@ -140,9 +163,7 @@ function ServiceTable() {
               <TableCell sx={{ fontWeight: 'bold' }}>{t('description') || 'Description'}</TableCell>
               <TableCell sx={{ fontWeight: 'bold' }}>{t('price') || 'Price'}</TableCell>
               <TableCell sx={{ fontWeight: 'bold' }}>{t('duration') || 'Duration (mins)'}</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }} align="right">
-                {t('actions') || 'Actions'}
-              </TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }} align="right">{t('actions') || 'Actions'}</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -155,23 +176,15 @@ function ServiceTable() {
             ) : services.length > 0 ? (
               services.map((service) => (
                 <TableRow key={service.id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                  <TableCell>{service.name}</TableCell>
-                  <TableCell>{service.description || '-'}</TableCell>
+                  <TableCell>{getLocalizedName(service)}</TableCell>
+                  <TableCell>{getLocalizedDescription(service) || '-'}</TableCell>
                   <TableCell>{service.price.toFixed(2)} RON</TableCell>
                   <TableCell>{service.durationMinutes}</TableCell>
                   <TableCell align="right">
-                    <IconButton
-                      color="primary"
-                      onClick={() => handleOpenModal(service)}
-                      disabled={deleteMutation.isPending}
-                    >
+                    <IconButton color="primary" onClick={() => handleOpenModal(service)} disabled={deleteMutation.isPending}>
                       <EditIcon />
                     </IconButton>
-                    <IconButton
-                      color="error"
-                      onClick={() => handleDelete(service.id!)}
-                      disabled={deleteMutation.isPending}
-                    >
+                    <IconButton color="error" onClick={() => handleDelete(service.id!)} disabled={deleteMutation.isPending}>
                       <DeleteIcon />
                     </IconButton>
                   </TableCell>
@@ -187,57 +200,35 @@ function ServiceTable() {
           </TableBody>
         </Table>
       </TableContainer>
-      <Dialog
-        open={isModalOpen}
-        onClose={handleCloseModal}
-        slotProps={{ paper: { sx: { minWidth: { xs: '300px', sm: '500px' } } } }}
-      >
+
+      <Dialog open={isModalOpen} onClose={handleCloseModal} maxWidth="md" fullWidth>
         <DialogTitle>
           {currentService.id ? t('editService') || 'Edit Service' : t('addService') || 'Add New Service'}
         </DialogTitle>
         <DialogContent sx={{ mt: 2 }}>
-          <TextField
-            fullWidth
-            label={t('serviceName') || 'Service Name'}
-            sx={{ mb: 2, mt: 1 }}
-            value={currentService.name}
-            onChange={(e) => setCurrentService({ ...currentService, name: e.target.value })}
-          />
-          <TextField
-            fullWidth
-            label={t('description') || 'Description'}
-            multiline
-            rows={3}
-            sx={{ mb: 2, mt: 1 }}
-            value={currentService.description || ''}
-            onChange={(e) => setCurrentService({ ...currentService, description: e.target.value })}
-          />
+          <Typography variant="subtitle2" sx={{ mb: 1 }}>{t('serviceName') || 'Service Names'}</Typography>
+          <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
+            <TextField fullWidth label="Magyar (HU)" required value={currentService.nameHu} onChange={(e) => setCurrentService({ ...currentService, nameHu: e.target.value })} />
+            <TextField fullWidth label="English (EN)" required value={currentService.nameEn} onChange={(e) => setCurrentService({ ...currentService, nameEn: e.target.value })} />
+            <TextField fullWidth label="Română (RO)" required value={currentService.nameRo} onChange={(e) => setCurrentService({ ...currentService, nameRo: e.target.value })} />
+          </Box>
+
+          <Typography variant="subtitle2" sx={{ mb: 1 }}>{t('description') || 'Descriptions'}</Typography>
+          <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
+            <TextField fullWidth label="Magyar (HU)" multiline rows={2} value={currentService.descriptionHu || ''} onChange={(e) => setCurrentService({ ...currentService, descriptionHu: e.target.value })} />
+            <TextField fullWidth label="English (EN)" multiline rows={2} value={currentService.descriptionEn || ''} onChange={(e) => setCurrentService({ ...currentService, descriptionEn: e.target.value })} />
+            <TextField fullWidth label="Română (RO)" multiline rows={2} value={currentService.descriptionRo || ''} onChange={(e) => setCurrentService({ ...currentService, descriptionRo: e.target.value })} />
+          </Box>
+
+          <Typography variant="subtitle2" sx={{ mb: 1 }}>{t('details') || 'Details'}</Typography>
           <Box sx={{ display: 'flex', gap: 2 }}>
-            <TextField
-              fullWidth
-              label={t('price') || 'Price'}
-              type="number"
-              sx={{ mb: 2, mt: 1 }}
-              value={currentService.price}
-              onChange={(e) => setCurrentService({ ...currentService, price: parseFloat(e.target.value) || 0 })}
-            />
-            <TextField
-              fullWidth
-              label={t('duration') || 'Duration (mins)'}
-              type="number"
-              sx={{ mb: 2, mt: 1 }}
-              value={currentService.durationMinutes}
-              onChange={(e) => setCurrentService({ ...currentService, durationMinutes: parseInt(e.target.value) || 0 })}
-            />
+            <TextField fullWidth label={t('price') || 'Price'} type="number" required value={currentService.price} onChange={(e) => setCurrentService({ ...currentService, price: parseFloat(e.target.value) || 0 })} />
+            <TextField fullWidth label={t('duration') || 'Duration (mins)'} type="number" required value={currentService.durationMinutes} onChange={(e) => setCurrentService({ ...currentService, durationMinutes: parseInt(e.target.value) || 0 })} />
           </Box>
         </DialogContent>
         <DialogActions sx={{ p: 3, pt: 0 }}>
           <Button onClick={handleCloseModal}>{t('cancel') || 'Cancel'}</Button>
-          <Button
-            variant="contained"
-            onClick={handleSave}
-            disabled={createMutation.isPending || updateMutation.isPending || !currentService.name}
-          >
+          <Button variant="contained" onClick={handleSave} disabled={createMutation.isPending || updateMutation.isPending || !isFormValid}>
             {createMutation.isPending || updateMutation.isPending ? (
               <CircularProgress size={24} color="inherit" />
             ) : (

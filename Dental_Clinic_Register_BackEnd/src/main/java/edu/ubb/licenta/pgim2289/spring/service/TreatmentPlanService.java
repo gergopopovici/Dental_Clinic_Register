@@ -22,4 +22,5 @@ public interface TreatmentPlanService {
     TreatmentPlan getTreatmentPlanEntityById(Long id);
 
     PanoramaImageDTO savePanoramaImage(Long planId, MultipartFile file);
+    void deletePanoramaImage(Long planId, Long imageId);
 }

@@ -414,5 +414,14 @@
 "accountDeactivatedMessage": "A fiókod zárolva van. A feloldáshoz kérjük, állíts be egy új jelszót!",
 "success.doctor.services.updated": "Szolgáltatások sikeresen frissítve!",
 "error.generic": "Valami hiba történt.",
-"updatedServices": "Szolgáltatások frissítése"
+"updatedServices": "Szolgáltatások frissítése",
+"plan.ORTHO_FIXED": "Rögzített fogszabályozó kezelés",
+  "plan.ORTHO_REMOVABLE": "Kivehető fogszabályozó kezelés",
+  "plan.INVISALIGN": "Invisalign (láthatatlan) fogszabályozás",
+  "plan.OTHER": "Egyéb kezelési terv",
+  "estimatedDurationMonths": "Becsült időtartam (hónap)",
+"progressPercentage": "Haladás (%)",
+"confirmDelete": "Törlés megerősítése",
+"areYouSureDeleteImage": "Biztosan törölni szeretné ezt a panoráma képet? Ez a művelet nem vonható vissza.",
+"details": "Részletek"
 }

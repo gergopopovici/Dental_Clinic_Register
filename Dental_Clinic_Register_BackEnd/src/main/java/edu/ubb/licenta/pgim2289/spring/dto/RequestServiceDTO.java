@@ -13,10 +13,18 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RequestServiceDTO {
-    @NotBlank(message = "service.name.not.blank")
-    private String name;
+    @NotBlank(message = "service.name.hu.not.blank")
+    private String nameHu;
 
-    private String description;
+    @NotBlank(message = "service.name.en.not.blank")
+    private String nameEn;
+
+    @NotBlank(message = "service.name.ro.not.blank")
+    private String nameRo;
+
+    private String descriptionHu;
+    private String descriptionEn;
+    private String descriptionRo;
 
     @NotNull(message = "service.price.is.required")
     @Positive(message = "service.price.must.be.greater.than.zero")

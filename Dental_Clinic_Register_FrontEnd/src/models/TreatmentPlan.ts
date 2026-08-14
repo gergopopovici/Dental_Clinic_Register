@@ -19,8 +19,7 @@ export interface PlanAppointmentDTO {
 export interface TreatmentPlanDTO {
   id?: number;
   patientId: number;
-  primaryServiceId: number;
-  primaryServiceName?: string;
+  planType: 'ORTHO_FIXED' | 'ORTHO_REMOVABLE' | 'INVISALIGN' | 'OTHER';
   plannedServiceIds?: number[];
   plannedServiceNames?: string[];
   requires3DModel: boolean;

@@ -58,4 +58,13 @@ public class TreatmentPlanController {
         return ResponseEntity.ok(treatmentPlanService.savePanoramaImage(planId, file));
     }
 
+    @DeleteMapping("/{planId}/panorama-images/{imageId}")
+    @PreAuthorize("hasRole('DOCTOR')")
+    public ResponseEntity<Void> deletePanoramaImage(
+            @PathVariable Long planId,
+            @PathVariable Long imageId) {
+        treatmentPlanService.deletePanoramaImage(planId, imageId);
+        return ResponseEntity.noContent().build();
+    }
+
 }

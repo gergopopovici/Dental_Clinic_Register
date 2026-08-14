@@ -11,8 +11,12 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class ResponseServiceDTO {
     private Long id;
-    private String name;
-    private String description;
+    private String nameHu;
+    private String nameEn;
+    private String nameRo;
+    private String descriptionHu;
+    private String descriptionEn;
+    private String descriptionRo;
     private BigDecimal price;
     private Integer durationMinutes;
 }

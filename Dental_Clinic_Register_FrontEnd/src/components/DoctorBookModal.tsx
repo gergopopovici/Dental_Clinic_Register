@@ -34,6 +34,8 @@ interface DoctorBookModalProps {
   onClose: () => void;
   doctorId: number;
   onSuccess?: () => void;
+  initialPatientId?: number;
+  initialPlanId?: number;
 }
 
 interface ApiError {
@@ -44,8 +46,8 @@ interface ApiError {
   };
 }
 
-function DoctorBookModal({ open, onClose, doctorId, onSuccess }: DoctorBookModalProps) {
-  const { t } = useTranslation();
+function DoctorBookModal({ open, onClose, doctorId, onSuccess, initialPatientId, initialPlanId }: DoctorBookModalProps) {
+  const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
 
   const [patientId, setPatientId] = useState<number | ''>('');
@@ -53,6 +55,7 @@ function DoctorBookModal({ open, onClose, doctorId, onSuccess }: DoctorBookModal
   const [treatmentPlanId, setTreatmentPlanId] = useState<number | ''>('');
   const [date, setDate] = useState<string>('');
   const [selectedTime, setSelectedTime] = useState<string>('');
+  const [customDuration, setCustomDuration] = useState<number | ''>('');
   const [notes, setNotes] = useState<string>('');
   const [resourceLink, setResourceLink] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState('');
@@ -66,15 +69,19 @@ function DoctorBookModal({ open, onClose, doctorId, onSuccess }: DoctorBookModal
       setTreatmentPlanId('');
       setDate('');
       setSelectedTime('');
+      setCustomDuration('');
       setNotes('');
       setResourceLink('');
       setErrorMessage('');
+    } else {
+      if (initialPatientId) setPatientId(initialPatientId);
+      if (initialPlanId) setTreatmentPlanId(initialPlanId);
     }
-  }, [open]);
+  }, [open, initialPatientId, initialPlanId]);
 
   useEffect(() => {
     setSelectedTime('');
-  }, [date, doctorId, serviceId]);
+  }, [date, doctorId, serviceId, customDuration]);
 
   const { data: patients, isLoading: isLoadingPatients } = useQuery<PatientDropDownDTO[]>({
     queryKey: ['patients'],
@@ -122,6 +129,12 @@ function DoctorBookModal({ open, onClose, doctorId, onSuccess }: DoctorBookModal
     enabled: !!patientId && open,
   });
 
+  const getLocalizedName = (service: any) => {
+    if (i18n.language.startsWith('hu')) return service.nameHu;
+    if (i18n.language.startsWith('ro')) return service.nameRo;
+    return service.nameEn;
+  };
+
   const activeAndSortedPatients = useMemo(() => {
     if (!patients) return [];
     return patients
@@ -135,6 +148,12 @@ function DoctorBookModal({ open, onClose, doctorId, onSuccess }: DoctorBookModal
     return services?.find((s: ResponseServiceDTO) => s.id === serviceId);
   }, [services, serviceId]);
 
+  useEffect(() => {
+    if (selectedService) {
+      setCustomDuration(selectedService.durationMinutes);
+    }
+  }, [selectedService]);
+
   const availableSlots = useMemo(() => {
     if (!date || !doctorId || !selectedService || !weeklySchedule) return [];
 
@@ -147,7 +166,7 @@ function DoctorBookModal({ open, onClose, doctorId, onSuccess }: DoctorBookModal
 
     if (!daySchedule || !daySchedule.isWorking) return [];
 
-    const duration = selectedService.durationMinutes;
+    const duration = customDuration !== '' ? Number(customDuration) : selectedService.durationMinutes;
     const [year, month, day] = date.split('-').map(Number);
     const [startH, startM] = daySchedule.startTime.split(':').map(Number);
     const [endH, endM] = daySchedule.endTime.split(':').map(Number);
@@ -180,12 +199,13 @@ function DoctorBookModal({ open, onClose, doctorId, onSuccess }: DoctorBookModal
       current = new Date(current.getTime() + (duration + APPOINTMENT_BUFFER_MINUTES) * 60000);
     }
     return slots;
-  }, [date, doctorId, selectedService, bookedSlots, weeklySchedule, timeOffs, globalHolidays]);
+  }, [date, doctorId, selectedService, customDuration, bookedSlots, weeklySchedule, timeOffs, globalHolidays]);
 
   const bookMutation = useMutation({
     mutationFn: (payload: DoctorCreateAppointmentDTO) => createAppointmentByDoctor(doctorId, payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['doctorAppointments'] });
+      queryClient.invalidateQueries({ queryKey: ['treatmentPlans'] });
       if (onSuccess) {
         onSuccess();
       } else {
@@ -224,13 +244,14 @@ function DoctorBookModal({ open, onClose, doctorId, onSuccess }: DoctorBookModal
       startTime: `${date}T${selectedTime}:00`,
       notes,
       resourceLink,
+      customDurationMinutes: customDuration !== '' ? Number(customDuration) : undefined,
     });
   };
 
   const isScheduleLoading = isLoadingSlots || isLoadingSchedule || isLoadingTimeOffs || isLoadingGlobal;
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle sx={{ fontWeight: 'bold' }}>{t('bookForPatient')}</DialogTitle>
       <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 3, pt: '24px !important' }}>
         {errorMessage && (
@@ -239,106 +260,135 @@ function DoctorBookModal({ open, onClose, doctorId, onSuccess }: DoctorBookModal
           </Typography>
         )}
 
-        <Autocomplete
-          options={activeAndSortedPatients}
-          loading={isLoadingPatients}
-          getOptionLabel={(p: PatientDropDownDTO) => `${p.fullName} (${p.email})`}
-          value={activeAndSortedPatients.find((p: PatientDropDownDTO) => p.userId === patientId) || null}
-          onChange={handlePatientChange}
-          renderInput={(params) => <TextField {...params} label={t('selectPatient')} />}
-        />
+        <Grid container spacing={2}>
+          <Grid size={{ xs: 12, md: 6 }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+              <Autocomplete
+                options={activeAndSortedPatients}
+                loading={isLoadingPatients}
+                getOptionLabel={(p: PatientDropDownDTO) => `${p.fullName} (${p.email})`}
+                value={activeAndSortedPatients.find((p: PatientDropDownDTO) => p.userId === patientId) || null}
+                onChange={handlePatientChange}
+                renderInput={(params) => <TextField {...params} label={t('selectPatient')} />}
+              />
 
-        {patientId !== '' && (
-          <FormControl fullWidth>
-            <InputLabel shrink>{t('selectTreatmentPlan')}</InputLabel>
-            <Select
-              value={treatmentPlanId}
-              onChange={handleTreatmentPlanChange}
-              label={t('selectTreatmentPlan')}
-              notched
-              displayEmpty
-            >
-              <MenuItem value="">
-                <em>{t('none')}</em>
-              </MenuItem>
-              {isLoadingPlans ? (
-                <MenuItem disabled>
-                  <CircularProgress size={20} />
-                </MenuItem>
-              ) : (
-                patientPlans
-                  ?.filter((p: TreatmentPlanDTO) => p.status === 'ACTIVE')
-                  .map((plan: TreatmentPlanDTO) => (
-                    <MenuItem key={plan.id} value={plan.id as number}>
-                      {plan.primaryServiceName || `Plan #${plan.id}`}
+              {patientId !== '' && (
+                <FormControl fullWidth>
+                  <InputLabel shrink>{t('selectTreatmentPlan')}</InputLabel>
+                  <Select
+                    value={treatmentPlanId}
+                    onChange={handleTreatmentPlanChange}
+                    label={t('selectTreatmentPlan')}
+                    notched
+                    displayEmpty
+                  >
+                    <MenuItem value="">
+                      <em>{t('none')}</em>
                     </MenuItem>
-                  ))
+                    {isLoadingPlans ? (
+                      <MenuItem disabled>
+                        <CircularProgress size={20} />
+                      </MenuItem>
+                    ) : (
+                      patientPlans
+                        ?.filter((p: TreatmentPlanDTO) => p.status === 'ACTIVE')
+                        .map((plan: TreatmentPlanDTO) => (
+                          <MenuItem key={plan.id} value={plan.id as number}>
+                            {plan.planType ? t(`plan.${plan.planType}`) : `Plan #${plan.id}`}
+                          </MenuItem>
+                        ))
+                    )}
+                  </Select>
+                </FormControl>
               )}
-            </Select>
-          </FormControl>
-        )}
 
-        <FormControl fullWidth>
-          <InputLabel shrink>{t('selectService')}</InputLabel>
-          <Select value={serviceId} onChange={handleServiceChange} label={t('selectService')} notched>
-            {services?.map((s: ResponseServiceDTO) => (
-              <MenuItem key={s.id} value={s.id}>
-                {s.name} ({s.durationMinutes} min)
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+              <FormControl fullWidth>
+                <InputLabel shrink>{t('selectService')}</InputLabel>
+                <Select value={serviceId} onChange={handleServiceChange} label={t('selectService')} notched>
+                  {services?.map((s: ResponseServiceDTO) => (
+                    <MenuItem key={s.id} value={s.id}>
+                      {getLocalizedName(s)} ({s.durationMinutes} min)
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
 
-        <TextField
-          type="date"
-          label={t('date')}
-          fullWidth
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-          slotProps={{ inputLabel: { shrink: true } }}
-        />
+              {selectedService && (
+                <TextField
+                  label={t('customDuration', 'Időtartam (perc)')}
+                  type="number"
+                  fullWidth
+                  value={customDuration}
+                  onChange={(e) => setCustomDuration(Number(e.target.value))}
+                  inputProps={{ min: 5, step: 5 }}
+                />
+              )}
 
-        {date && doctorId && selectedService && (
-          <Box>
-            <Typography variant="body2" sx={{ mb: 1, fontWeight: 'bold' }}>
-              {t('selectTime')}
-            </Typography>
-            {isScheduleLoading ? (
-              <CircularProgress size={24} />
-            ) : availableSlots.length === 0 ? (
-              <Typography>{t('noAvailableSlots')}</Typography>
+              <TextField
+                label={t('notesOptions')}
+                multiline
+                rows={2}
+                fullWidth
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+              />
+              <TextField
+                label={t('resourceLinkOptional')}
+                fullWidth
+                value={resourceLink}
+                onChange={(e) => setResourceLink(e.target.value)}
+              />
+            </Box>
+          </Grid>
+
+          <Grid size={{ xs: 12, md: 6 }}>
+            {doctorId && selectedService ? (
+              <Box>
+                <TextField
+                  type="date"
+                  label={t('date')}
+                  fullWidth
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                  slotProps={{ inputLabel: { shrink: true } }}
+                  sx={{ mb: 3 }}
+                />
+
+                {date && (
+                  <>
+                    <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 'bold' }}>
+                      {t('selectTime')}
+                    </Typography>
+                    {isScheduleLoading ? (
+                      <CircularProgress size={24} />
+                    ) : availableSlots.length === 0 ? (
+                      <Typography>{t('noAvailableSlots')}</Typography>
+                    ) : (
+                      <Grid container spacing={1}>
+                        {availableSlots.map((time: string) => (
+                          <Grid size={{ xs: 3 }} key={time}>
+                            <Button
+                              variant={selectedTime === time ? 'contained' : 'outlined'}
+                              onClick={() => setSelectedTime(time)}
+                              fullWidth
+                              size="small"
+                            >
+                              {time}
+                            </Button>
+                          </Grid>
+                        ))}
+                      </Grid>
+                    )}
+                  </>
+                )}
+              </Box>
             ) : (
-              <Grid container spacing={1}>
-                {availableSlots.map((time: string) => (
-                  <Grid size={{ xs: 3 }} key={time}>
-                    <Button
-                      variant={selectedTime === time ? 'contained' : 'outlined'}
-                      onClick={() => setSelectedTime(time)}
-                      fullWidth
-                    >
-                      {time}
-                    </Button>
-                  </Grid>
-                ))}
-              </Grid>
+              <Box sx={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Typography color="textSecondary">{t('selectServiceFirst')}</Typography>
+              </Box>
             )}
-          </Box>
-        )}
-
-        <TextField
-          label={t('notesOptions')}
-          multiline
-          rows={2}
-          fullWidth
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-        />
-        <TextField
-          label={t('resourceLinkOptional')}
-          fullWidth
-          value={resourceLink}
-          onChange={(e) => setResourceLink(e.target.value)}
-        />
+          </Grid>
+        </Grid>
       </DialogContent>
       <DialogActions sx={{ p: 3 }}>
         <Button onClick={onClose}>{t('cancel')}</Button>

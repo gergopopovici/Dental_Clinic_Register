@@ -26,7 +26,9 @@ public class TreatmentPlanServiceImpl implements TreatmentPlanService {
     public TreatmentPlanServiceImpl(TreatmentPlanRepository treatmentPlanRepository,
                                     PatientService patientService,
                                     UserService userService,
-                                    ServiceProvidedService serviceProvidedService, TreatmentPlanMapper treatmentPlanMapper, FileStorageService fileStorageService) {
+                                    ServiceProvidedService serviceProvidedService,
+                                    TreatmentPlanMapper treatmentPlanMapper,
+                                    FileStorageService fileStorageService) {
         this.treatmentPlanRepository = treatmentPlanRepository;
         this.patientService = patientService;
         this.userService = userService;
@@ -49,11 +51,10 @@ public class TreatmentPlanServiceImpl implements TreatmentPlanService {
         User user = userService.findById(dto.getPatientId())
                 .orElseThrow(() -> new IllegalArgumentException("error.user.not_found"));
         Patient patient = patientService.getPatient(user);
-        ServiceProvided primaryService = serviceProvidedService.findById(dto.getPrimaryServiceId())
-                .orElseThrow(() -> new IllegalArgumentException("error.service.not.found"));
+
         TreatmentPlan plan = new TreatmentPlan();
         plan.setPatient(patient);
-        plan.setPrimaryService(primaryService);
+        plan.setPlanType(dto.getPlanType());
         plan.setRequires3DModel(dto.isRequires3DModel());
         plan.setStartDate(dto.getStartDate());
         plan.setEndDate(dto.getEndDate());
@@ -86,10 +87,8 @@ public class TreatmentPlanServiceImpl implements TreatmentPlanService {
     public TreatmentPlanDTO updatePlan(Long id, TreatmentPlanDTO dto) {
         TreatmentPlan plan = treatmentPlanRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("error.treatment_plan.not_found"));
-        ServiceProvided primaryService = serviceProvidedService.findById(dto.getPrimaryServiceId())
-                .orElseThrow(() -> new IllegalArgumentException("error.service.not.found"));
 
-        plan.setPrimaryService(primaryService);
+        plan.setPlanType(dto.getPlanType());
         plan.setRequires3DModel(dto.isRequires3DModel());
         plan.setStartDate(dto.getStartDate());
         plan.setEndDate(dto.getEndDate());
@@ -145,5 +144,21 @@ public class TreatmentPlanServiceImpl implements TreatmentPlanService {
         dto.setUploadDate(panoramaImage.getUploadDate());
 
         return dto;
+    }
+
+    @Override
+    @Transactional
+    public void deletePanoramaImage(Long planId, Long imageId) {
+        TreatmentPlan plan = getTreatmentPlanEntityById(planId);
+
+        PanoramaImage imageToRemove = plan.getPanoramaImages().stream()
+                .filter(img -> img.getId().equals(imageId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("error.image_not_found"));
+
+        fileStorageService.deleteFile(imageToRemove.getUrl());
+
+        plan.getPanoramaImages().remove(imageToRemove);
+        treatmentPlanRepository.save(plan);
     }
 }

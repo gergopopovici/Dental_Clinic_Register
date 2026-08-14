@@ -33,6 +33,7 @@ export interface DoctorCreateAppointmentDTO {
   notes?: string;
   resourceLink?: string;
   treatmentPlanId?: number | null;
+  customDurationMinutes?: number;
 }
 
 export interface DoctorUpdateAppointmentDTO {
@@ -40,6 +41,7 @@ export interface DoctorUpdateAppointmentDTO {
   notes?: string;
   resourceLink?: string;
   treatmentPlanId?: number | null;
+  customDurationMinutes?: number;
 }
 
 export interface RequestUserDTO {

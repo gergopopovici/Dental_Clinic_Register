@@ -238,7 +238,9 @@ public class UserController {
                     .map(service -> {
                         ResponseServiceDTO sDTO = new ResponseServiceDTO();
                         sDTO.setId(service.getId());
-                        sDTO.setName(service.getName());
+                        sDTO.setNameHu(service.getNameHu());
+                        sDTO.setNameEn(service.getNameEn());
+                        sDTO.setNameRo(service.getNameRo());
                         sDTO.setPrice(service.getPrice());
                         return sDTO;
                     })

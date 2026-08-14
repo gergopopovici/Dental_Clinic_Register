@@ -100,13 +100,17 @@ public class AppointmentServiceImpl implements AppointmentService {
         ServiceProvided service = serviceProvidedService.findById(request.getServiceId()).orElseThrow(() -> new IllegalArgumentException("error.service.not.found"));
 
         LocalDateTime exactStartTime = request.getStartTime();
-        LocalDateTime exactEndTime = exactStartTime.plusMinutes(service.getDurationMinutes());
+
+        int duration = (request.getCustomDurationMinutes() != null && request.getCustomDurationMinutes() > 0)
+                ? request.getCustomDurationMinutes()
+                : service.getDurationMinutes();
+
+        LocalDateTime exactEndTime = exactStartTime.plusMinutes(duration);
 
         long overlapping = appointmentRepository.countOverlappingAppointments(doctor.getId(), exactStartTime, exactEndTime);
         if (overlapping > 0) {
             throw new IllegalArgumentException("error.doctor.already.booked");
         }
-
 
         Appointment appointment = new Appointment();
         appointment.setDoctor(doctor);
@@ -138,7 +142,12 @@ public class AppointmentServiceImpl implements AppointmentService {
         }
 
         LocalDateTime newStartTime = request.getNewStartTime();
-        LocalDateTime newEndTime = newStartTime.plusMinutes(appointment.getService().getDurationMinutes());
+
+        int duration = (request.getCustomDurationMinutes() != null && request.getCustomDurationMinutes() > 0)
+                ? request.getCustomDurationMinutes()
+                : appointment.getService().getDurationMinutes();
+
+        LocalDateTime newEndTime = newStartTime.plusMinutes(duration);
 
         long overlapping = appointmentRepository.countOverlappingAppointmentsExcluding(
                 appointment.getDoctor().getId(),
@@ -151,9 +160,9 @@ public class AppointmentServiceImpl implements AppointmentService {
         }
 
         appointment.setStartTime(newStartTime);
+        appointment.setEndTime(newEndTime);
         appointment.setNotes(request.getNotes());
         appointment.setResourceLink(request.getResourceLink());
-        appointment.setEndTime(newEndTime);
 
         emailService.sendAppointmentUpdatedEmailToPatient(appointment.getPatient().getUser().getEmail(), appointment.getPatient().getUser().getFullName(), newStartTime, appointment.getDoctor().getUser().getFullName());
         return appointmentMapper.toDto(appointmentRepository.save(appointment));

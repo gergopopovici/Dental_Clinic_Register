@@ -415,5 +415,14 @@
 "accountDeactivatedMessage": "Your account is locked. To unlock it, please set a new password!",
 "success.doctor.services.updated": "Services updated successfully!",
 "error.generic": "Something went wrong.",
-"updatedServices": "Update Services"
+"updatedServices": "Update Services",
+"plan.ORTHO_FIXED": "Fixed Orthodontic Treatment",
+  "plan.ORTHO_REMOVABLE": "Removable Orthodontic Treatment",
+  "plan.INVISALIGN": "Invisalign Treatment",
+  "plan.OTHER": "Other Treatment Plan",
+  "estimatedDurationMonths": "Estimated duration (months)",
+"progressPercentage": "Progress (%)",
+"confirmDelete": "Confirm Deletion",
+"areYouSureDeleteImage": "Are you sure you want to delete this panorama image? This action cannot be undone.",
+"details": "Details"
 }

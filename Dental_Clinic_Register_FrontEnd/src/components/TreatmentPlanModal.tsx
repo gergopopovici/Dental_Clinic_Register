@@ -39,10 +39,10 @@ function TreatmentPlanModal({
   onSuccess,
   onErrorAction,
 }: TreatmentPlanModalProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
 
-  const [primaryService, setPrimaryService] = useState<ResponseServiceDTO | null>(null);
+  const [planType, setPlanType] = useState<TreatmentPlanDTO['planType'] | ''>('');
   const [requires3DModel, setRequires3DModel] = useState(false);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
@@ -57,8 +57,15 @@ function TreatmentPlanModal({
     queryFn: getAllServices,
   });
 
+  const getLocalizedName = (opt: ResponseServiceDTO) => {
+    if (i18n.language.startsWith('hu')) return opt.nameHu;
+    if (i18n.language.startsWith('ro')) return opt.nameRo;
+    return opt.nameEn;
+  };
+
   useEffect(() => {
     if (open && existingPlan) {
+      setPlanType(existingPlan.planType);
       setRequires3DModel(existingPlan.requires3DModel || false);
       setStartDate(existingPlan.startDate);
       setEndDate(existingPlan.endDate || '');
@@ -67,11 +74,10 @@ function TreatmentPlanModal({
       setEstimatedDurationMonths(existingPlan.estimatedDurationMonths || '');
       setProgressPercentage(existingPlan.progressPercentage || 0);
       if (availableServices) {
-        setPrimaryService(availableServices.find((s) => s.id === existingPlan.primaryServiceId) || null);
         setPlannedServices(availableServices.filter((s) => existingPlan.plannedServiceIds?.includes(s.id)));
       }
     } else {
-      setPrimaryService(null);
+      setPlanType('');
       setRequires3DModel(false);
       setStartDate(new Date().toISOString().slice(0, 10));
       setEndDate('');
@@ -87,17 +93,18 @@ function TreatmentPlanModal({
     mutationFn: (payload: TreatmentPlanDTO) =>
       existingPlan?.id ? updatePlan(existingPlan.id, payload) : createPlan(payload),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['treatmentPlans'] });
+    await queryClient.invalidateQueries({ queryKey: ['treatmentPlans', patientId] });
       onSuccess();
     },
     onError: (error: any) => onErrorAction(t(error.response?.data?.message || 'error.unknown')),
   });
 
   const handleSubmit = () => {
-    if (!primaryService || !startDate) return onErrorAction(t('pleaseFillRequiredFields'));
+    if (!planType || !startDate) return onErrorAction(t('pleaseFillRequiredFields'));
+    
     mutation.mutate({
       patientId,
-      primaryServiceId: primaryService.id,
+      planType: planType as TreatmentPlanDTO['planType'],
       requires3DModel,
       startDate,
       endDate: endDate || undefined,
@@ -113,14 +120,22 @@ function TreatmentPlanModal({
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle>{existingPlan ? t('editTreatmentPlan') : t('createNewPlan')}</DialogTitle>
       <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 3, pt: '24px !important' }}>
-        <Autocomplete
-          options={availableServices || []}
-          getOptionLabel={(opt) => opt.name}
-          loading={isLoadingServices}
-          value={primaryService}
-          onChange={(_, val) => setPrimaryService(val)}
-          renderInput={(params) => <TextField {...params} label={t('primaryServiceCategory')} required />}
-        />
+        
+        <TextField
+          select
+          label={t('primaryServiceCategory')}
+          required
+          fullWidth
+          value={planType}
+          onChange={(e) => setPlanType(e.target.value as TreatmentPlanDTO['planType'])}
+        >
+          {['ORTHO_FIXED', 'ORTHO_REMOVABLE', 'INVISALIGN', 'OTHER'].map((type) => (
+            <MenuItem key={type} value={type}>
+              {t(`plan.${type}`)}
+            </MenuItem>
+          ))}
+        </TextField>
+
         <FormControlLabel
           control={
             <Checkbox
@@ -153,7 +168,7 @@ function TreatmentPlanModal({
         <Box sx={{ display: 'flex', gap: 2 }}>
           <TextField
             type="number"
-            label={t('estimatedDurationMonths', 'Becsült időtartam (hónap)')}
+            label={t('estimatedDurationMonths')}
             fullWidth
             value={estimatedDurationMonths}
             onChange={(e) => setEstimatedDurationMonths(e.target.value === '' ? '' : Number(e.target.value))}
@@ -163,7 +178,7 @@ function TreatmentPlanModal({
 
         <Box sx={{ px: 1 }}>
           <Typography gutterBottom color="textSecondary" variant="body2">
-            {t('progressPercentage', 'Kezelés állapota (haladás)')}: {progressPercentage}%
+            {t('progressPercentage')}: {progressPercentage}%
           </Typography>
           <Slider
             value={progressPercentage}
@@ -188,15 +203,17 @@ function TreatmentPlanModal({
             </MenuItem>
           ))}
         </TextField>
+        
         <Autocomplete
           multiple
           options={availableServices || []}
-          getOptionLabel={(opt) => opt.name}
+          getOptionLabel={getLocalizedName}
           loading={isLoadingServices}
           value={plannedServices}
           onChange={(_, val) => setPlannedServices(val)}
           renderInput={(params) => <TextField {...params} label={t('plannedServicesOptional', 'Planned Services')} />}
         />
+        
         <TextField
           label={t('generalNotes')}
           multiline

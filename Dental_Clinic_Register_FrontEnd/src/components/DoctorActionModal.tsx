@@ -24,8 +24,8 @@ import {
   markAsCompleted,
   addSummaryToAppointment,
 } from '../services/AppointmentService';
-import { getDoctorSchedule, getDoctorTimeOffs, getGlobalHolidays } from '../services/ScheduleService';
-import { DoctorUpdateAppointmentDTO, BookedSlotDTO } from '../models/Appointment';
+import { getDoctorSchedule, getDoctorTimeOffs } from '../services/ScheduleService';
+import { BookedSlotDTO } from '../models/Appointment';
 import { AppointmentSummaryDTO, TreatmentPlanDTO } from '../models/TreatmentPlan';
 import { getPlansByPatientId } from '../services/TreatmentPlanService';
 import { DoctorScheduleDTO, TimeOffDTO } from '../models/Schedule';
@@ -68,6 +68,7 @@ function DoctorActionModal({
 
   const [date, setDate] = useState('');
   const [selectedTime, setSelectedTime] = useState('');
+  const [customDuration, setCustomDuration] = useState<number | ''>('');
   const [treatmentPlanId, setTreatmentPlanId] = useState<number | ''>('');
   const [notes, setNotes] = useState('');
   const [resourceLink, setResourceLink] = useState('');
@@ -86,6 +87,7 @@ function DoctorActionModal({
       setAudioFile(null);
       setImageFile(null);
       setDocumentFile(null);
+      setCustomDuration('');
 
       if (initialStartTime && mode === 'RESCHEDULE') {
         const [dPart, tPart] = initialStartTime.split('T');
@@ -130,7 +132,7 @@ function DoctorActionModal({
 
     if (!daySchedule || !daySchedule.isWorking) return [];
 
-    const duration = 30;
+    const duration = customDuration !== '' ? Number(customDuration) : 30; 
     const [startH, startM] = daySchedule.startTime.split(':').map(Number);
     const [endH, endM] = daySchedule.endTime.split(':').map(Number);
 
@@ -156,7 +158,7 @@ function DoctorActionModal({
       current = new Date(current.getTime() + (duration + APPOINTMENT_BUFFER_MINUTES) * 60000);
     }
     return slots;
-  }, [date, userId, bookedSlots, weeklySchedule, timeOffs, mode, initialStartTime]);
+  }, [date, userId, bookedSlots, weeklySchedule, timeOffs, mode, initialStartTime, customDuration]);
 
   const mutation = useMutation({
     mutationFn: async () => {
@@ -167,6 +169,7 @@ function DoctorActionModal({
           treatmentPlanId: treatmentPlanId === '' ? null : (treatmentPlanId as number),
           notes,
           resourceLink,
+          customDurationMinutes: customDuration !== '' ? Number(customDuration) : undefined,
         });
       } else {
         await markAsCompleted(userId, appointmentId);
@@ -188,7 +191,7 @@ function DoctorActionModal({
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle sx={{ fontWeight: 'bold' }}>
         {mode === 'RESCHEDULE' ? t('rescheduleAppointment') : t('addSummary')}
       </DialogTitle>
@@ -196,77 +199,98 @@ function DoctorActionModal({
         {errorMessage && <Typography color="error">{errorMessage}</Typography>}
 
         {mode === 'RESCHEDULE' ? (
-          <>
-            <TextField
-              type="date"
-              label={t('date')}
-              fullWidth
-              value={date}
-              onChange={(e) => {
-                setDate(e.target.value);
-                setSelectedTime('');
-              }}
-              slotProps={{ inputLabel: { shrink: true } }}
-            />
-            {date && (
+          <Grid container spacing={2}>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                {patientId && (
+                  <FormControl fullWidth>
+                    <InputLabel shrink>{t('selectTreatmentPlan')}</InputLabel>
+                    <Select
+                      value={treatmentPlanId}
+                      onChange={handleTreatmentPlanChange}
+                      notched
+                      label={t('selectTreatmentPlan')}
+                    >
+                      <MenuItem value="">{t('none')}</MenuItem>
+                      {patientPlans
+                        ?.filter((p) => p.status === 'ACTIVE')
+                        .map((plan) => (
+                          <MenuItem key={plan.id} value={plan.id as number}>
+                            {plan.planType ? t(`plan.${plan.planType}`) : `Plan #${plan.id}`}
+                          </MenuItem>
+                        ))}
+                    </Select>
+                  </FormControl>
+                )}
+
+                <TextField
+                  label={t('customDuration', 'Időtartam (perc)')}
+                  type="number"
+                  fullWidth
+                  value={customDuration}
+                  onChange={(e) => setCustomDuration(Number(e.target.value))}
+                  inputProps={{ min: 5, step: 5 }}
+                />
+
+                <TextField
+                  label={t('notesOptions')}
+                  multiline
+                  rows={3}
+                  fullWidth
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                />
+                <TextField
+                  label={t('resourceLinkOptional')}
+                  fullWidth
+                  value={resourceLink}
+                  onChange={(e) => setResourceLink(e.target.value)}
+                />
+              </Box>
+            </Grid>
+            <Grid size={{ xs: 12, md: 6 }}>
               <Box>
-                <Typography variant="body2" sx={{ mb: 1.5, fontWeight: 'bold' }}>
-                  {t('selectTime')}
-                </Typography>
-                {availableSlots.length === 0 ? (
-                  <Typography>{t('noAvailableSlots')}</Typography>
-                ) : (
-                  <Grid container spacing={1}>
-                    {availableSlots.map((time) => (
-                      <Grid size={{ xs: 3 }} key={time}>
-                        <Button
-                          variant={selectedTime === time ? 'contained' : 'outlined'}
-                          onClick={() => setSelectedTime(time)}
-                          fullWidth
-                        >
-                          {time}
-                        </Button>
+                <TextField
+                  type="date"
+                  label={t('date')}
+                  fullWidth
+                  value={date}
+                  onChange={(e) => {
+                    setDate(e.target.value);
+                    setSelectedTime('');
+                  }}
+                  slotProps={{ inputLabel: { shrink: true } }}
+                  sx={{ mb: 3 }}
+                />
+
+                {date && (
+                  <Box>
+                    <Typography variant="body2" sx={{ mb: 1.5, fontWeight: 'bold' }}>
+                      {t('selectTime')}
+                    </Typography>
+                    {availableSlots.length === 0 ? (
+                      <Typography>{t('noAvailableSlots')}</Typography>
+                    ) : (
+                      <Grid container spacing={1}>
+                        {availableSlots.map((time) => (
+                          <Grid size={{ xs: 3 }} key={time}>
+                            <Button
+                              variant={selectedTime === time ? 'contained' : 'outlined'}
+                              onClick={() => setSelectedTime(time)}
+                              fullWidth
+                              size="small"
+                            >
+                              {time}
+                            </Button>
+                          </Grid>
+                        ))}
                       </Grid>
-                    ))}
-                  </Grid>
+                    )}
+                  </Box>
                 )}
               </Box>
-            )}
-            {patientId && (
-              <FormControl fullWidth>
-                <InputLabel shrink>{t('selectTreatmentPlan')}</InputLabel>
-                <Select
-                  value={treatmentPlanId}
-                  onChange={handleTreatmentPlanChange}
-                  notched
-                  label={t('selectTreatmentPlan')}
-                >
-                  <MenuItem value="">{t('none')}</MenuItem>
-                  {patientPlans
-                    ?.filter((p) => p.status === 'ACTIVE')
-                    .map((plan) => (
-                      <MenuItem key={plan.id} value={plan.id as number}>
-                        {plan.primaryServiceName}
-                      </MenuItem>
-                    ))}
-                </Select>
-              </FormControl>
-            )}
-            <TextField
-              label={t('notesOptions')}
-              multiline
-              rows={3}
-              fullWidth
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-            />
-            <TextField
-              label={t('resourceLinkOptional')}
-              fullWidth
-              value={resourceLink}
-              onChange={(e) => setResourceLink(e.target.value)}
-            />
-          </>
+            </Grid>
+          </Grid>
         ) : (
           <>
             <TextField
@@ -294,7 +318,7 @@ function DoctorActionModal({
       </DialogContent>
       <DialogActions sx={{ p: 3 }}>
         <Button onClick={onClose}>{t('cancel')}</Button>
-        <Button variant="contained" onClick={() => mutation.mutate()} disabled={mutation.isPending}>
+        <Button variant="contained" onClick={() => mutation.mutate()} disabled={mutation.isPending || (mode === 'RESCHEDULE' && !selectedTime)}>
           {mutation.isPending ? <CircularProgress size={24} /> : t('save')}
         </Button>
       </DialogActions>

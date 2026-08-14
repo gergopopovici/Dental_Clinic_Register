@@ -22,4 +22,5 @@ public class DoctorCreateAppointmentDTO {
     private String resourceLink;
     private Long treatmentPlanId;
 
+    private Integer customDurationMinutes;
 }

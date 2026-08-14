@@ -29,7 +29,6 @@ import AudiotrackIcon from '@mui/icons-material/Audiotrack';
 import ImageIcon from '@mui/icons-material/Image';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import { LinearProgress } from '@mui/material';
-
 import { getAllPatientsForDropdown } from '../services/PatientService';
 import { getPlansByPatientId } from '../services/TreatmentPlanService';
 import { PatientDropDownDTO } from '../models/Appointment';
@@ -39,6 +38,7 @@ import { apiURL } from '../config/apiUrl';
 import { cancelAppointmentByDoctor, markAsNoShow } from '../services/AppointmentService';
 import DoctorActionModal from './DoctorActionModal';
 import PanoramaViewerModal from './PanoramaViewerModal';
+import DoctorBookModal from './DoctorBookModal';
 
 interface DoctorViewProps {
   doctorId: number;
@@ -72,16 +72,21 @@ function DoctorTreatmentPlansView({ doctorId }: DoctorViewProps) {
 
   const [isPanoramaModalOpen, setIsPanoramaModalOpen] = useState(false);
   const [selectedPlanForPanorama, setSelectedPlanForPanorama] = useState<TreatmentPlanDTO | null>(null);
+
+  const [isBookModalOpen, setIsBookModalOpen] = useState(false);
+  const [bookModalPlanId, setBookModalPlanId] = useState<number | undefined>(undefined);
+
   const openPanoramaModal = (plan: TreatmentPlanDTO) => {
     setSelectedPlanForPanorama(plan);
     setIsPanoramaModalOpen(true);
   }
+
   const getProgressColor = (progress: number) => {
-  if (progress < 33) return 'error';     
-  if (progress < 66) return 'warning';  
-  if (progress < 100) return 'primary';  
-  return 'success';                     
-};
+    if (progress < 33) return 'error';     
+    if (progress < 66) return 'warning';  
+    if (progress < 100) return 'primary';  
+    return 'success';                      
+  };
 
   const { data: patients, isLoading: isLoadingPatients } = useQuery({
     queryKey: ['patientsDropdown'],
@@ -138,6 +143,11 @@ function DoctorTreatmentPlansView({ doctorId }: DoctorViewProps) {
     setSummaryExistingNotes(apt.summary?.notes || '');
     setSummaryExistingData(apt.summary);
     setIsSummaryModalOpen(true);
+  };
+
+  const openBookModalForPlan = (planId: number) => {
+    setBookModalPlanId(planId);
+    setIsBookModalOpen(true);
   };
 
   const renderAppointmentHistory = (appointments: PlanAppointmentDTO[] | undefined, planId: number) => {
@@ -260,13 +270,23 @@ function DoctorTreatmentPlansView({ doctorId }: DoctorViewProps) {
           >
             <Box>
               <Typography variant="h6" color="primary.main">
-                {plan.primaryServiceName}
+                {plan.planType ? t(`plan.${plan.planType}`) : ''}
               </Typography>
               <Typography variant="body2" color="textSecondary">
                 {t('startDate')}: {plan.startDate} | {t('endDate')}: {plan.endDate || t('ongoing')}
               </Typography>
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
+              {plan.status === 'ACTIVE' && (
+                <Button
+                  variant="contained"
+                  color="primary"
+                  size="small"
+                  onClick={() => openBookModalForPlan(plan.id as number)}
+                >
+                  {t('bookAppointment')}
+                </Button>
+              )}
               {plan.requires3DModel && (
                 <Button
                   variant="contained"
@@ -401,9 +421,10 @@ function DoctorTreatmentPlansView({ doctorId }: DoctorViewProps) {
           onClose={() => setIsModalOpen(false)}
           patientId={selectedPatient.userId}
           existingPlan={editingPlan}
-          onSuccess={() => {
+          onSuccess={ async () => {
             setIsModalOpen(false);
             setSnackbar({ open: true, message: t('planSavedSuccessfully'), severity: 'success' });
+            await queryClient.invalidateQueries({ queryKey: ['treatmentPlans', selectedPatient.userId] });
           }}
           onErrorAction={(message) => {
             setSnackbar({ open: true, message: message, severity: 'error' });
@@ -450,6 +471,18 @@ function DoctorTreatmentPlansView({ doctorId }: DoctorViewProps) {
        plan={selectedPlanForPanorama}
        isDoctor={true}
        />
+      <DoctorBookModal
+        open={isBookModalOpen}
+        onClose={() => setIsBookModalOpen(false)}
+        doctorId={doctorId}
+        initialPatientId={selectedPatient?.userId}
+        initialPlanId={bookModalPlanId}
+        onSuccess={() => {
+          setIsBookModalOpen(false);
+          setSnackbar({ open: true, message: t('appointmentCreated'), severity: 'success' });
+          queryClient.invalidateQueries({ queryKey: ['treatmentPlans', selectedPatient?.userId] });
+        }}
+      />
       <Dialog open={cancelDialogOpen} onClose={() => setCancelDialogOpen(false)}>
         <DialogTitle>{t('cancelAppointment')}</DialogTitle>
         <DialogContent sx={{ pt: '24px !important' }}>

@@ -33,10 +33,18 @@ public class ServiceProvidedServiceImpl implements ServiceProvidedService {
     public ResponseServiceDTO updateService(Long id, RequestServiceDTO request) {
         ServiceProvided serviceProvided = serviceRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("error.service_not_found"));
-        serviceProvided.setName(request.getName());
+
+        serviceProvided.setNameHu(request.getNameHu());
+        serviceProvided.setNameEn(request.getNameEn());
+        serviceProvided.setNameRo(request.getNameRo());
+
+        serviceProvided.setDescriptionHu(request.getDescriptionHu());
+        serviceProvided.setDescriptionEn(request.getDescriptionEn());
+        serviceProvided.setDescriptionRo(request.getDescriptionRo());
+
         serviceProvided.setPrice(request.getPrice());
-        serviceProvided.setDescription(request.getDescription());
         serviceProvided.setDurationMinutes(request.getDurationMinutes());
+
         return mapper.toDTO(serviceRepository.save(serviceProvided));
     }
 

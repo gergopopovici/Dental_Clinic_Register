@@ -1,14 +1,22 @@
 export interface RequestServiceDTO {
-    name: string;
-    description?: string;
-    price: number;
-    durationMinutes: number;
+  nameHu: string;
+  nameEn: string;
+  nameRo: string;
+  descriptionHu?: string;
+  descriptionEn?: string;
+  descriptionRo?: string;
+  price: number;
+  durationMinutes: number;
 }
 
 export interface ResponseServiceDTO {
-    id: number;
-    name: string;
-    description?: string;
-    price: number;
-    durationMinutes: number;
+  id: number;
+  nameHu: string;
+  nameEn: string;
+  nameRo: string;
+  descriptionHu?: string;
+  descriptionEn?: string;
+  descriptionRo?: string;
+  price: number;
+  durationMinutes: number;
 }

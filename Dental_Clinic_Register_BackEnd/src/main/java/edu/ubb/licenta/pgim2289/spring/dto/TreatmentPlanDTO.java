@@ -11,8 +11,7 @@ import java.util.Set;
 public class TreatmentPlanDTO {
     private Long id;
     private Long patientId;
-    private Long primaryServiceId;
-    private String primaryServiceName;
+    private TreatmentPlan.TreatmentPlanType planType;
     private Set<Long> plannedServiceIds;
     private List<String> plannedServiceNames;
     private boolean requires3DModel;

@@ -14,4 +14,6 @@ public class DoctorUpdateAppointmentDTO {
 
     private String notes;
     private String resourceLink;
+
+    private Integer customDurationMinutes;
 }

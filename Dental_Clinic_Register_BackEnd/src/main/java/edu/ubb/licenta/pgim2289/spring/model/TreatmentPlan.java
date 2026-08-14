@@ -17,13 +17,14 @@ import java.util.Set;
 @Data
 @NoArgsConstructor
 public class TreatmentPlan extends BaseEntity {
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "patient_id", nullable = false)
     private Patient patient;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "primary_service_id", nullable = false)
-    private ServiceProvided primaryService;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "plan_type", nullable = false)
+    private TreatmentPlanType planType;
 
     @Column(name = "requires_3d_model", nullable = false)
     private boolean requires3DModel = false;
@@ -59,6 +60,13 @@ public class TreatmentPlan extends BaseEntity {
         ACTIVE, COMPLETED, SUSPENDED, CANCELLED
     }
 
+    public enum TreatmentPlanType {
+        ORTHO_FIXED,
+        ORTHO_REMOVABLE,
+        INVISALIGN,
+        OTHER
+    }
+
     @Column(name = "estimated_duration_months")
     private Integer estimatedDurationMonths;
 
@@ -67,5 +75,4 @@ public class TreatmentPlan extends BaseEntity {
 
     @OneToMany(mappedBy = "treatmentPlan", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PanoramaImage> panoramaImages = new ArrayList<>();
-
 }

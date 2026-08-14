@@ -414,5 +414,14 @@
 "accountDeactivatedMessage": "Contul tău este blocat. Pentru a-l debloca, te rugăm să setezi o nouă parolă!",
 "success.doctor.services.updated": "Serviciile au fost actualizate cu succes!",
 "error.generic": "Ceva nu a mers bine.",
-"updatedServices": "Actualizare Servicii"
+"updatedServices": "Actualizare Servicii",
+"plan.ORTHO_FIXED": "Tratament ortodontic fix",
+"plan.ORTHO_REMOVABLE": "Tratament ortodontic mobil",
+"plan.INVISALIGN": "Tratament Invisalign",
+"plan.OTHER": "Alt plan de tratament",
+"estimatedDurationMonths": "Durata estimată (luni)",
+"progressPercentage": "Progres (%)",
+"confirmDelete": "Confirmare ștergere",
+"areYouSureDeleteImage": "Sigur doriți să ștergeți această imagine panoramică? Această acțiune nu poate fi anulată.",
+"details": "Detalii"
 }

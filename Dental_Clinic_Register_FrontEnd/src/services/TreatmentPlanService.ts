@@ -58,11 +58,10 @@ export const uploadPanoramaImage = async (planId: number, file: File): Promise<P
     formData.append("file", file);
 
     try {
-        // A fetch API-t használjuk az apiClient helyett, hogy a böngésző maga állítsa be a Multipart Boundary-t!
         const response = await fetch(`${treatmentPlanApiUrl}/${planId}/panorama-images`, {
             method: 'POST',
             body: formData,
-            credentials: 'include' // Ez küldi el a JWT 'auth_token' sütit!
+            credentials: 'include'
         });
 
         if (!response.ok) {
@@ -73,6 +72,15 @@ export const uploadPanoramaImage = async (planId: number, file: File): Promise<P
         return data as PanoramaImageDTO;
     } catch (error) {
         console.error(`Error uploading panorama image for plan ${planId}:`, error);
+        throw error;
+    }
+}
+
+export const deletePanoramaImage = async (planId: number, imageId: number): Promise<void> => {
+    try {
+        await apiClient.delete(`${treatmentPlanApiUrl}/${planId}/panorama-images/${imageId}`);
+    } catch (error) {
+        console.error(`Error deleting panorama image ${imageId} for plan ${planId}:`, error);
         throw error;
     }
 }

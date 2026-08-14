@@ -17,13 +17,11 @@ import java.util.stream.Collectors;
 public interface TreatmentPlanMapper {
 
     @Mapping(source = "patient.user.id", target = "patientId")
-    @Mapping(source = "primaryService.id", target = "primaryServiceId")
-    @Mapping(source = "primaryService.name", target = "primaryServiceName")
     @Mapping(source = "plannedServices", target = "plannedServiceIds", qualifiedByName = "mapServiceIds")
     @Mapping(source = "plannedServices", target = "plannedServiceNames", qualifiedByName = "mapServiceNames")
     TreatmentPlanDTO toDto(TreatmentPlan plan);
 
-    @Mapping(source = "service.name", target = "serviceName")
+    @Mapping(source = "service.nameEn", target = "serviceName")
     PlanAppointmentDTO toPlanAppointmentDto(Appointment appointment);
 
     PanoramaImageDTO toPanoramaImageDto(PanoramaImage panoramaImage);
@@ -41,6 +39,6 @@ public interface TreatmentPlanMapper {
         if (services == null) {
             return null;
         }
-        return services.stream().map(ServiceProvided::getName).collect(Collectors.toList());
+        return services.stream().map(ServiceProvided::getNameEn).collect(Collectors.toList());
     }
 }

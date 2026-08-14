@@ -52,11 +52,11 @@ function PatientTreatmentPlansView({ patientId }: PatientViewProps) {
   const getFileUrl = (url: string) => `http://localhost:8080/api/files/${url.split('/').pop()}`;
 
   const getProgressColor = (progress: number) => {
-  if (progress < 33) return 'error';     
-  if (progress < 66) return 'warning';   
-  if (progress < 100) return 'primary';  
-  return 'success';                     
-};
+    if (progress < 33) return 'error';     
+    if (progress < 66) return 'warning';   
+    if (progress < 100) return 'primary';  
+    return 'success';                      
+  };
 
   const renderAppointmentHistory = (appointments?: PlanAppointmentDTO[]) => {
     if (!appointments || appointments.length === 0)
@@ -118,7 +118,9 @@ function PatientTreatmentPlansView({ patientId }: PatientViewProps) {
     <Card key={plan.id} sx={{ mb: 2 }}>
       <CardContent>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-          <Typography variant="h6">{plan.primaryServiceName}</Typography>
+          <Typography variant="h6">
+            {plan.planType ? t(`plan.${plan.planType}`) : ''}
+          </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             {plan.requires3DModel && (
               <Button

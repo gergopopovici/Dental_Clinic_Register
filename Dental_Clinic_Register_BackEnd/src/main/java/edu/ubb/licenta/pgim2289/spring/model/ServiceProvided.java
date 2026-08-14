@@ -14,17 +14,27 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 public class ServiceProvided extends BaseEntity {
 
-    @Column(name = "name", unique = true, nullable = false)
-    private String name;
+    @Column(name = "name_hu", unique = true, nullable = false)
+    private String nameHu;
 
-    @Column(name = "description", columnDefinition = "TEXT")
-    private String description;
+    @Column(name = "name_en", unique = true, nullable = false)
+    private String nameEn;
+
+    @Column(name = "name_ro", unique = true, nullable = false)
+    private String nameRo;
+
+    @Column(name = "description_hu", columnDefinition = "TEXT")
+    private String descriptionHu;
+
+    @Column(name = "description_en", columnDefinition = "TEXT")
+    private String descriptionEn;
+
+    @Column(name = "description_ro", columnDefinition = "TEXT")
+    private String descriptionRo;
 
     @Column(name = "price", nullable = false)
     private BigDecimal price;
 
     @Column(name = "duration_minutes", nullable = false)
     private Integer durationMinutes;
-
-
 }
