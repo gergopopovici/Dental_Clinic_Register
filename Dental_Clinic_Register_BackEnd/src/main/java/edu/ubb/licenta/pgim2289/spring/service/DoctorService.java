@@ -1,9 +1,6 @@
 package edu.ubb.licenta.pgim2289.spring.service;
 
-import edu.ubb.licenta.pgim2289.spring.dto.DoctorDropDownDTO;
-import edu.ubb.licenta.pgim2289.spring.dto.MessageResponse;
-import edu.ubb.licenta.pgim2289.spring.dto.RequestDoctorDTO;
-import edu.ubb.licenta.pgim2289.spring.dto.RequestUserDTO;
+import edu.ubb.licenta.pgim2289.spring.dto.*;
 import edu.ubb.licenta.pgim2289.spring.model.Doctor;
 import edu.ubb.licenta.pgim2289.spring.model.User;
 import org.springframework.http.ResponseEntity;
@@ -23,4 +20,6 @@ public interface DoctorService {
     Optional<Doctor> findByUserId(Long id);
 
     ResponseEntity<MessageResponse> updateDoctorServices(Long userId, List<Long> serviceIds);
+
+    List<ResponseServiceDTO> getOfferedServicesForDoctor(Long userId);
 }

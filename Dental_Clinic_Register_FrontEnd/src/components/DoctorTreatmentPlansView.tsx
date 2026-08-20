@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Box,
   Autocomplete,
@@ -19,7 +19,10 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  LinearProgress
+  LinearProgress,
+  Menu,
+  MenuItem,
+  IconButton
 } from '@mui/material';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
@@ -29,6 +32,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import AudiotrackIcon from '@mui/icons-material/Audiotrack';
 import ImageIcon from '@mui/icons-material/Image';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { getAllPatientsForDropdown } from '../services/PatientService';
 import { getPlansByPatientId } from '../services/TreatmentPlanService';
 import { getAllServices } from '../services/ProvidedServiceService';
@@ -36,7 +40,7 @@ import { PatientDropDownDTO } from '../models/Appointment';
 import { TreatmentPlanDTO, PlanAppointmentDTO, AppointmentSummaryDTO } from '../models/TreatmentPlan';
 import TreatmentPlanModal from './TreatmentPlanModal';
 import { apiURL } from '../config/apiUrl';
-import { cancelAppointmentByDoctor, markAsNoShow } from '../services/AppointmentService';
+import { cancelAppointmentByDoctor, markAsNoShow, detachFromTreatmentPlan } from '../services/AppointmentService';
 import DoctorActionModal from './DoctorActionModal';
 import PanoramaViewerModal from './PanoramaViewerModal';
 import DoctorBookModal from './DoctorBookModal';
@@ -83,11 +87,28 @@ function DoctorTreatmentPlansView({ doctorId }: DoctorViewProps) {
   const [appointmentToCancel, setAppointmentToCancel] = useState<number | null>(null);
   const [cancelReason, setCancelReason] = useState('');
 
+  const [detachDialogOpen, setDetachDialogOpen] = useState(false);
+  const [appointmentToDetach, setAppointmentToDetach] = useState<number | null>(null);
+
   const [isPanoramaModalOpen, setIsPanoramaModalOpen] = useState(false);
   const [selectedPlanForPanorama, setSelectedPlanForPanorama] = useState<TreatmentPlanDTO | null>(null);
 
   const [isBookModalOpen, setIsBookModalOpen] = useState(false);
   const [bookModalPlanId, setBookModalPlanId] = useState<number | undefined>(undefined);
+
+  // Állapotok a "További műveletek" (három pont) menühöz
+  const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
+  const [activeMenuAptId, setActiveMenuAptId] = useState<number | null>(null);
+
+  const handleMenuOpen = (event: React.MouseEvent<HTMLButtonElement>, aptId: number) => {
+    setMenuAnchorEl(event.currentTarget);
+    setActiveMenuAptId(aptId);
+  };
+
+  const handleMenuClose = () => {
+    setMenuAnchorEl(null);
+    setActiveMenuAptId(null);
+  };
 
   const openPanoramaModal = (plan: TreatmentPlanDTO) => {
     setSelectedPlanForPanorama(plan);
@@ -136,8 +157,8 @@ function DoctorTreatmentPlansView({ doctorId }: DoctorViewProps) {
     mutationFn: ({ id, reason }: { id: number; reason: string }) => cancelAppointmentByDoctor(doctorId, id, reason),
     onSuccess: async () => {
       setSnackbar({ open: true, message: t('appointmentCancelled'), severity: 'success' });
-      await queryClient.invalidateQueries({ queryKey: ['treatmentPlans', selectedPatient?.userId] });
-      await queryClient.invalidateQueries({ queryKey: ['doctorAppointments', doctorId] });
+      await queryClient.invalidateQueries({ queryKey: ['treatmentPlans'] });
+      await queryClient.invalidateQueries({ queryKey: ['doctorAppointments'] });
     },
     onError: (error: any) => {
       setSnackbar({ open: true, message: t(error.response?.data?.message || 'error.unknown'), severity: 'error' });
@@ -148,8 +169,22 @@ function DoctorTreatmentPlansView({ doctorId }: DoctorViewProps) {
     mutationFn: (id: number) => markAsNoShow(doctorId, id),
     onSuccess: async () => {
       setSnackbar({ open: true, message: t('markedAsNoShow'), severity: 'success' });
-      await queryClient.invalidateQueries({ queryKey: ['treatmentPlans', selectedPatient?.userId] });
-      await queryClient.invalidateQueries({ queryKey: ['doctorAppointments', doctorId] });
+      await queryClient.invalidateQueries({ queryKey: ['treatmentPlans'] });
+      await queryClient.invalidateQueries({ queryKey: ['doctorAppointments'] });
+    },
+    onError: (error: any) => {
+      setSnackbar({ open: true, message: t(error.response?.data?.message || 'error.unknown'), severity: 'error' });
+    },
+  });
+
+  const detachPlanMutation = useMutation({
+    mutationFn: async (appointmentId: number) => {
+      await detachFromTreatmentPlan(doctorId, appointmentId);
+    },
+    onSuccess: async () => {
+      setSnackbar({ open: true, message: t('appointmentDetached'), severity: 'success' });
+      await queryClient.invalidateQueries({ queryKey: ['treatmentPlans'] });
+      await queryClient.invalidateQueries({ queryKey: ['doctorAppointments'] });
     },
     onError: (error: any) => {
       setSnackbar({ open: true, message: t(error.response?.data?.message || 'error.unknown'), severity: 'error' });
@@ -209,30 +244,70 @@ function DoctorTreatmentPlansView({ doctorId }: DoctorViewProps) {
                 <Button size="small" variant="outlined" onClick={() => openRescheduleModal(apt, planId)}>
                   {t('edit')}
                 </Button>
-                <Button size="small" variant="outlined" color="warning" onClick={() => noShowMutation.mutate(apt.id)}>
-                  {t('noShow')}
-                </Button>
-                <Button
-                  size="small"
-                  variant="outlined"
-                  color="error"
-                  onClick={() => {
-                    setAppointmentToCancel(apt.id);
-                    setCancelDialogOpen(true);
-                  }}
-                >
-                  {t('cancel')}
-                </Button>
                 <Button size="small" variant="contained" color="primary" onClick={() => openSummaryModal(apt, planId)}>
                   {t('complete')}
                 </Button>
+                
+                {/* Menü gomb */}
+                <IconButton size="small" onClick={(e) => handleMenuOpen(e, apt.id)}>
+                  <MoreVertIcon fontSize="small" />
+                </IconButton>
+
+                <Menu
+                  anchorEl={menuAnchorEl}
+                  open={Boolean(menuAnchorEl) && activeMenuAptId === apt.id}
+                  onClose={handleMenuClose}
+                >
+                  <MenuItem onClick={() => {
+                    handleMenuClose();
+                    setAppointmentToDetach(apt.id);
+                    setDetachDialogOpen(true);
+                  }}>
+                    <Typography color="warning.main" variant="body2">{t('detachFromPlan')}</Typography>
+                  </MenuItem>
+                  <MenuItem onClick={() => {
+                    handleMenuClose();
+                    noShowMutation.mutate(apt.id);
+                  }}>
+                    <Typography color="warning.main" variant="body2">{t('noShow')}</Typography>
+                  </MenuItem>
+                  <MenuItem onClick={() => {
+                    handleMenuClose();
+                    setAppointmentToCancel(apt.id);
+                    setCancelDialogOpen(true);
+                  }}>
+                    <Typography color="error.main" variant="body2">{t('cancel')}</Typography>
+                  </MenuItem>
+                </Menu>
               </>
             )}
+            
             {apt.status === 'COMPLETED' && (
-              <Button size="small" variant="outlined" onClick={() => openSummaryModal(apt, planId)}>
-                {t('editSummary')}
-              </Button>
+              <>
+                <Button size="small" variant="outlined" onClick={() => openSummaryModal(apt, planId)}>
+                  {t('editSummary')}
+                </Button>
+
+                <IconButton size="small" onClick={(e) => handleMenuOpen(e, apt.id)}>
+                  <MoreVertIcon fontSize="small" />
+                </IconButton>
+
+                <Menu
+                  anchorEl={menuAnchorEl}
+                  open={Boolean(menuAnchorEl) && activeMenuAptId === apt.id}
+                  onClose={handleMenuClose}
+                >
+                  <MenuItem onClick={() => {
+                    handleMenuClose();
+                    setAppointmentToDetach(apt.id);
+                    setDetachDialogOpen(true);
+                  }}>
+                    <Typography color="warning.main" variant="body2">{t('detachFromPlan')}</Typography>
+                  </MenuItem>
+                </Menu>
+              </>
             )}
+
             <Chip size="small" label={t(apt.status)} color={apt.status === 'COMPLETED' ? 'success' : 'default'} />
           </Box>
         </Box>
@@ -451,7 +526,7 @@ function DoctorTreatmentPlansView({ doctorId }: DoctorViewProps) {
           onSuccess={ async () => {
             setIsModalOpen(false);
             setSnackbar({ open: true, message: t('planSavedSuccessfully'), severity: 'success' });
-            await queryClient.invalidateQueries({ queryKey: ['treatmentPlans', selectedPatient.userId] });
+            await queryClient.invalidateQueries({ queryKey: ['treatmentPlans'] });
           }}
           onErrorAction={(message) => {
             setSnackbar({ open: true, message: message, severity: 'error' });
@@ -470,8 +545,8 @@ function DoctorTreatmentPlansView({ doctorId }: DoctorViewProps) {
         onSuccess={() => {
           setIsActionModalOpen(false);
           setSnackbar({ open: true, message: t('appointmentUpdated'), severity: 'success' });
-          queryClient.invalidateQueries({ queryKey: ['treatmentPlans', selectedPatient?.userId] });
-          queryClient.invalidateQueries({ queryKey: ['doctorAppointments', doctorId] });
+          queryClient.invalidateQueries({ queryKey: ['treatmentPlans'] });
+          queryClient.invalidateQueries({ queryKey: ['doctorAppointments'] });
         }}
       />
       <DoctorActionModal
@@ -488,8 +563,8 @@ function DoctorTreatmentPlansView({ doctorId }: DoctorViewProps) {
         onSuccess={() => {
           setIsSummaryModalOpen(false);
           setSnackbar({ open: true, message: t('appointmentCompleted'), severity: 'success' });
-          queryClient.invalidateQueries({ queryKey: ['treatmentPlans', selectedPatient?.userId] });
-          queryClient.invalidateQueries({ queryKey: ['doctorAppointments', doctorId] });
+          queryClient.invalidateQueries({ queryKey: ['treatmentPlans'] });
+          queryClient.invalidateQueries({ queryKey: ['doctorAppointments'] });
         }}
       />
       <PanoramaViewerModal
@@ -507,9 +582,11 @@ function DoctorTreatmentPlansView({ doctorId }: DoctorViewProps) {
         onSuccess={() => {
           setIsBookModalOpen(false);
           setSnackbar({ open: true, message: t('appointmentCreated'), severity: 'success' });
-          queryClient.invalidateQueries({ queryKey: ['treatmentPlans', selectedPatient?.userId] });
+          queryClient.invalidateQueries({ queryKey: ['treatmentPlans'] });
         }}
       />
+      
+      {/* Mégse megerősítő ablak */}
       <Dialog open={cancelDialogOpen} onClose={() => setCancelDialogOpen(false)}>
         <DialogTitle>{t('cancelAppointment')}</DialogTitle>
         <DialogContent sx={{ pt: '24px !important' }}>
@@ -544,6 +621,34 @@ function DoctorTreatmentPlansView({ doctorId }: DoctorViewProps) {
           </Button>
         </DialogActions>
       </Dialog>
+      
+      {/* Leválasztás megerősítő ablak */}
+      <Dialog open={detachDialogOpen} onClose={() => setDetachDialogOpen(false)}>
+        <DialogTitle>{t('confirmDetachTitle')}</DialogTitle>
+        <DialogContent sx={{ pt: '24px !important' }}>
+          <Typography variant="body2">
+            {t('confirmDetachMessage')}
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ p: 2 }}>
+          <Button onClick={() => setDetachDialogOpen(false)}>{t('cancel')}</Button>
+          <Button
+            variant="contained"
+            color="warning"
+            disabled={detachPlanMutation.isPending}
+            onClick={async () => {
+              if (appointmentToDetach) {
+                await detachPlanMutation.mutateAsync(appointmentToDetach);
+              }
+              setDetachDialogOpen(false);
+              setAppointmentToDetach(null);
+            }}
+          >
+            {detachPlanMutation.isPending ? <CircularProgress size={24} /> : t('detachFromPlan')}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       <Snackbar open={snackbar.open} autoHideDuration={6000} onClose={() => setSnackbar({ ...snackbar, open: false })}>
         <Alert
           onClose={() => setSnackbar({ ...snackbar, open: false })}

@@ -74,8 +74,8 @@ export const addSummaryToAppointment = async(
 ): Promise<AppointmentSummaryDTO> => {
   try{
     const formData = new FormData();
-    if(notes){
-        formData.append('notes',notes);
+    if (notes !== undefined) {
+        formData.append('notes', notes);
     }
     if(audioFile){
         formData.append('audio',audioFile);
@@ -101,3 +101,18 @@ export const addSummaryToAppointment = async(
     throw error;
   }
 }
+
+export const deleteAppointmentSummary = async (userId: number, appointmentId: number): Promise<void> => {
+  const response = await apiClient.delete(`${appointmentSummaryBaseApiUrl}/${userId}/summary/${appointmentId}`);
+  return response.data;
+};
+
+export const deleteSummaryFile = async (userId: number, appointmentId: number, fileType: string): Promise<AppointmentSummaryDTO> => {
+  const response = await apiClient.delete(`${appointmentSummaryBaseApiUrl}/${userId}/summary/${appointmentId}/file/${fileType}`);
+  return response.data;
+};
+
+export const detachFromTreatmentPlan = async (userId: number, appointmentId: number): Promise<ResponseAppointmentDTO> => {
+  const response = await apiClient.put(`${appointmentsApiUrl}/doctor/${userId}/detach-plan/${appointmentId}`);
+  return response.data;
+};

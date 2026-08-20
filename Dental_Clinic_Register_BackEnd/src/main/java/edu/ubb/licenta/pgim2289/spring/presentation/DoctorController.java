@@ -2,6 +2,7 @@ package edu.ubb.licenta.pgim2289.spring.presentation;
 
 import edu.ubb.licenta.pgim2289.spring.dto.DoctorDropDownDTO;
 import edu.ubb.licenta.pgim2289.spring.dto.MessageResponse;
+import edu.ubb.licenta.pgim2289.spring.dto.ResponseServiceDTO;
 import edu.ubb.licenta.pgim2289.spring.security.UserDetailsImpl;
 import edu.ubb.licenta.pgim2289.spring.service.DoctorService;
 import org.springframework.http.ResponseEntity;
@@ -25,11 +26,19 @@ public class DoctorController {
     public ResponseEntity<List<DoctorDropDownDTO>> getDoctorsByService(@PathVariable Long serviceId) {
         return ResponseEntity.ok(doctorService.getDoctorsByServiceId(serviceId));
     }
+
     @PutMapping("/me/services")
     @PreAuthorize("hasRole('DOCTOR')")
     public ResponseEntity<MessageResponse> updateMyServices(
             @RequestBody List<Long> serviceIds,
             @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return doctorService.updateDoctorServices(userDetails.getId(), serviceIds);
+    }
+
+    @GetMapping("/me/services")
+    @PreAuthorize("hasRole('DOCTOR')")
+    public ResponseEntity<List<ResponseServiceDTO>> getMyOfferedServices(
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return ResponseEntity.ok(doctorService.getOfferedServicesForDoctor(userDetails.getId()));
     }
 }

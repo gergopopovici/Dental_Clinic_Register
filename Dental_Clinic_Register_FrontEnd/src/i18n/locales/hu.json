@@ -386,7 +386,8 @@
   "appointmentHistory": "Vizitek története",
   "requires3DModel": "3D modell szükséges",
   "primaryServiceCategory": "Fő kategória",
-  "plannedServicesOptional": "Tervezett beavatkozások",
+  "plannedServicesOptional": "Tervezett beavatkozások (opcionális)",
+  "plannedServices":"Tervezett beavatkozások",
   "generalNotes": "Megjegyzések",
   "CONFIRMED": "Megerősítve",
   "NO_SHOW": "Nem jelent meg",
@@ -429,5 +430,15 @@
   "success.panorama.uploaded": "Panoráma kép sikeresen feltöltve!",
   "error.panorama.upload": "Hiba történt a kép feltöltése során!",
   "success.panorama.deleted": "Panoráma kép sikeresen törölve!",
-  "error.panorama.delete": "Hiba történt a kép törlése során!"
+  "error.panorama.delete": "Hiba történt a kép törlése során!",
+  "initialState": "Kezdeti állapot",
+  "selectedState": "Kiválasztott állapot",
+  "allRecordsChronological": "Összes felvétel időrendben (Kattints a megtekintéshez):",
+  "playAnimation": "Idővonal animálása",
+  "stopAnimation": "Leállítás",
+  "fileUploaded": "Feltöltve",
+  "detachFromPlan": "Leválasztás a tervről",
+  "appointmentDetached": "Vizit sikeresen leválasztva",
+  "confirmDetachTitle": "Vizit leválasztása",
+    "confirmDetachMessage": "Biztosan le szeretné választani ezt a vizitet a kezelési tervről? A vizit nem törlődik a rendszerből, csak kikerül ebből a listából."
 }

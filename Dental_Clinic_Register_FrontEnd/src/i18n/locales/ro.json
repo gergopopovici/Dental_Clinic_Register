@@ -387,6 +387,7 @@
   "requires3DModel": "Necesită simulare 3D / Bracketuri",
   "primaryServiceCategory": "Etapă / Tip aparat ortodontic",
   "plannedServicesOptional": "Proceduri asociate (Opțional)",
+  "plannedServices":"Proceduri asociate",
   "generalNotes": "Observații clinice generale",
   "CONFIRMED": "Confirmat",
   "NO_SHOW": "Neprezentare",
@@ -429,5 +430,15 @@
   "success.panorama.uploaded": "Imaginea panoramică a fost încărcată cu succes!",
   "error.panorama.upload": "Eroare la încărcarea imaginii panoramice!",
   "success.panorama.deleted": "Imaginea panoramică a fost ștearsă cu succes!",
-  "error.panorama.delete": "Eroare la ștergerea imaginii panoramice!"
+  "error.panorama.delete": "Eroare la ștergerea imaginii panoramice!",
+  "initialState": "Starea inițială",
+  "selectedState": "Starea selectată",
+  "allRecordsChronological": "Toate înregistrările în ordine cronologică (Fă clic pentru a vizualiza):",
+  "playAnimation": "Animare cronologică",
+  "stopAnimation": "Oprire",
+  "fileUploaded": "Încărcat",
+  "detachFromPlan": "Detașare de la plan",
+  "appointmentDetached": "Vizită detașată cu succes",
+  "confirmDetachTitle": "Detașare vizită",
+    "confirmDetachMessage": "Sunteți sigur că doriți să detașați această vizită de planul de tratament? Vizita nu va fi ștearsă din sistem, ci doar eliminată din această listă."
 }

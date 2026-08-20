@@ -311,4 +311,89 @@ public class AppointmentServiceImpl implements AppointmentService {
         dto.setDocumentUrl(summary.getDocumentUrl());
         return dto;
     }
+
+    @Override
+    @Transactional
+    public void deleteAppointmentSummary(Long appointmentId, Long doctorUserId) {
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new IllegalArgumentException("error.appointment.not.found"));
+
+        if (!appointment.getDoctor().getUser().getId().equals(doctorUserId)) {
+            throw new SecurityException("error.unauthorised.action");
+        }
+
+        AppointmentSummary summary = appointment.getSummary();
+        if (summary != null) {
+            if (summary.getAudioUrl() != null) fileStorageService.deleteFile(summary.getAudioUrl());
+            if (summary.getImageUrl() != null) fileStorageService.deleteFile(summary.getImageUrl());
+            if (summary.getDocumentUrl() != null) fileStorageService.deleteFile(summary.getDocumentUrl());
+
+            appointment.setSummary(null);
+            appointmentRepository.save(appointment);
+        }
+    }
+
+    @Override
+    @Transactional
+    public AppointmentSummaryDTO deleteSummaryFile(Long appointmentId, Long doctorUserId, String fileType) {
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new IllegalArgumentException("error.appointment.not.found"));
+
+        if (!appointment.getDoctor().getUser().getId().equals(doctorUserId)) {
+            throw new SecurityException("error.unauthorised.action");
+        }
+
+        AppointmentSummary summary = appointment.getSummary();
+        if (summary == null) {
+            throw new IllegalArgumentException("error.summary.not.found");
+        }
+
+        switch (fileType.toLowerCase()) {
+            case "audio":
+                if (summary.getAudioUrl() != null) {
+                    fileStorageService.deleteFile(summary.getAudioUrl());
+                    summary.setAudioUrl(null);
+                }
+                break;
+            case "image":
+                if (summary.getImageUrl() != null) {
+                    fileStorageService.deleteFile(summary.getImageUrl());
+                    summary.setImageUrl(null);
+                }
+                break;
+            case "document":
+                if (summary.getDocumentUrl() != null) {
+                    fileStorageService.deleteFile(summary.getDocumentUrl());
+                    summary.setDocumentUrl(null);
+                }
+                break;
+            default:
+                throw new IllegalArgumentException("error.invalid.file.type");
+        }
+
+        appointmentRepository.save(appointment);
+
+        AppointmentSummaryDTO dto = new AppointmentSummaryDTO();
+        dto.setId(summary.getId());
+        dto.setNotes(summary.getNotes());
+        dto.setAudioUrl(summary.getAudioUrl());
+        dto.setImageUrl(summary.getImageUrl());
+        dto.setDocumentUrl(summary.getDocumentUrl());
+        return dto;
+    }
+
+    @Override
+    @Transactional
+    public ResponseAppointmentDTO detachFromTreatmentPlan(Long appointmentId, Long doctorUserId) {
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new IllegalArgumentException("error.appointment.not.found"));
+
+        if (!appointment.getDoctor().getUser().getId().equals(doctorUserId)) {
+            throw new SecurityException("error.unauthorised.action");
+        }
+
+        appointment.setTreatmentPlan(null);
+
+        return appointmentMapper.toDto(appointmentRepository.save(appointment));
+    }
 }

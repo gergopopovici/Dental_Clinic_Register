@@ -15,7 +15,9 @@ import {
   Select,
   MenuItem,
   SelectChangeEvent,
+  IconButton,
 } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
@@ -23,6 +25,7 @@ import {
   getBookedSlotsForDoctor,
   markAsCompleted,
   addSummaryToAppointment,
+  deleteSummaryFile,
 } from '../services/AppointmentService';
 import { getDoctorSchedule, getDoctorTimeOffs } from '../services/ScheduleService';
 import { BookedSlotDTO } from '../models/Appointment';
@@ -72,9 +75,12 @@ function DoctorActionModal({
   const [treatmentPlanId, setTreatmentPlanId] = useState<number | ''>('');
   const [notes, setNotes] = useState('');
   const [resourceLink, setResourceLink] = useState('');
+  
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [documentFile, setDocumentFile] = useState<File | null>(null);
+  
+  const [localSummary, setLocalSummary] = useState<AppointmentSummaryDTO | undefined>(existingSummary);
   const [errorMessage, setErrorMessage] = useState('');
 
   const APPOINTMENT_BUFFER_MINUTES = 5;
@@ -88,6 +94,8 @@ function DoctorActionModal({
       setImageFile(null);
       setDocumentFile(null);
       setCustomDuration('');
+      setLocalSummary(existingSummary);
+      setErrorMessage('');
 
       if (initialStartTime && mode === 'RESCHEDULE') {
         const [dPart, tPart] = initialStartTime.split('T');
@@ -96,7 +104,7 @@ function DoctorActionModal({
         setSelectedTime(`${h}:${m}`);
       }
     }
-  }, [open, initialNotes, initialResourceLink, initialTreatmentPlanId, initialStartTime, mode]);
+  }, [open, initialNotes, initialResourceLink, initialTreatmentPlanId, initialStartTime, mode, existingSummary]);
 
   const { data: patientPlans, isLoading: isLoadingPlans } = useQuery<TreatmentPlanDTO[]>({
     queryKey: ['treatmentPlans', patientId],
@@ -179,6 +187,22 @@ function DoctorActionModal({
     onSuccess: () => {
       if (onSuccess) onSuccess();
       onClose();
+    },
+    onError: (error: unknown) => {
+      const err = error as ApiError;
+      setErrorMessage(t(err.response?.data?.message || 'error.unknown'));
+    },
+  });
+
+  const deleteFileMutation = useMutation({
+    mutationFn: (fileType: string) => {
+      if (!appointmentId) throw new Error(t('no.appointment.id'));
+      return deleteSummaryFile(userId, appointmentId, fileType);
+    },
+    onSuccess: (updatedSummary) => {
+      setLocalSummary(updatedSummary);
+      queryClient.invalidateQueries({ queryKey: ['treatmentPlans', patientId] });
+      queryClient.invalidateQueries({ queryKey: ['doctorAppointments', userId] });
     },
     onError: (error: unknown) => {
       const err = error as ApiError;
@@ -301,24 +325,81 @@ function DoctorActionModal({
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
             />
+            
             <Box>
-              <Typography variant="body2">{t('uploadAudio')}</Typography>
-              <input type="file" accept="audio/*" onChange={(e) => setAudioFile(e.target.files?.[0] || null)} />
+              <Typography variant="body2" sx={{ mb: 1 }}>{t('uploadAudio')}</Typography>
+              {localSummary?.audioUrl ? (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Typography variant="caption" color="textSecondary">
+                    {t('fileUploaded', 'Feltöltve')}
+                  </Typography>
+                  <IconButton 
+                    size="small" 
+                    color="error" 
+                    onClick={() => deleteFileMutation.mutate('audio')}
+                    disabled={deleteFileMutation.isPending}
+                  >
+                    <DeleteIcon fontSize="small" />
+                  </IconButton>
+                </Box>
+              ) : (
+                <input type="file" accept="audio/*" onChange={(e) => setAudioFile(e.target.files?.[0] || null)} />
+              )}
             </Box>
+
             <Box>
-              <Typography variant="body2">{t('uploadImage')}</Typography>
-              <input type="file" accept="image/*" onChange={(e) => setImageFile(e.target.files?.[0] || null)} />
+              <Typography variant="body2" sx={{ mb: 1 }}>{t('uploadImage')}</Typography>
+              {localSummary?.imageUrl ? (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Typography variant="caption" color="textSecondary">
+                    {t('fileUploaded', 'Feltöltve')}
+                  </Typography>
+                  <IconButton 
+                    size="small" 
+                    color="error" 
+                    onClick={() => deleteFileMutation.mutate('image')}
+                    disabled={deleteFileMutation.isPending}
+                  >
+                    <DeleteIcon fontSize="small" />
+                  </IconButton>
+                </Box>
+              ) : (
+                <input type="file" accept="image/*" onChange={(e) => setImageFile(e.target.files?.[0] || null)} />
+              )}
             </Box>
+
             <Box>
-              <Typography variant="body2">{t('uploadDocument')}</Typography>
-              <input type="file" accept=".pdf" onChange={(e) => setDocumentFile(e.target.files?.[0] || null)} />
+              <Typography variant="body2" sx={{ mb: 1 }}>{t('uploadDocument')}</Typography>
+              {localSummary?.documentUrl ? (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Typography variant="caption" color="textSecondary">
+                    {t('fileUploaded', 'Feltöltve')}
+                  </Typography>
+                  <IconButton 
+                    size="small" 
+                    color="error" 
+                    onClick={() => deleteFileMutation.mutate('document')}
+                    disabled={deleteFileMutation.isPending}
+                  >
+                    <DeleteIcon fontSize="small" />
+                  </IconButton>
+                </Box>
+              ) : (
+                <input type="file" accept=".pdf" onChange={(e) => setDocumentFile(e.target.files?.[0] || null)} />
+              )}
             </Box>
           </>
         )}
       </DialogContent>
       <DialogActions sx={{ p: 3 }}>
-        <Button onClick={onClose}>{t('cancel')}</Button>
-        <Button variant="contained" onClick={() => mutation.mutate()} disabled={mutation.isPending || (mode === 'RESCHEDULE' && !selectedTime)}>
+        <Button onClick={onClose} disabled={mutation.isPending}>
+          {t('cancel')}
+        </Button>
+        <Button 
+          variant="contained" 
+          onClick={() => mutation.mutate()} 
+          disabled={mutation.isPending || (mode === 'RESCHEDULE' && !selectedTime)}
+        >
           {mutation.isPending ? <CircularProgress size={24} /> : t('save')}
         </Button>
       </DialogActions>

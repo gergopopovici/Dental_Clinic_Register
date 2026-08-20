@@ -1,9 +1,6 @@
 package edu.ubb.licenta.pgim2289.spring.service;
 
-import edu.ubb.licenta.pgim2289.spring.dto.DoctorDropDownDTO;
-import edu.ubb.licenta.pgim2289.spring.dto.MessageResponse;
-import edu.ubb.licenta.pgim2289.spring.dto.RequestDoctorDTO;
-import edu.ubb.licenta.pgim2289.spring.dto.RequestUserDTO;
+import edu.ubb.licenta.pgim2289.spring.dto.*;
 import edu.ubb.licenta.pgim2289.spring.model.Doctor;
 import edu.ubb.licenta.pgim2289.spring.model.ServiceProvided;
 import edu.ubb.licenta.pgim2289.spring.model.User;
@@ -85,5 +82,26 @@ public class DoctorServiceImpl implements DoctorService {
         doctorRepository.save(doctor);
 
         return ResponseEntity.ok(new MessageResponse("success.doctor.services.updated"));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ResponseServiceDTO> getOfferedServicesForDoctor(Long userId) {
+        Doctor doctor = doctorRepository.findByUser_Id(userId)
+                .orElseThrow(() -> new RuntimeException("doctor.not.found"));
+
+        return doctor.getServices().stream()
+                .map(service -> new ResponseServiceDTO(
+                        service.getId(),
+                        service.getNameHu(),
+                        service.getNameEn(),
+                        service.getNameRo(),
+                        service.getDescriptionHu(),
+                        service.getDescriptionEn(),
+                        service.getDescriptionRo(),
+                        service.getPrice(),
+                        service.getDurationMinutes()
+                ))
+                .collect(Collectors.toList());
     }
 }

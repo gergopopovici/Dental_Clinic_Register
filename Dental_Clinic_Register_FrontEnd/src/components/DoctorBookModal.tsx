@@ -19,7 +19,6 @@ import {
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getAllServices } from '../services/ProvidedServiceService';
 import { createAppointmentByDoctor, getBookedSlotsForDoctor } from '../services/AppointmentService';
 import { getAllPatientsForDropdown } from '../services/PatientService';
 import { getDoctorSchedule, getDoctorTimeOffs, getGlobalHolidays } from '../services/ScheduleService';
@@ -28,6 +27,7 @@ import { getPlansByPatientId } from '../services/TreatmentPlanService';
 import { TreatmentPlanDTO } from '../models/TreatmentPlan';
 import { DoctorScheduleDTO, TimeOffDTO } from '../models/Schedule';
 import { ResponseServiceDTO } from '../models/Service';
+import { getMyServices } from '../services/DoctorService';
 
 interface DoctorBookModalProps {
   open: boolean;
@@ -91,7 +91,7 @@ function DoctorBookModal({ open, onClose, doctorId, onSuccess, initialPatientId,
 
   const { data: services, isLoading: isLoadingServices } = useQuery<ResponseServiceDTO[]>({
     queryKey: ['services'],
-    queryFn: getAllServices,
+    queryFn: getMyServices,
     enabled: open,
   });
 

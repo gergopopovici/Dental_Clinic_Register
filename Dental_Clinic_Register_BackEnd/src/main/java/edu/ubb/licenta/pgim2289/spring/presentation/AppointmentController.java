@@ -104,7 +104,7 @@ public class AppointmentController {
     }
 
     @PostMapping(value = "/doctor/{userId}/summary/{appointmentId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasAnyRole('DOCTOR', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('DOCTOR')")
     public ResponseEntity<AppointmentSummaryDTO> addSummaryToAppointment(
             @PathVariable Long userId,
             @PathVariable Long appointmentId,
@@ -113,5 +113,29 @@ public class AppointmentController {
             @RequestParam(value = "image", required = false) MultipartFile image,
             @RequestParam(value = "document", required = false) MultipartFile document) {
         return ResponseEntity.ok(appointmentService.addSummaryToAppointment(appointmentId, userId, notes, audio, image, document));
+    }
+    @DeleteMapping("/doctor/{userId}/summary/{appointmentId}")
+    @PreAuthorize("hasAnyRole('DOCTOR')")
+    public ResponseEntity<Void> deleteAppointmentSummary(
+            @PathVariable Long userId,
+            @PathVariable Long appointmentId) {
+        appointmentService.deleteAppointmentSummary(appointmentId, userId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/doctor/{userId}/summary/{appointmentId}/file/{fileType}")
+    @PreAuthorize("hasAnyRole('DOCTOR')")
+    public ResponseEntity<AppointmentSummaryDTO> deleteSummaryFile(
+            @PathVariable Long userId,
+            @PathVariable Long appointmentId,
+            @PathVariable String fileType) {
+        return ResponseEntity.ok(appointmentService.deleteSummaryFile(appointmentId, userId, fileType));
+    }
+    @PutMapping("/doctor/{userId}/detach-plan/{appointmentId}")
+    @PreAuthorize("hasAnyRole('DOCTOR')")
+    public ResponseEntity<ResponseAppointmentDTO> detachFromTreatmentPlan(
+            @PathVariable Long userId,
+            @PathVariable Long appointmentId) {
+        return ResponseEntity.ok(appointmentService.detachFromTreatmentPlan(appointmentId, userId));
     }
 }

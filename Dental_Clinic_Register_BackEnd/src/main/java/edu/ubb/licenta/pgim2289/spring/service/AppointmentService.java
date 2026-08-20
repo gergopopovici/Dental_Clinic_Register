@@ -30,4 +30,7 @@ public interface AppointmentService {
     AppointmentSummaryDTO addSummaryToAppointment(Long appointmentId, Long doctorUserId,
                                                   String notes, MultipartFile audio,
                                                   MultipartFile image, MultipartFile document);
+    void deleteAppointmentSummary(Long appointmentId, Long doctorUserId);
+    AppointmentSummaryDTO deleteSummaryFile(Long appointmentId, Long doctorUserId, String fileType);
+    ResponseAppointmentDTO detachFromTreatmentPlan(Long appointmentId, Long doctorUserId);
 }

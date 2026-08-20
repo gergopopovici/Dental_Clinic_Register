@@ -19,6 +19,8 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
+  LinearProgress,
+  Chip,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import AudiotrackIcon from '@mui/icons-material/Audiotrack';
@@ -27,21 +29,31 @@ import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import AppointmentCard from '../components/AppointmentCard';
 import { cancelAppointmentByPatient, getPatientAppointments } from '../services/AppointmentService';
 import { getPlansByPatientId } from '../services/TreatmentPlanService';
+import { getAllServices } from '../services/ProvidedServiceService';
 import { ResponseAppointmentDTO } from '../models/Appointment';
 import { TreatmentPlanDTO, PlanAppointmentDTO } from '../models/TreatmentPlan';
+import PanoramaViewerModal from '../components/PanoramaViewerModal';
 
 interface PatientDashboardProps {
   userId: number;
 }
 
 function PatientDashboard({ userId }: PatientDashboardProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
 
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [appointmentToCancel, setAppointmentToCancel] = useState<number | null>(null);
+
+  const [isPanoramaModalOpen, setIsPanoramaModalOpen] = useState(false);
+  const [selectedPlanForPanorama, setSelectedPlanForPanorama] = useState<TreatmentPlanDTO | null>(null);
+
+  const openPanoramaModal = (plan: TreatmentPlanDTO) => {
+    setSelectedPlanForPanorama(plan);
+    setIsPanoramaModalOpen(true);
+  };
 
   const {
     data: appointments,
@@ -55,6 +67,11 @@ function PatientDashboard({ userId }: PatientDashboardProps) {
   const { data: treatmentPlans, isLoading: isPlansLoading } = useQuery<TreatmentPlanDTO[]>({
     queryKey: ['patientTreatmentPlans', userId],
     queryFn: () => getPlansByPatientId(userId),
+  });
+
+  const { data: allServices } = useQuery({
+    queryKey: ['allServices'],
+    queryFn: getAllServices,
   });
 
   const nextAppointment = useMemo(() => {
@@ -90,6 +107,22 @@ function PatientDashboard({ userId }: PatientDashboardProps) {
 
   const getFileUrl = (url: string) => `http://localhost:8080/api/files/${url.split('/').pop()}`;
 
+  const getLocalizedServiceName = (serviceName: string) => {
+    if (!allServices) return serviceName;
+    const service = allServices.find((s) => s.nameEn === serviceName || s.nameHu === serviceName || s.nameRo === serviceName);
+    if (!service) return serviceName;
+    if (i18n.language.startsWith('hu')) return service.nameHu;
+    if (i18n.language.startsWith('ro')) return service.nameRo;
+    return service.nameEn;
+  };
+
+  const getProgressColor = (progress: number) => {
+    if (progress < 33) return 'error';
+    if (progress < 66) return 'warning';
+    if (progress < 100) return 'primary';
+    return 'success';
+  };
+
   const renderAppointmentHistory = (planAppointments?: PlanAppointmentDTO[]) => {
     if (!planAppointments || planAppointments.length === 0)
       return <Typography variant="body2">{t('noAppointmentsYet', 'No appointments yet.')}</Typography>;
@@ -101,7 +134,7 @@ function PatientDashboard({ userId }: PatientDashboardProps) {
           sx={{ mb: 2, p: 2, bgcolor: 'background.paper', borderRadius: 1, border: '1px solid #e0e0e0' }}
         >
           <Typography variant="subtitle2" fontWeight="bold">
-            {new Date(apt.startTime).toLocaleString()} - {apt.serviceName}
+            {new Date(apt.startTime).toLocaleString()} - {getLocalizedServiceName(apt.serviceName)}
           </Typography>
           {apt.summary ? (
             <Box sx={{ mt: 1 }}>
@@ -208,22 +241,73 @@ function PatientDashboard({ userId }: PatientDashboardProps) {
           {!isPlansLoading && activePlan && (
             <Card>
               <CardContent>
-                <Typography variant="h6" sx={{ mb: 1, fontWeight: 'bold' }}>
-                  {activePlan.primaryServiceName || t('planName')}
-                </Typography>
-                <Typography variant="body2" sx={{ mb: 2 }}>
-                  {t('status')}: {t(activePlan.status)}
-                </Typography>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={() => navigate(`/treatment-plans/${activePlan.id}/braces`)}
-                  sx={{ textTransform: 'uppercase', '&:focus': { outline: 'none' }, mb: 2 }}
-                >
-                  {t('view3DModel')}
-                </Button>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                    {activePlan.planType ? t(`plan.${activePlan.planType}`) : ''}
+                  </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                    {activePlan.requires3DModel && (
+                      <Button
+                        variant="contained"
+                        color="info"
+                        size="small"
+                        onClick={() => navigate(`/treatment-plans/${activePlan.id}/braces`)}
+                      >
+                        {t('view3DModel', 'View 3D Model')}
+                      </Button>
+                    )}
+                    <Chip
+                      label={t(activePlan.status)}
+                      color={activePlan.status === 'ACTIVE' ? 'success' : activePlan.status === 'CANCELLED' ? 'error' : 'default'}
+                    />
+                  </Box>
+                </Box>
 
-                <Accordion variant="outlined" sx={{ bgcolor: 'background.default' }}>
+                <Typography variant="body2" gutterBottom>
+                  {t('startDate')}: {activePlan.startDate} | {t('endDate')}: {activePlan.endDate || t('ongoing')}
+                </Typography>
+
+                <Box sx={{ mt: 2, mb: 2 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                    <Typography variant="body2" color="textSecondary">
+                      {t('estimatedDuration', 'Estimated duration')}: {activePlan.estimatedDurationMonths || 0} {t('months', 'months')}
+                    </Typography>
+                    <Typography variant="body2" color="textSecondary" fontWeight={"bold"}>
+                      {activePlan.progressPercentage || 0}%
+                    </Typography>
+                  </Box>
+                  <LinearProgress
+                    variant="determinate"
+                    value={activePlan.progressPercentage || 0}
+                    sx={{ height: 10, borderRadius: 5 }}
+                    color={getProgressColor(activePlan.progressPercentage || 0)}
+                  />
+                </Box>
+
+                <Box sx={{ mb: 2 }}>
+                  <Button variant="outlined" size="small" onClick={() => openPanoramaModal(activePlan)}>
+                    {t('viewPanoramaImages', 'Panorama Images')}
+                  </Button>
+                </Box>
+
+                <Typography variant="body1" sx={{ mt: 2 }}>
+                  {activePlan.generalNotes || t('noNotesProvided')}
+                </Typography>
+
+               {activePlan.plannedServiceNames && activePlan.plannedServiceNames.length > 0 && (
+                    <Box sx={{ mt: 2, mb: 2 }}>
+                      <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>
+                        {t('plannedServices', 'Várható szolgáltatások:')}
+                      </Typography>
+                      <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                        {activePlan.plannedServiceNames.map((name, i) => (
+                          <Chip key={i} label={getLocalizedServiceName(name)} size="small" variant="outlined" />
+                        ))}
+                      </Box>
+                    </Box>
+                  )}
+
+                <Accordion variant="outlined" sx={{ mt: 2, bgcolor: 'background.default' }}>
                   <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                     <Typography fontWeight="bold">
                       {t('appointmentHistory', 'Appointment History & Summaries')}
@@ -236,6 +320,13 @@ function PatientDashboard({ userId }: PatientDashboardProps) {
           )}
         </Grid>
       </Grid>
+
+      <PanoramaViewerModal
+        open={isPanoramaModalOpen}
+        onClose={() => setIsPanoramaModalOpen(false)}
+        plan={selectedPlanForPanorama}
+        isDoctor={false}
+      />
 
       <Dialog open={cancelDialogOpen} onClose={() => setCancelDialogOpen(false)}>
         <DialogTitle>{t('cancelAppointment')}</DialogTitle>

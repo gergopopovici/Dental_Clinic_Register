@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Dialog, DialogTitle, DialogContent, DialogActions, Box,
   Button, Typography, CircularProgress, Divider, IconButton, Tooltip,
@@ -9,6 +9,8 @@ import { useTranslation } from 'react-i18next';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import DownloadIcon from '@mui/icons-material/Download';
 import DeleteIcon from '@mui/icons-material/Delete';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import StopIcon from '@mui/icons-material/Stop';
 import { uploadPanoramaImage, getPlanById, deletePanoramaImage } from '../services/TreatmentPlanService';
 import { TreatmentPlanDTO } from '../models/TreatmentPlan';
 import { PanoramaImageDTO } from '../models/PanoramaImage';
@@ -28,6 +30,7 @@ export default function PanoramaViewerModal({ open, onClose, plan, isDoctor }: P
   
   const [selectedImage, setSelectedImage] = useState<PanoramaImageDTO | null>(null);
   const [imageToDelete, setImageToDelete] = useState<number | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({
     open: false,
@@ -42,15 +45,42 @@ export default function PanoramaViewerModal({ open, onClose, plan, isDoctor }: P
   });
 
   const images = activePlan?.panoramaImages || [];
-  const firstImage = images.length > 0 ? images[0] : null;
+  
+  const sortedImages = useMemo(() => {
+    return [...images].sort((a, b) => new Date(a.uploadDate).getTime() - new Date(b.uploadDate).getTime());
+  }, [images]);
+
+  const firstImage = sortedImages.length > 0 ? sortedImages[0] : null;
 
   useEffect(() => {
-    if (images.length > 0) {
-      setSelectedImage(images[images.length - 1]);
-    } else {
+    if (!isPlaying && sortedImages.length > 0) {
+      setSelectedImage(sortedImages[sortedImages.length - 1]);
+    } else if (sortedImages.length === 0) {
       setSelectedImage(null);
     }
-  }, [images.length]);
+  }, [sortedImages.length, isPlaying]);
+
+  useEffect(() => {
+    let interval: number;
+
+    if (isPlaying && sortedImages.length > 0) {
+      interval = window.setInterval(() => {
+        setSelectedImage((prevSelected) => {
+          const currentIndex = sortedImages.findIndex(img => img.id === prevSelected?.id);
+          const nextIndex = currentIndex + 1;
+
+          if (nextIndex < sortedImages.length) {
+            return sortedImages[nextIndex]; 
+          } else {
+            setIsPlaying(false); 
+            return prevSelected; 
+          }
+        });
+      }, 1000);
+    }
+
+    return () => window.clearInterval(interval);
+  }, [isPlaying, sortedImages]);
 
   const uploadMutation = useMutation({
     mutationFn: (file: File) => uploadPanoramaImage(plan!.id!, file),
@@ -100,16 +130,16 @@ export default function PanoramaViewerModal({ open, onClose, plan, isDoctor }: P
 
   return (
     <>
-      <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth>
+      <Dialog open={open} onClose={() => { setIsPlaying(false); onClose(); }} maxWidth="lg" fullWidth>
         <DialogTitle>
-          {t('panoramaImages', 'Panoráma Képek')} - {plan.planType ? t(`plan.${plan.planType}`) : ''}
+          {t('panoramaImages')} - {plan.planType ? t(`plan.${plan.planType}`) : ''}
         </DialogTitle>
         
         <DialogContent dividers>
           {isDoctor && (
             <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 2 }}>
               <Button variant="outlined" component="label" startIcon={<CloudUploadIcon />}>
-                {t('selectFile', 'Új kép kiválasztása')}
+                {t('selectFile')}
                 <input type="file" hidden accept="image/*" onChange={(e) => setSelectedFile(e.target.files?.[0] || null)} />
               </Button>
               {selectedFile && <Typography variant="body2">{selectedFile.name}</Typography>}
@@ -118,21 +148,21 @@ export default function PanoramaViewerModal({ open, onClose, plan, isDoctor }: P
                 onClick={() => selectedFile && uploadMutation.mutate(selectedFile)} 
                 disabled={!selectedFile || uploadMutation.isPending}
               >
-                {uploadMutation.isPending ? <CircularProgress size={24} /> : t('upload', 'Feltöltés')}
+                {uploadMutation.isPending ? <CircularProgress size={24} /> : t('upload')}
               </Button>
             </Box>
           )}
 
           {isLoading ? (
             <CircularProgress />
-          ) : images.length === 0 ? (
-            <Typography>{t('noImagesYet', 'Még nincsenek feltöltve képek.')}</Typography>
+          ) : sortedImages.length === 0 ? (
+            <Typography>{t('noImagesYet')}</Typography>
           ) : (
             <Box>
               <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
                 <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                   <Typography variant="subtitle1" fontWeight="bold" align="center" gutterBottom>
-                    Kezdeti állapot ({firstImage ? new Date(firstImage.uploadDate).toLocaleDateString() : ''})
+                    {t('initialState')} ({firstImage ? new Date(firstImage.uploadDate).toLocaleDateString() : ''})
                   </Typography>
                   {firstImage && (
                     <Box sx={{ position: 'relative', display: 'inline-block', width: '100%' }}>
@@ -145,7 +175,7 @@ export default function PanoramaViewerModal({ open, onClose, plan, isDoctor }: P
                           backgroundColor: '#121212', display: 'block'
                         }} 
                       />
-                      <Tooltip title={t('download', 'Letöltés')}>
+                      <Tooltip title={t('download')}>
                         <IconButton 
                           onClick={() => handleDownload(getFileUrl(firstImage.url), `kezdeti_${firstImage.uploadDate}.jpg`)}
                           sx={{ 
@@ -163,7 +193,7 @@ export default function PanoramaViewerModal({ open, onClose, plan, isDoctor }: P
 
                 <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                   <Typography variant="subtitle1" fontWeight="bold" align="center" gutterBottom>
-                    Kiválasztott állapot ({selectedImage ? new Date(selectedImage.uploadDate).toLocaleDateString() : ''})
+                    {t('selectedState')} ({selectedImage ? new Date(selectedImage.uploadDate).toLocaleDateString() : ''})
                   </Typography>
                   {selectedImage && (
                     <Box sx={{ position: 'relative', display: 'inline-block', width: '100%' }}>
@@ -176,7 +206,7 @@ export default function PanoramaViewerModal({ open, onClose, plan, isDoctor }: P
                           backgroundColor: '#121212', display: 'block'
                         }} 
                       />
-                      <Tooltip title={t('download', 'Letöltés')}>
+                      <Tooltip title={t('download')}>
                         <IconButton 
                           onClick={() => handleDownload(getFileUrl(selectedImage.url), `kivalasztott_${selectedImage.uploadDate}.jpg`)}
                           sx={{ 
@@ -195,14 +225,33 @@ export default function PanoramaViewerModal({ open, onClose, plan, isDoctor }: P
 
               <Divider sx={{ my: 2 }} />
               
-              <Typography variant="subtitle2" gutterBottom>Összes felvétel időrendben (Kattints a megtekintéshez):</Typography>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                <Typography variant="subtitle2">{t('allRecordsChronological')}</Typography>
+                
+                <Button 
+                  variant={isPlaying ? "outlined" : "contained"} 
+                  color={isPlaying ? "error" : "primary"}
+                  size="small"
+                  startIcon={isPlaying ? <StopIcon /> : <PlayArrowIcon />}
+                  onClick={() => {
+                    if (!isPlaying && sortedImages.length > 0) {
+                      setSelectedImage(sortedImages[0]);
+                    }
+                    setIsPlaying(!isPlaying);
+                  }}
+                  disabled={sortedImages.length < 2}
+                >
+                  {isPlaying ? t('stopAnimation') : t('playAnimation')}
+                </Button>
+              </Box>
+
               <Box sx={{ display: 'flex', gap: 2, overflowX: 'auto', pb: 2 }}>
-                {images.map((img) => {
+                {sortedImages.map((img) => {
                   const isSelected = selectedImage?.id === img.id;
                   return (
                     <Box 
                       key={img.id} 
-                      onClick={() => setSelectedImage(img)}
+                      onClick={() => { setIsPlaying(false); setSelectedImage(img); }}
                       sx={{ 
                         minWidth: 150, 
                         border: isSelected ? '3px solid #1976d2' : '1px solid #ccc', 
@@ -264,20 +313,20 @@ export default function PanoramaViewerModal({ open, onClose, plan, isDoctor }: P
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={onClose}>{t('close', 'Bezárás')}</Button>
+          <Button onClick={() => { setIsPlaying(false); onClose(); }}>{t('close')}</Button>
         </DialogActions>
       </Dialog>
 
       <Dialog open={!!imageToDelete} onClose={() => setImageToDelete(null)}>
-        <DialogTitle>{t('confirmDelete', 'Törlés megerősítése')}</DialogTitle>
+        <DialogTitle>{t('confirmDelete')}</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            {t('areYouSureDeleteImage', 'Biztosan törölni szeretné ezt a panoráma képet? Ez a művelet nem vonható vissza.')}
+            {t('areYouSureDeleteImage')}
           </DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setImageToDelete(null)} color="primary">
-            {t('cancel', 'Mégse')}
+            {t('cancel')}
           </Button>
           <Button 
             onClick={() => imageToDelete && deleteMutation.mutate(imageToDelete)} 
@@ -285,7 +334,7 @@ export default function PanoramaViewerModal({ open, onClose, plan, isDoctor }: P
             variant="contained"
             disabled={deleteMutation.isPending}
           >
-            {deleteMutation.isPending ? <CircularProgress size={24} color="inherit" /> : t('delete', 'Törlés')}
+            {deleteMutation.isPending ? <CircularProgress size={24} color="inherit" /> : t('delete')}
           </Button>
         </DialogActions>
       </Dialog>
