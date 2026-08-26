@@ -706,7 +706,7 @@ function ProfileSettings() {
           </Box>
         </Box>
         
-        {!user.roles?.includes('ROLE_DOCTOR') && (
+        {!user.roles?.includes('ROLE_DOCTOR') || !user.roles?.includes('ROLE_ADMIN') && (
           <Box sx={{ width: '100%', mt: 4 }}>
             <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold' }}>
               {t('deleteAccount')}

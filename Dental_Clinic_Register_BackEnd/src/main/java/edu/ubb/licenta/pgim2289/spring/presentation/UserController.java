@@ -135,7 +135,7 @@ public class UserController {
         return userService.updateEmail(userId, request.getEmail());
     }
 
-    @PreAuthorize("hasAnyRole('PATIENT','ADMIN','DOCTOR')")
+    @PreAuthorize("hasAnyRole('PATIENT')")
     @DeleteMapping("/delete")
     public ResponseEntity<MessageResponse> delete() {
         Long userId = SecurityUtil.getCurrentUserId();
