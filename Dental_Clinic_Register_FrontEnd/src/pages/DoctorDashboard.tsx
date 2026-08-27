@@ -20,6 +20,7 @@ import {
 } from '@mui/material';
 import AppointmentCard from '../components/AppointmentCard';
 import DoctorActionModal from '../components/DoctorActionModal';
+import DoctorServiceList from '../components/DoctorServiceList';
 import { getDoctorDailyAppointments, cancelAppointmentByDoctor, markAsNoShow } from '../services/AppointmentService';
 import { ResponseAppointmentDTO } from '../models/Appointment';
 
@@ -32,7 +33,8 @@ function DoctorDashboard({ userId }: DoctorDashboardProps) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  const today = new Date().toISOString().split('T')[0];
+  const now = new Date();
+  const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
 
@@ -106,10 +108,10 @@ function DoctorDashboard({ userId }: DoctorDashboardProps) {
   const { nextAppointments, totalToday, remainingToday } = useMemo(() => {
     if (!appointments) return { nextAppointments: [], totalToday: 0, remainingToday: 0 };
 
-    const now = new Date().getTime();
+    const currentTime = new Date().getTime();
 
     const confirmedList = appointments
-      .filter((a) => a.status === 'CONFIRMED' && new Date(a.startTime).getTime() > now)
+      .filter((a) => a.status === 'CONFIRMED' && new Date(a.startTime).getTime() > currentTime)
       .sort((a, b) => a.startTime.localeCompare(b.startTime));
 
     return {
@@ -181,6 +183,8 @@ function DoctorDashboard({ userId }: DoctorDashboardProps) {
           </Grid>
         </Grid>
       )}
+
+      <DoctorServiceList doctorId={userId} />
 
       <DoctorActionModal
         open={isActionModalOpen}

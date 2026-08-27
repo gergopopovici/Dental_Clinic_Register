@@ -283,10 +283,15 @@ function DoctorActionModal({
                     setDate(e.target.value);
                     setSelectedTime('');
                   }}
-                  slotProps={{ inputLabel: { shrink: true } }}
+                  slotProps={{
+                    inputLabel: { shrink: true },
+                    htmlInput: { 
+                      min: `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}-${String(new Date().getDate()).padStart(2, '0')}` 
+                    },
+                  }}
                   sx={{ mb: 3 }}
                 />
-
+                
                 {date && (
                   <Box>
                     <Typography variant="body2" sx={{ mb: 1.5, fontWeight: 'bold' }}>

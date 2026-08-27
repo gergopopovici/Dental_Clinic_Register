@@ -441,5 +441,9 @@
   "detachFromPlan": "Detach from plan",
   "appointmentDetached": "Appointment detached successfully",
   "confirmDetachTitle": "Detach appointment",
-    "confirmDetachMessage": "Are you sure you want to detach this appointment from the treatment plan? The appointment will not be deleted from the system, it will only be removed from this list."
+  "confirmDetachMessage": "Are you sure you want to detach this appointment from the treatment plan? The appointment will not be deleted from the system, it will only be removed from this list.",
+  "service.is_patient_bookable.is.required": "Patient bookability selection is required.",
+  "isPatientBookable": "Patient Bookable",
+  "ourServicesAndPrices": "Services and Prices",
+  "cancelAppointmentBtn": "Cancel"
 }

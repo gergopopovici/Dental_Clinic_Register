@@ -100,7 +100,8 @@ public class DoctorServiceImpl implements DoctorService {
                         service.getDescriptionEn(),
                         service.getDescriptionRo(),
                         service.getPrice(),
-                        service.getDurationMinutes()
+                        service.getDurationMinutes(),
+                        service.getIsPatientBookable()
                 ))
                 .collect(Collectors.toList());
     }

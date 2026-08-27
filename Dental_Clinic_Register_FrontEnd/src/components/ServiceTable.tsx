@@ -22,22 +22,13 @@ import {
   TextField,
   Typography,
   Snackbar,
+  FormControlLabel,
+  Checkbox,
 } from '@mui/material';
-import { Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
+import { Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon, CheckCircle as CheckCircleIcon, Cancel as CancelIcon } from '@mui/icons-material';
+import { RequestServiceDTO, ResponseServiceDTO } from '../models/Service';
 
-export interface ServiceProvided {
-  id?: number;
-  nameHu: string;
-  nameEn: string;
-  nameRo: string;
-  descriptionHu?: string;
-  descriptionEn?: string;
-  descriptionRo?: string;
-  price: number;
-  durationMinutes: number;
-}
-
-const emptyService: ServiceProvided = {
+const emptyService: RequestServiceDTO = {
   nameHu: '',
   nameEn: '',
   nameRo: '',
@@ -46,13 +37,14 @@ const emptyService: ServiceProvided = {
   descriptionRo: '',
   price: 0,
   durationMinutes: 0,
+  isPatientBookable: false,
 };
 
 function ServiceTable() {
   const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [currentService, setCurrentService] = useState<ServiceProvided>(emptyService);
+  const [currentService, setCurrentService] = useState<RequestServiceDTO & { id?: number }>(emptyService);
 
   const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({
     open: false,
@@ -64,25 +56,40 @@ function ServiceTable() {
     data: services = [],
     isLoading,
     isError,
-  } = useQuery<ServiceProvided[]>({
+  } = useQuery<ResponseServiceDTO[]>({
     queryKey: ['adminServices'],
     queryFn: getAllServices,
   });
 
-  const getLocalizedName = (service: ServiceProvided) => {
+  const getLocalizedName = (service: ResponseServiceDTO) => {
     if (i18n.language.startsWith('hu')) return service.nameHu;
     if (i18n.language.startsWith('ro')) return service.nameRo;
     return service.nameEn;
   };
 
-  const getLocalizedDescription = (service: ServiceProvided) => {
+  const getLocalizedDescription = (service: ResponseServiceDTO) => {
     if (i18n.language.startsWith('hu')) return service.descriptionHu;
     if (i18n.language.startsWith('ro')) return service.descriptionRo;
     return service.descriptionEn;
   };
 
-  const handleOpenModal = (service: ServiceProvided = emptyService) => {
-    setCurrentService(service);
+  const handleOpenModal = (service?: ResponseServiceDTO) => {
+    if (service) {
+      setCurrentService({
+        id: service.id,
+        nameHu: service.nameHu,
+        nameEn: service.nameEn,
+        nameRo: service.nameRo,
+        descriptionHu: service.descriptionHu || '',
+        descriptionEn: service.descriptionEn || '',
+        descriptionRo: service.descriptionRo || '',
+        price: service.price,
+        durationMinutes: service.durationMinutes,
+        isPatientBookable: service.isPatientBookable,
+      });
+    } else {
+      setCurrentService(emptyService);
+    }
     setIsModalOpen(true);
   };
 
@@ -93,7 +100,7 @@ function ServiceTable() {
 
   const handleSave = () => {
     if (currentService.id) {
-      updateMutation.mutate(currentService);
+      updateMutation.mutate({ id: currentService.id, data: currentService });
     } else {
       createMutation.mutate(currentService);
     }
@@ -106,7 +113,7 @@ function ServiceTable() {
   };
 
   const createMutation = useMutation({
-    mutationFn: (newService: ServiceProvided) => createService(newService),
+    mutationFn: (newService: RequestServiceDTO) => createService(newService),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['adminServices'] });
       setSnackbar({ open: true, message: t('success.service.created'), severity: 'success' });
@@ -119,7 +126,7 @@ function ServiceTable() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: (updatedService: ServiceProvided) => updateService(updatedService.id!, updatedService),
+    mutationFn: ({ id, data }: { id: number; data: RequestServiceDTO }) => updateService(id, data),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['adminServices'] });
       setSnackbar({ open: true, message: t('success.service.updated'), severity: 'success' });
@@ -148,7 +155,8 @@ function ServiceTable() {
     currentService.nameEn &&
     currentService.nameRo &&
     currentService.price > 0 &&
-    currentService.durationMinutes > 0;
+    currentService.durationMinutes > 0 &&
+    currentService.isPatientBookable !== undefined;
 
   const handleCloseSnackbar = () => setSnackbar({ ...snackbar, open: false });
 
@@ -177,6 +185,7 @@ function ServiceTable() {
               <TableCell sx={{ fontWeight: 'bold' }}>{t('description')}</TableCell>
               <TableCell sx={{ fontWeight: 'bold' }}>{t('price')}</TableCell>
               <TableCell sx={{ fontWeight: 'bold' }}>{t('duration')}</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }} align="center">{t('isPatientBookable')}</TableCell>
               <TableCell sx={{ fontWeight: 'bold' }} align="right">
                 {t('actions')}
               </TableCell>
@@ -185,7 +194,7 @@ function ServiceTable() {
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={5} align="center" sx={{ py: 3 }}>
+                <TableCell colSpan={6} align="center" sx={{ py: 3 }}>
                   <CircularProgress color="primary" />
                 </TableCell>
               </TableRow>
@@ -195,7 +204,13 @@ function ServiceTable() {
                   <TableCell>{getLocalizedName(service)}</TableCell>
                   <TableCell>{getLocalizedDescription(service) || '-'}</TableCell>
                   <TableCell>{service.price.toFixed(2)} RON</TableCell>
-                  <TableCell>{service.durationMinutes}</TableCell>
+                  <TableCell>{service.durationMinutes} {i18n.language.startsWith('hu') ? 'perc' : 'min'}</TableCell>                  <TableCell align="center">
+                    {service.isPatientBookable ? (
+                      <CheckCircleIcon color="success" fontSize="small" />
+                    ) : (
+                      <CancelIcon color="error" fontSize="small" />
+                    )}
+                  </TableCell>
                   <TableCell align="right">
                     <IconButton color="primary" onClick={() => handleOpenModal(service)} disabled={deleteMutation.isPending}>
                       <EditIcon />
@@ -208,7 +223,7 @@ function ServiceTable() {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={5} align="center" sx={{ py: 3 }}>
+                <TableCell colSpan={6} align="center" sx={{ py: 3 }}>
                   {t('noServicesFound')}
                 </TableCell>
               </TableRow>
@@ -243,9 +258,22 @@ function ServiceTable() {
           <Typography variant="subtitle2" sx={{ mb: 1 }}>
             {t('details')}
           </Typography>
-          <Box sx={{ display: 'flex', gap: 2 }}>
+          <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
             <TextField fullWidth label={t('price')} type="number" required value={currentService.price} onChange={(e) => setCurrentService({ ...currentService, price: parseFloat(e.target.value) || 0 })} />
             <TextField fullWidth label={t('duration')} type="number" required value={currentService.durationMinutes} onChange={(e) => setCurrentService({ ...currentService, durationMinutes: parseInt(e.target.value) || 0 })} />
+          </Box>
+
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={!!currentService.isPatientBookable}
+                  onChange={(e) => setCurrentService({ ...currentService, isPatientBookable: e.target.checked })}
+                  color="primary"
+                />
+              }
+              label={t('isPatientBookable')}
+            />
           </Box>
         </DialogContent>
         <DialogActions sx={{ p: 3, pt: 0 }}>

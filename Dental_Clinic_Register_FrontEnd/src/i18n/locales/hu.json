@@ -440,5 +440,9 @@
   "detachFromPlan": "Leválasztás a tervről",
   "appointmentDetached": "Vizit sikeresen leválasztva",
   "confirmDetachTitle": "Vizit leválasztása",
-    "confirmDetachMessage": "Biztosan le szeretné választani ezt a vizitet a kezelési tervről? A vizit nem törlődik a rendszerből, csak kikerül ebből a listából."
+  "confirmDetachMessage": "Biztosan le szeretné választani ezt a vizitet a kezelési tervről? A vizit nem törlődik a rendszerből, csak kikerül ebből a listából.",
+  "service.is_patient_bookable.is.required": "A páciens által történő foglalhatóság megadása kötelező.",
+  "isPatientBookable": "Páciens által foglalható",
+  "ourServicesAndPrices": "Szolgáltatások és árak",
+  "cancelAppointmentBtn": "Lemondás"
 }

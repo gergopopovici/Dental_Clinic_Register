@@ -33,4 +33,7 @@ public class RequestServiceDTO {
     @NotNull(message = "service.duration.is.required")
     @Positive(message = "service.duration.must.be.greater.than.zero")
     private Integer durationMinutes;
+
+    @NotNull(message = "service.is_patient_bookable.is.required")
+    private Boolean isPatientBookable;
 }

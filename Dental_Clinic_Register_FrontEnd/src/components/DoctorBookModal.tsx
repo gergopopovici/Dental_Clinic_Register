@@ -344,15 +344,19 @@ function DoctorBookModal({ open, onClose, doctorId, onSuccess, initialPatientId,
           <Grid size={{ xs: 12, md: 6 }}>
             {doctorId && selectedService ? (
               <Box>
-                <TextField
-                  type="date"
-                  label={t('date')}
-                  fullWidth
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  slotProps={{ inputLabel: { shrink: true } }}
-                  sx={{ mb: 3 }}
-                />
+               <TextField
+                type="date"
+                label={t('date')}
+                fullWidth
+                slotProps={{
+                  inputLabel: { shrink: true },
+                  htmlInput: { 
+                    min: `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}-${String(new Date().getDate()).padStart(2, '0')}` 
+                  },
+                }}
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+              />
 
                 {date && (
                   <>

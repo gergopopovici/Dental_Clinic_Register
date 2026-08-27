@@ -29,13 +29,11 @@ function AppointmentCard({
 }: AppointmentCardProps) {
   const { t, i18n } = useTranslation();
 
-  // Szolgáltatások lekérése a fordításhoz
   const { data: allServices } = useQuery({
     queryKey: ['allServices'],
     queryFn: getAllServices,
   });
 
-  // Fordító segédfüggvény
   const getLocalizedServiceName = (serviceName: string) => {
     if (!allServices) return serviceName;
     const service = allServices.find(s => s.nameEn === serviceName || s.nameHu === serviceName || s.nameRo === serviceName);
@@ -84,7 +82,6 @@ function AppointmentCard({
           </Box>
         </Box>
 
-        {/* ITT TÖRTÉNIK A FORDÍTÁS */}
         <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 1 }}>
           {appointment.serviceName ? getLocalizedServiceName(appointment.serviceName) : ''}
         </Typography>
@@ -94,6 +91,25 @@ function AppointmentCard({
             ? `${t('doctor')}: Dr. ${appointment.doctorName}`
             : `${t('patient')}: ${appointment.patientName}`}
         </Typography>
+
+        {appointment.notes && (
+      <Box sx={{ mt: 1, mb: 1, p: 1.5, bgcolor: 'action.hover', borderRadius: 1 }}>
+        <Typography variant="body2" sx={{ fontStyle: 'italic' }}>
+          <strong>{t('notes', 'Megjegyzés')}:</strong> {appointment.notes}
+        </Typography>
+      </Box>
+      )}
+       {appointment.resourceLink && (
+      <Button
+        variant="outlined"
+        size="small"
+        href={appointment.resourceLink}
+        target="_blank"
+        sx={{ mt: 1 }}
+      >
+        {t('resourceLink', 'Online csatlakozás')}
+      </Button>
+    )}
 
         {appointment.summary && (
           <Box sx={{ mt: 1, mb: 2, p: 2, bgcolor: 'summaryBox', borderRadius: 1 }}>
@@ -143,7 +159,7 @@ function AppointmentCard({
         <Box sx={{ display: 'flex', gap: 1.5, mt: 'auto', flexWrap: 'wrap', pt: 2 }}>
           {appointment.status === 'CONFIRMED' && onCancel && (
             <Button variant="contained" color="error" size="small" onClick={() => onCancel(appointment.id)}>
-              {t('cancel')}
+              {t('cancelAppointmentBtn')}
             </Button>
           )}
 

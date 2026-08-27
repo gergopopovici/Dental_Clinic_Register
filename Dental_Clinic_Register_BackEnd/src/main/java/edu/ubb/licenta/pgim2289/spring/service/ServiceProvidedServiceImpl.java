@@ -26,6 +26,9 @@ public class ServiceProvidedServiceImpl implements ServiceProvidedService {
     @Transactional
     public ResponseServiceDTO createService(RequestServiceDTO request) {
         ServiceProvided serviceProvided = mapper.toEntity(request);
+        if (request.getIsPatientBookable() != null) {
+            serviceProvided.setIsPatientBookable(request.getIsPatientBookable());
+        }
         return mapper.toDTO(serviceRepository.save(serviceProvided));
     }
 
@@ -44,6 +47,10 @@ public class ServiceProvidedServiceImpl implements ServiceProvidedService {
 
         serviceProvided.setPrice(request.getPrice());
         serviceProvided.setDurationMinutes(request.getDurationMinutes());
+
+        if (request.getIsPatientBookable() != null) {
+            serviceProvided.setIsPatientBookable(request.getIsPatientBookable());
+        }
 
         return mapper.toDTO(serviceRepository.save(serviceProvided));
     }

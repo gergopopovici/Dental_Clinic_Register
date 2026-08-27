@@ -29,8 +29,10 @@ function DoctorAppointments({ userId }: DoctorAppointmentsProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
-  const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
-  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
+  const now = new Date();
+  const localToday = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
+  const [selectedDate, setSelectedDate] = useState<string>(localToday);  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
 
   const [isActionModalOpen, setIsActionModalOpen] = useState(false);
   const [selectedApptId, setSelectedApptId] = useState<number | null>(null);

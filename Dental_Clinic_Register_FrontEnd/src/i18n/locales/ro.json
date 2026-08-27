@@ -440,5 +440,9 @@
   "detachFromPlan": "Detașare de la plan",
   "appointmentDetached": "Vizită detașată cu succes",
   "confirmDetachTitle": "Detașare vizită",
-    "confirmDetachMessage": "Sunteți sigur că doriți să detașați această vizită de planul de tratament? Vizita nu va fi ștearsă din sistem, ci doar eliminată din această listă."
+  "confirmDetachMessage": "Sunteți sigur că doriți să detașați această vizită de planul de tratament? Vizita nu va fi ștearsă din sistem, ci doar eliminată din această listă.",
+  "service.is_patient_bookable.is.required": "Selectarea posibilității de programare de către pacient este obligatorie.",
+  "isPatientBookable": "Rezervat de pacient",
+  "ourServicesAndPrices": "Servicii și Prețuri",
+  "cancelAppointmentBtn": "Anulare"
 }

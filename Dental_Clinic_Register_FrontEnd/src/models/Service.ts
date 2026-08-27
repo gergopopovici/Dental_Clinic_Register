@@ -7,6 +7,7 @@ export interface RequestServiceDTO {
   descriptionRo?: string;
   price: number;
   durationMinutes: number;
+  isPatientBookable: boolean;
 }
 
 export interface ResponseServiceDTO {
@@ -19,4 +20,5 @@ export interface ResponseServiceDTO {
   descriptionRo?: string;
   price: number;
   durationMinutes: number;
+  isPatientBookable: boolean;
 }

@@ -27,6 +27,7 @@ import AudiotrackIcon from '@mui/icons-material/Audiotrack';
 import ImageIcon from '@mui/icons-material/Image';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import AppointmentCard from '../components/AppointmentCard';
+import PatientServiceList from '../components/PatientServiceList';
 import { cancelAppointmentByPatient, getPatientAppointments } from '../services/AppointmentService';
 import { getPlansByPatientId } from '../services/TreatmentPlanService';
 import { getAllServices } from '../services/ProvidedServiceService';
@@ -294,18 +295,18 @@ function PatientDashboard({ userId }: PatientDashboardProps) {
                   {activePlan.generalNotes || t('noNotesProvided')}
                 </Typography>
 
-               {activePlan.plannedServiceNames && activePlan.plannedServiceNames.length > 0 && (
-                    <Box sx={{ mt: 2, mb: 2 }}>
-                      <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>
-                        {t('plannedServices', 'Várható szolgáltatások:')}
-                      </Typography>
-                      <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                        {activePlan.plannedServiceNames.map((name, i) => (
-                          <Chip key={i} label={getLocalizedServiceName(name)} size="small" variant="outlined" />
-                        ))}
-                      </Box>
+                {activePlan.plannedServiceNames && activePlan.plannedServiceNames.length > 0 && (
+                  <Box sx={{ mt: 2, mb: 2 }}>
+                    <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>
+                      {t('plannedServices', 'Várható szolgáltatások:')}
+                    </Typography>
+                    <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                      {activePlan.plannedServiceNames.map((name, i) => (
+                        <Chip key={i} label={getLocalizedServiceName(name)} size="small" variant="outlined" />
+                      ))}
                     </Box>
-                  )}
+                  </Box>
+                )}
 
                 <Accordion variant="outlined" sx={{ mt: 2, bgcolor: 'background.default' }}>
                   <AccordionSummary expandIcon={<ExpandMoreIcon />}>
@@ -320,6 +321,8 @@ function PatientDashboard({ userId }: PatientDashboardProps) {
           )}
         </Grid>
       </Grid>
+
+      <PatientServiceList />
 
       <PanoramaViewerModal
         open={isPanoramaModalOpen}

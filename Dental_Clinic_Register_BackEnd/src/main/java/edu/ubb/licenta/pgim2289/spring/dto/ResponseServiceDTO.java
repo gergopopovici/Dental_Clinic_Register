@@ -19,4 +19,5 @@ public class ResponseServiceDTO {
     private String descriptionRo;
     private BigDecimal price;
     private Integer durationMinutes;
+    private Boolean isPatientBookable;
 }

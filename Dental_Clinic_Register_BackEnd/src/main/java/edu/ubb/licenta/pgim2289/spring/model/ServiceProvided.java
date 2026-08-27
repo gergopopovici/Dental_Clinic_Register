@@ -37,4 +37,7 @@ public class ServiceProvided extends BaseEntity {
 
     @Column(name = "duration_minutes", nullable = false)
     private Integer durationMinutes;
+
+    @Column(name = "is_patient_bookable", nullable = false)
+    private Boolean isPatientBookable;
 }

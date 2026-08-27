@@ -40,6 +40,8 @@ function PatientBookModal({ open, onClose, userId, onSuccess }: PatientBookModal
   const [date, setDate] = useState<string>('');
   const [selectedTime, setSelectedTime] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState('');
+  const now = new Date();
+  const localToday = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 
   const APPOINTMENT_BUFFER_MINUTES = 5;
 
@@ -120,7 +122,7 @@ function PatientBookModal({ open, onClose, userId, onSuccess }: PatientBookModal
   };
 
   const sortedServices = useMemo(
-    () => (services ? [...services].sort((a, b) => getLocalizedName(a).localeCompare(getLocalizedName(b))) : []),
+    () => (services ? [...services].filter((s: any) => s.isPatientBookable).sort((a, b) => getLocalizedName(a).localeCompare(getLocalizedName(b))) : []),
     [services, i18n.language],
   );
 
@@ -299,7 +301,7 @@ function PatientBookModal({ open, onClose, userId, onSuccess }: PatientBookModal
           fullWidth
           slotProps={{
             inputLabel: { shrink: true },
-            htmlInput: { min: new Date().toISOString().split('T')[0] },
+            htmlInput: { min: localToday },
           }}
           value={date}
           onChange={(e) => setDate(e.target.value)}
