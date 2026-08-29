@@ -257,7 +257,7 @@
   "reschedule": "Vizit módosítása",
   "complete": "Vizit lezárása",
   "noShow": "Nem jelent meg",
-  "cancelReason": "Törlés oka",
+  "cancelReason": "Törlés oka:",
   "searchPatientByName": "Páciens keresése név alapján...",
   "searchDoctorByName": "Orvos keresése név alapján...",
   "noPatientsFound": "Nincs találat.",
@@ -444,5 +444,6 @@
   "service.is_patient_bookable.is.required": "A páciens által történő foglalhatóság megadása kötelező.",
   "isPatientBookable": "Páciens által foglalható",
   "ourServicesAndPrices": "Szolgáltatások és árak",
-  "cancelAppointmentBtn": "Lemondás"
+  "cancelAppointmentBtn": "Lemondás",
+  "accountBannedMessage": "A fiókja le lett tiltva. Kérjük, vegye fel a kapcsolatot az adminisztrátorral."
 }

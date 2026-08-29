@@ -69,32 +69,45 @@ function LoginPage() {
       fetchUserDetailsMutation.mutate();
     },
     onError: (error) => {
-      if (axios.isAxiosError(error) && error.response?.data) {
-        const errMsg = error.response.data.message || error.response.data.error || '';
-        
-        if (errMsg === 'error.account.disabled' || errMsg === 'error.account.locked') {
-           alert(t('accountDeactivatedMessage')); 
-           navigate('/forgot-password')
-        } else if (errMsg === 'error.bad.credentials') {
-           alert(t('error.bad.credentials'));
-        } else {
-           alert(`${t('loginFailed')}: ${t(errMsg)}`);
-        }
+    if (axios.isAxiosError(error) && error.response?.data) {
+      const errMsg = error.response.data.message || error.response.data.error || '';
+      
+      if (errMsg === 'error.account.locked') {
+        alert(t('accountBannedMessage'));
+      } else if (errMsg === 'error.account.disabled') {
+        alert(t('accountDeactivatedMessage')); 
+        navigate('/forgot-password');
+      } else if (errMsg === 'error.bad.credentials') {
+        alert(t('error.bad.credentials'));
       } else {
-        alert(t('loginCredentialsInvalid'));
+        alert(`${t('loginFailed')}: ${t(errMsg)}`);
       }
-    },
+    } else {
+      alert(t('loginCredentialsInvalid'));
+    }
+  },
+  
   });
 
-  const resendMutation = useMutation<MessageResponse, Error, string>({
+ const resendMutation = useMutation<MessageResponse, Error, string>({
     mutationFn: (email: string) => resendActivation(email),
     onSuccess: () => {
       alert(t('success.activation.resent'));
       setResendDialogOpen(false);
       setResendEmail('');
     },
-    onError: () => {
-      alert(t('error.email.required'));
+    onError: (error) => {
+      if (axios.isAxiosError(error) && error.response?.data) {
+        const errMsg = error.response.data.message || error.response.data.error || '';
+        
+        if (errMsg === 'error.account.locked') {
+        alert(t('accountBannedMessage'));
+        } else {
+          alert(t(errMsg || 'error.email.required'));
+        }
+      } else {
+        alert(t('error.email.required'));
+      }
     },
   });
 

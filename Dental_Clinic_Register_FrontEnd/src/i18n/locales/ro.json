@@ -257,7 +257,7 @@
   "reschedule": "Modifică ora",
   "complete": "Finalizează",
   "noShow": "Absent",
-  "cancelReason": "Motivul anulării",
+  "cancelReason": "Motivul anulării:",
   "searchPatientByName": "Caută pacient după nume...",
   "searchDoctorByName": "Caută medic după nume...",
   "noPatientsFound": "Niciun pacient găsit",
@@ -444,5 +444,6 @@
   "service.is_patient_bookable.is.required": "Selectarea posibilității de programare de către pacient este obligatorie.",
   "isPatientBookable": "Rezervat de pacient",
   "ourServicesAndPrices": "Servicii și Prețuri",
-  "cancelAppointmentBtn": "Anulare"
+  "cancelAppointmentBtn": "Anulare",
+  "accountBannedMessage": "Contul tău a fost blocat. Te rugăm să contactezi administratorul."
 }

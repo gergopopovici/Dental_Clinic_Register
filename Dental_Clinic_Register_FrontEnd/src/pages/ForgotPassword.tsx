@@ -32,11 +32,16 @@ function ForgotPassword() {
       setSuccessMessage(t('passwordResetEmailSent'));
       setErrorMessage('');
     },
-    onError: (error: AxiosError<{ message: string }>) => {
-      const message = error.response?.data?.message || t('passwordResetFailed');
-      setErrorMessage(t(message));
-      setSuccessMessage('');
-    },
+      onError: (error: AxiosError<{ message: string }>) => {
+        const errMsg = error.response?.data?.message || '';
+
+        if (errMsg === 'error.account.locked') {
+          setErrorMessage(t('accountBannedMessage')); // Ugyanaz a fordítás, amit a bejelentkezésnél használtunk
+        } else {
+          setErrorMessage(t(errMsg || 'passwordResetFailed'));
+        }
+        setSuccessMessage('');
+      },
   });
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {

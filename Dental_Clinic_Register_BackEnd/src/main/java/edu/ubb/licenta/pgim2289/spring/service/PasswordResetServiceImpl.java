@@ -42,6 +42,9 @@ public class PasswordResetServiceImpl implements PasswordResetService {
         if (user == null) {
             return ResponseEntity.badRequest().body(new MessageResponse("error.email.not_found"));
         }
+        if (!user.getAccountNonLocked()) {
+            return ResponseEntity.badRequest().body(new MessageResponse("error.account.locked"));
+        }
         String rawToken = UUID.randomUUID().toString();
         String hashedToken = encoder.encode(rawToken);
         PasswordResetToken resetToken = new PasswordResetToken();
@@ -84,7 +87,6 @@ public class PasswordResetServiceImpl implements PasswordResetService {
         User user = token.getUser();
         user.setPassword(encoder.encode(dto.getPassword()));
         user.setEnabled(true);
-        user.setAccountNonLocked(true);
         userRepository.save(user);
         emailService.passwordResetConfirmationEmail(user.getEmail(), user.getUserName());
 

@@ -258,7 +258,7 @@
   "reschedule": "Reschedule",
   "complete": "Complete",
   "noShow": "No Show",
-  "cancelReason": "Cancel reason",
+  "cancelReason": "Cancel reason:",
   "searchPatientByName": "Search patient by name...",
   "searchDoctorByName": "Search doctor by name...",
   "noPatientsFound": "No patients found",
@@ -445,5 +445,6 @@
   "service.is_patient_bookable.is.required": "Patient bookability selection is required.",
   "isPatientBookable": "Patient Bookable",
   "ourServicesAndPrices": "Services and Prices",
-  "cancelAppointmentBtn": "Cancel"
+  "cancelAppointmentBtn": "Cancel",
+  "accountBannedMessage": "Your account has been banned. Please contact the administrator."
 }

@@ -91,6 +91,9 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
         }
         User user = userRepository.findByEmail(email);
         if (user != null) {
+            if (!user.getAccountNonLocked()) {
+                return ResponseEntity.badRequest().body(new MessageResponse("error.account.locked"));
+            }
             if (!user.getEnabled()) {
                 VerificationToken verificationToken = user.getVerificationToken();
                 if (verificationToken == null) {

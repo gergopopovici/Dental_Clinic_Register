@@ -91,14 +91,15 @@ function AppointmentCard({
             ? `${t('doctor')}: Dr. ${appointment.doctorName}`
             : `${t('patient')}: ${appointment.patientName}`}
         </Typography>
-
         {appointment.notes && (
-      <Box sx={{ mt: 1, mb: 1, p: 1.5, bgcolor: 'action.hover', borderRadius: 1 }}>
-        <Typography variant="body2" sx={{ fontStyle: 'italic' }}>
-          <strong>{t('notes', 'Megjegyzés')}:</strong> {appointment.notes}
-        </Typography>
-      </Box>
-      )}
+          <Box sx={{ mt: 1, mb: 1, p: 1.5, bgcolor: 'action.hover', borderRadius: 1 }}>
+            <Typography variant="body2" sx={{ fontStyle: 'italic' }}>
+              <strong>{t('notes', 'Megjegyzés')}:</strong> {
+                appointment.notes.replace(/\s*\|\s*Cancel reason:/, ` - ${t('cancelReason', 'Törlés oka:')}`)
+              }
+            </Typography>
+          </Box>
+        )}
        {appointment.resourceLink && (
       <Button
         variant="outlined"
