@@ -87,7 +87,8 @@ function PatientDashboard({ userId }: PatientDashboardProps) {
 
   const activePlan = useMemo(() => {
     if (!treatmentPlans || treatmentPlans.length === 0) return null;
-    return treatmentPlans[0];
+    const active = treatmentPlans.find(plan => plan.status === 'ACTIVE');
+    return active || null; 
   }, [treatmentPlans]);
 
   const cancelMutation = useMutation({
