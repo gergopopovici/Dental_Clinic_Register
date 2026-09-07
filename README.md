@@ -40,7 +40,6 @@ Before starting, make sure you have these installed:
 * **Java Development Kit (JDK):** For the backend.
 * **Node.js (LTS):** For the frontend (comes with npm).
 * **MySQL Server:** For the database.
-* **Maven:** Build tool for the backend (if applicable).
 
 ### 1. Backend Setup (Spring Boot)
 
