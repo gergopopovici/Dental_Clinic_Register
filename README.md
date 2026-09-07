@@ -1,4 +1,4 @@
-# Dental Clinic Management System (Thesis Project - Work In Progress 🚧)
+# Dental Clinic Management System (Thesis Project)
 
 ## Project Overview
 
