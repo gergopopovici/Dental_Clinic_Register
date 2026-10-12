@@ -4,7 +4,7 @@ import enTranslations from './locales/en.json';
 import roTranslations from './locales/ro.json';
 import huTranslations from './locales/hu.json';
 
-const savedLanguage = localStorage.getItem('applanguage') || 'ro'
+const savedLanguage = localStorage.getItem('applanguage') || 'en'
 i18next.use(initReactI18next).init({
   lng: savedLanguage,
   fallbackLng: 'en',
