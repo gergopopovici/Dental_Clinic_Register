@@ -42,7 +42,7 @@ public class EmailServiceImpl implements EmailService {
         message.setTo(to);
         message.setSubject("Complete Your Registration!");
         message.setText("To confirm your account, please click the link below:\n\n"
-                + "http://localhost:5175/verify?token=" + token);
+                + "https://smilesync.gergopopovici.com/verify?token=" + token);
         mailSender.send(message);
     }
 
@@ -249,8 +249,8 @@ public class EmailServiceImpl implements EmailService {
         message.setSubject("Activate Your Account");
         message.setText("Hello " + userName + ",\n\n"
                 + "Please click the link below to activate your account:\n\n"
-                + "http://localhost:5175/verify?token=" + token + "\n\n"
+                + "https://smilesync.gergopopovici.com/verify?token=" + token + "\n\n"
                 + "Thank you!");
         mailSender.send(message);
     }
-}
+}g

@@ -32,7 +32,7 @@ spring:
             enable: true
 file:
   upload:
-    upload-dir: ./uploads/avatars
+    upload-dir: /home/ubuntu/uploads/avatars
 jwt:
   secret: ${Secret_Key}
   access-token-expiration-ms: 600000 # 10 minutes
