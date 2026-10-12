@@ -52,7 +52,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
         resetToken.setTokenHash(hashedToken);
         passwordResetTokenService.savePasswordResetToken(resetToken);
 
-        String link = "http://localhost:5175/reset-password?token=" + rawToken;
+        String link = "https://smilesync.gergopopovici.com/reset-password?token=" + rawToken;
         emailService.sendPasswordResetEmail(user.getEmail(), link, user.getUserName());
 
         return ResponseEntity.ok(new MessageResponse("If that email exists, a password reset link has been sent."));
