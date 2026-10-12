@@ -13,7 +13,7 @@ import java.util.Set;
 
 @EqualsAndHashCode(callSuper = true, exclude = {"plannedServices", "braceComponents", "appointments","panoramaImages"})
 @Entity
-@Table(name = "Treatment_Plan")
+@Table(name = "treatment_plan")
 @Data
 @NoArgsConstructor
 public class TreatmentPlan extends BaseEntity {

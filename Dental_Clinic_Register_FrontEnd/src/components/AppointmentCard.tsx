@@ -60,7 +60,8 @@ function AppointmentCard({
   const displayTime = appointment.startTime?.split('T')[1].substring(0, 5);
   const isInactive = ['CANCELLED', 'NO_SHOW'].includes(appointment.status);
 
-  const getFileUrl = (url: string) => `http://localhost:8080/api/files/${url.split('/').pop()}`;
+  const api = import.meta.env.VITE_API_URL;
+  const getFileUrl = (url: string) => `${api}/api/files/${url.split('/').pop()}`;
 
   return (
     <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column', opacity: isInactive ? 0.7 : 1 }}>

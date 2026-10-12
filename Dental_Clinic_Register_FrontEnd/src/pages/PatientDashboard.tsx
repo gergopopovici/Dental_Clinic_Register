@@ -107,8 +107,9 @@ function PatientDashboard({ userId }: PatientDashboardProps) {
     },
   });
 
-  const getFileUrl = (url: string) => `http://localhost:8080/api/files/${url.split('/').pop()}`;
-
+  const api = import.meta.env.VITE_API_URL;
+  const getFileUrl = (url: string) => `${api}/api/files/${url.split('/').pop()}`;
+  
   const getLocalizedServiceName = (serviceName: string) => {
     if (!allServices) return serviceName;
     const service = allServices.find((s) => s.nameEn === serviceName || s.nameHu === serviceName || s.nameRo === serviceName);

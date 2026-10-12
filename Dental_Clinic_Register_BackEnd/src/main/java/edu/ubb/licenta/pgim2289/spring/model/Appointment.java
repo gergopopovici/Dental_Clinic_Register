@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 
 @EqualsAndHashCode(callSuper = true)
 @Entity
-@Table(name = "Appointment")
+@Table(name = "appointment")
 @Data
 @NoArgsConstructor
 public class Appointment extends BaseEntity {
@@ -58,6 +58,4 @@ public class Appointment extends BaseEntity {
 
     @OneToOne(mappedBy = "appointment", cascade = CascadeType.ALL)
     private AppointmentSummary summary;
-
-
 }

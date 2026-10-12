@@ -10,7 +10,7 @@ import java.util.ArrayList;
 
 @EqualsAndHashCode(callSuper = true)
 @Entity
-@Table(name = "Doctor")
+@Table(name = "doctor")
 @Data
 @NoArgsConstructor
 public class Doctor extends BaseEntity {

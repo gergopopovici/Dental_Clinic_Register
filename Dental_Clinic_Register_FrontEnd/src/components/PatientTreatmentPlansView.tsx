@@ -66,8 +66,8 @@ function PatientTreatmentPlansView({ patientId }: PatientViewProps) {
 
   const activePlans = plans?.filter((p) => p.status === 'ACTIVE' || p.status === 'SUSPENDED') || [];
   const pastPlans = plans?.filter((p) => p.status === 'COMPLETED' || p.status === 'CANCELLED') || [];
-  const getFileUrl = (url: string) => `http://localhost:8080/api/files/${url.split('/').pop()}`;
-
+  const api = import.meta.env.VITE_API_URL;
+  const getFileUrl = (url: string) => `${api}/api/files/${url.split('/').pop()}`;
   const getProgressColor = (progress: number) => {
     if (progress < 33) return 'error';     
     if (progress < 66) return 'warning';   

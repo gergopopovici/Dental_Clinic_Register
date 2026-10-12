@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 
 @EqualsAndHashCode(callSuper = true)
 @Entity
-@Table(name = "Appointment_Summary")
+@Table(name = "appointment_summary")
 @Data
 @NoArgsConstructor
 public class AppointmentSummary extends BaseEntity {
