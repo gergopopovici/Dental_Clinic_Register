@@ -1,5 +1,28 @@
 # SmileSync - Orthodontic Clinic Management System (Thesis Project)
+## 🚀 Live Demo
 
+**https://smilesync.gergopopovici.com**
+
+SmileSync is deployed on an Oracle Cloud Ubuntu server (Spring Boot + MySQL)
+behind a custom domain. All data is mock data, so feel free to explore.
+The password for **every** account is `password123`.
+
+| Role | Username | What to try |
+|---|---|---|
+| Admin | `systemadmin`, `admin123` | User, service and invite management |
+| Dentist (Orthodontist) | `dr_kovacs` | Treatment plans, 3D configurator, X-ray viewer |
+| Dentist (Oral Surgeon) | `dr_szabo` | Schedule and appointments |
+| Dentist (General) | `dr_nagy` | Schedule and appointments |
+| Patient | `kissmate` | Treatment plan, progress bar, appointment history |
+| Patient | `mariapopescu`, `vargadora`, `totheszter`, `szabobence` | Booking and profile |
+
+**Good to know**
+- The demo database resets every night at around 04:00 (Romanian time), and uploaded files are deleted.
+- Try the flow in two steps: log in as `dr_kovacs` to edit the 3D orthodontic
+  configurator, then as `kissmate` to see the patient's at-home view.
+- Switch the language (EN / HU / RO) and the light/dark theme from the UI.
+
+---
 ## Project Overview
 This thesis project, SmileSync, is a distributed orthodontic clinic management system designed to provide a solution to a real-world problem. Inspired by the digitisation needs of an orthodontic clinic in Salonta, the developed web application successfully visualises the communication between patients and dentists. It focuses on secure administration, treatment tracking, and providing an at-home visual guide for patients regarding the correct placement of orthodontic elastics.
 
