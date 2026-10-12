@@ -445,5 +445,7 @@
   "isPatientBookable": "Páciens által foglalható",
   "ourServicesAndPrices": "Szolgáltatások és árak",
   "cancelAppointmentBtn": "Lemondás",
-  "accountBannedMessage": "A fiókja le lett tiltva. Kérjük, vegye fel a kapcsolatot az adminisztrátorral."
+  "accountBannedMessage": "A fiókja le lett tiltva. Kérjük, vegye fel a kapcsolatot az adminisztrátorral.",
+  "mobileWarningTitle": "Csak Asztali Számítógépre",
+  "mobileWarningMessage": "Ez az alkalmazás nem támogatott mobileszközökön. Kérjük, nyissa meg asztali számítógépen vagy laptopon."
 }

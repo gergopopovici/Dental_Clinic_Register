@@ -1,6 +1,8 @@
 import './i18n/i18n';
 import { BrowserRouter as Router, Routes, Route, Outlet } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
+import { useMediaQuery, Box, Typography, useTheme } from '@mui/material';
 
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
@@ -26,10 +28,34 @@ import Schedules from './pages/Schedules/Schedules';
 const queryClient = new QueryClient();
 
 function App() {
+  const { t } = useTranslation();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
+  if (isMobile) {
+    return (
+      <Box
+        display="flex"
+        flexDirection="column"
+        alignItems="center"
+        justifyContent="center"
+        height="100vh"
+        textAlign="center"
+        p={3}
+      >
+        <Typography variant="h4" gutterBottom>
+          {t('mobileWarningTitle')}
+        </Typography>
+        <Typography variant="body1" color="text.secondary">
+          {t('mobileWarningMessage')}
+        </Typography>
+      </Box>
+    );
+  }
+
   return (
     <QueryClientProvider client={queryClient}>
       <UserProvider>
-        {' '}
         <Router>
           <Routes>
             <Route element={<PublicRoute />}>

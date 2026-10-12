@@ -445,5 +445,7 @@
   "isPatientBookable": "Rezervat de pacient",
   "ourServicesAndPrices": "Servicii și Prețuri",
   "cancelAppointmentBtn": "Anulare",
-  "accountBannedMessage": "Contul tău a fost blocat. Te rugăm să contactezi administratorul."
+  "accountBannedMessage": "Contul tău a fost blocat. Te rugăm să contactezi administratorul.",
+  "mobileWarningTitle": "Doar pentru Desktop",
+  "mobileWarningMessage": "Această aplicație nu este suportată pe dispozitive mobile. Vă rugăm să o deschideți pe un desktop sau laptop."
 }

@@ -446,5 +446,7 @@
   "isPatientBookable": "Patient Bookable",
   "ourServicesAndPrices": "Services and Prices",
   "cancelAppointmentBtn": "Cancel",
-  "accountBannedMessage": "Your account has been banned. Please contact the administrator."
+  "accountBannedMessage": "Your account has been banned. Please contact the administrator.",
+  "mobileWarningTitle": "Desktop Only",
+  "mobileWarningMessage": "This application is not supported on mobile devices. Please open it on a desktop or laptop."
 }
